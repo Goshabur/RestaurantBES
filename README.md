@@ -1,6 +1,8 @@
 # RestaurantBES
 HSE first grade project
 
-![Логика](Restaurant_BES.png)
+# Логика
+![Логика](https://github.com/Goshabur/RestaurantBES/blob/main/Restaurant%20BES.png)
 
-![Клиент-Сервер](Client-Server_Model.png)
+# Клиент-сервер
+![Клиент-Сервер](https://github.com/Goshabur/RestaurantBES/blob/main/Client-Server%20Model.png)
