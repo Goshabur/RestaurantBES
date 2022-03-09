@@ -1,20 +1,16 @@
-#ifndef RESTAURANTBES_ADMIN_H
-#define RESTAURANTBES_ADMIN_H
+#pragma once
 
 #include "client.h"
-#include <string>
 
-namespace admin {
+namespace restbes {
     class Admin {
     public:
         Admin() = default;
 
-        static void change_order_status(int order_id, int set_status);
+        static void change_order_status(int order_id, int set_status) noexcept;
 
-        void cancel_order(int order_id);
+        static void cancel_order(int order_id) noexcept;
 
-        void accept_order(client::Client &user);
+        static void accept_order(restbes::Client &user) noexcept;
     };
-}
-
-#endif //RESTAURANTBES_ADMIN_H
+}  // namespace restbes

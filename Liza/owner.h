@@ -1,19 +1,16 @@
-#ifndef RESTAURANTBES_OWNER_H
-#define RESTAURANTBES_OWNER_H
+#pragma once
 
-#include <string>
+#include "fwd.h"
 
-namespace owner {
+namespace restbes {
     class Owner {
     public:
         Owner() = default;
 
-        void change_dish_status(int dish_id, int set_status);
+        static void change_dish_status(int dish_id, int set_status);
 
-        void change_dish_price(int dish_id, int set_price);
+        static void change_dish_price(int dish_id, int set_price);
 
-        void change_dish_info(int dish_id, const std::string &set_info);
+        static void change_dish_info(int dish_id, const std::string &set_info);
     };
-}
-
-#endif //RESTAURANTBES_OWNER_H
+}  // namespace restbes

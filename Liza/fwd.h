@@ -1,13 +1,11 @@
-#ifndef RESTAURANTBES_SERVER_H
-#define RESTAURANTBES_SERVER_H
+#pragma once
 
 #include <vector>
 #include <string>
+#include "pqxx/pqxx"
 
-namespace db {
+namespace restbes {
     void connect_to_db_exec(const std::string &sql);
 
     std::string connect_to_db_get(const std::string &sql);
 }
-
-#endif //RESTAURANTBES_SERVER_H
