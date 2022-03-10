@@ -20,6 +20,6 @@ int main() {
     }
 
     while(true) {
-        vec[0]->receiveMessage();
+        std::cout << vec[0]->receiveMessages() << std::flush;
     }
 }
