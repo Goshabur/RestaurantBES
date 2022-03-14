@@ -1,0 +1,64 @@
+#include "user.h"
+#include "chat.h"
+#include "message.h"
+#include "server.h"
+
+User::User(std::string nm, std::shared_ptr<Session> session) : name(std::move(nm)), activeSessions({std::move(session)}) {}
+
+void User::sendMessage(const std::string &text, std::shared_ptr<Chat> chat) const {
+    chat->addMessage(Message{name, text});
+}
+
+void User::yieldMessage(const Message &message) {
+    std::unique_lock lock(mutex);
+    auto response = generate_response(message.generateMessage(), Connection::KEEP_ALIVE);
+    for (const auto &session : activeSessions) {
+        if (session->is_open()) {
+            session->yield(*response);
+        }
+    }
+//    messageHoldSpace.push_back(message);
+}
+
+void User::addSession(std::shared_ptr<Session> session) {
+    std::unique_lock lock(mutex);
+    activeSessions.insert(std::move(session));
+//    auto response = generate_response(generateHoldSpaceMessages(), Connection::KEEP_ALIVE);
+//    messageHoldSpace.clear();
+}
+
+std::shared_ptr<Session> User::getSession(std::shared_ptr<Session> session) {
+    std::shared_lock lock(mutex);
+    if (activeSessions.count(session) == 0) return nullptr;
+    else return session;
+}
+
+const std::unordered_set<std::shared_ptr<Session>> &User::getActiveSessions() const {
+    std::shared_lock lock(mutex);
+    return activeSessions;
+}
+
+void User::eraseInactiveSessions() {
+    std::unique_lock lock(mutex);
+    for (auto session = activeSessions.begin(); session != activeSessions.end(); ) {
+        if ((*session)->is_closed()) {
+            session = activeSessions.erase(session);
+        } else {
+            ++session;
+        }
+    }
+}
+
+const std::string &User::getName() const {
+    std::shared_lock lock(mutex);
+    return name;
+}
+
+std::string User::generateHoldSpaceMessages() const {
+    std::shared_lock lock(mutex);
+    std::string holdSpace;
+    for (auto &message : messageHoldSpace) {
+        holdSpace.append(message.generateMessage());
+    }
+    return std::move(holdSpace);
+}
