@@ -16,5 +16,6 @@ target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
 target_link_libraries(Server restbed crypto ssl pthread gflags)
 
 add_executable(Client
-        client/client.cpp server/include/fwd.h)
+        client/client.cpp
+        )
 target_link_libraries(Client crypto ssl pthread gflags)
