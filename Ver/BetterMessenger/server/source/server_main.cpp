@@ -18,8 +18,8 @@ static bool ValidatePath(const char *flagname, const std::string &value) {
     return false;
 }
 
-DEFINE_string(SSL_keys, "", "Path to SSL keys");
-DEFINE_validator(SSL_keys, &ValidatePath);
+DEFINE_string(SSLkeys, "", "Path to SSL keys");
+DEFINE_validator(SSLkeys, &ValidatePath);
 
 static bool ValidatePort(const char *flagname, gflags::int32 value) {
     if (value > 0 && value < 32768) {
@@ -53,11 +53,11 @@ int main(int argc, char **argv) {
     auto ssl_settings = std::make_shared<SSLSettings>();
     ssl_settings->set_http_disabled(true);
     ssl_settings->set_private_key(
-            Uri("file://" + fLS::FLAGS_SSL_keys + "/server.key"));
+            Uri("file://" + fLS::FLAGS_SSLkeys + "/server.key"));
     ssl_settings->set_certificate(
-            Uri("file://" + fLS::FLAGS_SSL_keys + "/server.crt"));
+            Uri("file://" + fLS::FLAGS_SSLkeys + "/server.crt"));
     ssl_settings->set_temporary_diffie_hellman(
-            Uri("file://" + fLS::FLAGS_SSL_keys + "/dh2048.pem"));
+            Uri("file://" + fLS::FLAGS_SSLkeys + "/dh2048.pem"));
     ssl_settings->set_port(fLI::FLAGS_port);
 
     auto settings = std::make_shared<Settings>();

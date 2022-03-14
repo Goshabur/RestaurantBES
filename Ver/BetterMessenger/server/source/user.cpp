@@ -17,25 +17,11 @@ void User::yieldMessage(const Message &message) {
             session->yield(*response);
         }
     }
-//    messageHoldSpace.push_back(message);
 }
 
 void User::addSession(std::shared_ptr<Session> session) {
     std::unique_lock lock(mutex);
     activeSessions.insert(std::move(session));
-//    auto response = generate_response(generateHoldSpaceMessages(), Connection::KEEP_ALIVE);
-//    messageHoldSpace.clear();
-}
-
-std::shared_ptr<Session> User::getSession(std::shared_ptr<Session> session) {
-    std::shared_lock lock(mutex);
-    if (activeSessions.count(session) == 0) return nullptr;
-    else return session;
-}
-
-const std::unordered_set<std::shared_ptr<Session>> &User::getActiveSessions() const {
-    std::shared_lock lock(mutex);
-    return activeSessions;
 }
 
 void User::eraseInactiveSessions() {
@@ -49,16 +35,18 @@ void User::eraseInactiveSessions() {
     }
 }
 
+std::shared_ptr<Session> User::getSession(std::shared_ptr<Session> session) const {
+    std::shared_lock lock(mutex);
+    if (activeSessions.count(session) == 0) return nullptr;
+    else return session;
+}
+
+const std::unordered_set<std::shared_ptr<Session>> &User::getActiveSessions() const {
+    std::shared_lock lock(mutex);
+    return activeSessions;
+}
+
 const std::string &User::getName() const {
     std::shared_lock lock(mutex);
     return name;
-}
-
-std::string User::generateHoldSpaceMessages() const {
-    std::shared_lock lock(mutex);
-    std::string holdSpace;
-    for (auto &message : messageHoldSpace) {
-        holdSpace.append(message.generateMessage());
-    }
-    return std::move(holdSpace);
 }

@@ -10,9 +10,9 @@ enum ResponseCode {
   OK = 200
 };
 
-std::shared_ptr<Chat> &getChat();
+[[nodiscard]] std::shared_ptr<Chat> &getChat();
 
-std::shared_ptr<Response> generate_response(const std::string &body, Connection connection = Connection::CLOSE);
+[[nodiscard]] std::shared_ptr<Response> generate_response(const std::string &body, Connection connection = Connection::CLOSE);
 
 void get_method_handler(std::shared_ptr<Session> session);
 void post_method_handler(std::shared_ptr<Session> session);

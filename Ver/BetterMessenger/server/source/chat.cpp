@@ -7,13 +7,12 @@ using restbed::Session;
 
 void Chat::addMessage(const Message &message) {
     std::unique_lock lock(mutex);
-    messages.push_back(message);
     for (auto &user : users) {
         user.second->yieldMessage(message);
     }
 }
 
-std::unordered_map<std::string, std::shared_ptr<User>> &Chat::getUsers() {
+const std::unordered_map<std::string, std::shared_ptr<User>> &Chat::getUsers() const {
     return users;
 }
 

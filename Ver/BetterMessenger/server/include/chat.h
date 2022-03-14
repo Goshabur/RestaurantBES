@@ -7,21 +7,22 @@
 #include <unordered_set>
 #include <vector>
 #include "fwd.h"
+#include "user.h"
 
-using restbed::Session, restbed::Response;
+using restbed::Session;
 
 struct Chat {
 private:
-    std::vector<Message> messages;
     std::unordered_map<std::string, std::shared_ptr<User>> users;
     mutable std::shared_mutex mutex;
 
-    friend User;
+    void addMessage(const Message &message);
+
+    friend void User::sendMessage(const std::string &text, std::shared_ptr<Chat> chat) const;
 
 public:
-    void addMessage(const Message &message);
-    std::unordered_map<std::string, std::shared_ptr<User>> &getUsers();
-    std::shared_ptr<User> getUser(const std::string &name) const;
+    [[nodiscard]] const std::unordered_map<std::string, std::shared_ptr<User>> &getUsers() const;
+    [[nodiscard]] std::shared_ptr<User> getUser(const std::string &name) const;
     void addUser(const std::string &name, std::shared_ptr<Session> session);
 };
 

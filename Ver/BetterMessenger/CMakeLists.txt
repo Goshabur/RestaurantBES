@@ -5,13 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(./server/include)
 
-add_executable(test-chat
-        server/source/test-chat.cpp
-        server/source/chat.cpp
-        server/source/server.cpp)
-target_include_directories(test-chat PRIVATE $ENV{HOME}/restbed/source)
-target_link_libraries(test-chat restbed crypto ssl pthread)
-
 add_executable(Server
         server/source/message.cpp
         server/source/chat.cpp

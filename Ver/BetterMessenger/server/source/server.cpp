@@ -23,6 +23,7 @@ std::shared_ptr<Response> generate_response(const std::string &body, Connection 
             break;
     }
     response->set_status_code(ResponseCode::OK);
+    // make OK const
     response->set_status_message("OK");
     return response;
 }
@@ -42,13 +43,12 @@ void post_method_handler(std::shared_ptr<Session> session) {
     const auto request = session->get_request();
 
     int content_length = request->get_header("Content-Length", 0);
-    std::string name = request->get_header("Name", "Anonymous"); // some problems here
+    std::string name = request->get_header("Name", "Anonymous");
+
     session->fetch(content_length, [name](const std::shared_ptr<Session> session, const Bytes &body) {
         std::string data(body.begin(), body.end());
-
         getChat()->getUser(name)->sendMessage(data, getChat());
-
-        // make a const, send JSONs
+        // make const, send JSONs
         std::string response_body = "PROCESSED, OK\n";
         auto response = generate_response(response_body, Connection::CLOSE);
         session->close(*response);
@@ -56,7 +56,7 @@ void post_method_handler(std::shared_ptr<Session> session) {
 }
 
 void handle_inactive_sessions() {
-    for (auto &user : getChat()->getUsers()) {
+    for (const auto &user : getChat()->getUsers()) {
         user.second->eraseInactiveSessions();
     }
 }
