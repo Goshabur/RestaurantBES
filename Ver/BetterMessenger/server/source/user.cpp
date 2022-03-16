@@ -11,7 +11,7 @@ void User::sendMessage(const std::string &text, std::shared_ptr<Chat> chat) cons
 
 void User::yieldMessage(const Message &message) {
     std::unique_lock lock(mutex);
-    auto response = generate_response(message.generateMessage(), Connection::KEEP_ALIVE);
+    auto response = generateResponse(message.generateMessage(), Connection::KEEP_ALIVE);
     for (const auto &session : activeSessions) {
         if (session->is_open()) {
             session->yield(*response);

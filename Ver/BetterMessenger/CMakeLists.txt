@@ -13,6 +13,7 @@ add_executable(Server
         server/source/server_main.cpp
         )
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
+#target_include_directories(Server PRIVATE $ENV{HOME}/folly)
 target_link_libraries(Server restbed crypto ssl pthread gflags)
 
 add_executable(Client

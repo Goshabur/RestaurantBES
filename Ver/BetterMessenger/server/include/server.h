@@ -2,9 +2,12 @@
 #define RESTAURANTBES_SERVER_H
 
 #include <corvusoft/restbed/session.hpp>
+#include <corvusoft/restbed/settings.hpp>
 #include "fwd.h"
 
-using restbed::Session, restbed::Response;
+using restbed::Session, restbed::Response, restbed::Resource, restbed::Settings;
+using HTTP_Handler = std::function<void(std::shared_ptr<Session>)>;
+using ErrorHandler = std::function<void(const int, const std::exception &, std::shared_ptr<Session>)>;
 
 enum ResponseCode {
   OK = 200
@@ -12,10 +15,28 @@ enum ResponseCode {
 
 [[nodiscard]] std::shared_ptr<Chat> &getChat();
 
-[[nodiscard]] std::shared_ptr<Response> generate_response(const std::string &body, Connection connection = Connection::CLOSE);
+[[nodiscard]] std::shared_ptr<Response> generateResponse(const std::string &body, Connection connection = Connection::CLOSE);
 
-void get_method_handler(std::shared_ptr<Session> session);
-void post_method_handler(std::shared_ptr<Session> session);
-void handle_inactive_sessions();
+void getMethodHandler(std::shared_ptr<Session> session);
+
+HTTP_Handler generatePostMethodHandler(const std::function<void(std::shared_ptr<Session>, const std::string&)> &callback);
+void postMethodHandler(std::shared_ptr<Session> session, const std::string &data);
+
+void errorHandler(const int code,
+                  const std::exception &exception,
+                  std::shared_ptr<Session> session);
+
+void handleInactiveSessions();
+
+std::shared_ptr<Resource> createResource(const std::string &path,
+                                         const HTTP_Handler &getMethodHandler,
+                                         const HTTP_Handler &postMethodHandler,
+                                         const ErrorHandler &errorHandler);
+
+std::shared_ptr<Settings> createSettingsWithSSL(const std::string &SSL_ServerKey,
+                                                const std::string &SSL_Certificate,
+                                                const std::string &SSL_DHKey,
+                                                const int port,
+                                                const int workers);
 
 #endif //RESTAURANTBES_SERVER_H

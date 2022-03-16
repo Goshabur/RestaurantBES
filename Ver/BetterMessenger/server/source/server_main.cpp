@@ -45,28 +45,24 @@ DEFINE_validator(workers, &ValidateWorkers);
 
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-    auto resource = std::make_shared<Resource>();
-    resource->set_path("/messenger");
-    resource->set_method_handler("GET", get_method_handler);
-    resource->set_method_handler("POST", post_method_handler);
 
-    auto ssl_settings = std::make_shared<SSLSettings>();
-    ssl_settings->set_http_disabled(true);
-    ssl_settings->set_private_key(
-            Uri("file://" + fLS::FLAGS_SSLkeys + "/server.key"));
-    ssl_settings->set_certificate(
-            Uri("file://" + fLS::FLAGS_SSLkeys + "/server.crt"));
-    ssl_settings->set_temporary_diffie_hellman(
-            Uri("file://" + fLS::FLAGS_SSLkeys + "/dh2048.pem"));
-    ssl_settings->set_port(fLI::FLAGS_port);
+    auto resource = createResource("/messenger",
+                                   getMethodHandler,
+                                   generatePostMethodHandler(postMethodHandler),
+                                   errorHandler);
 
-    auto settings = std::make_shared<Settings>();
-    settings->set_ssl_settings(ssl_settings);
-    settings->set_worker_limit(fLI::FLAGS_workers);
+    std::string pathToSSL[] = { fLS::FLAGS_SSLkeys + "/server.key",
+                                fLS::FLAGS_SSLkeys + "/server.crt",
+                                fLS::FLAGS_SSLkeys + "/dh2048.pem" };
+    auto settings = createSettingsWithSSL(pathToSSL[0],
+                                              pathToSSL[1],
+                                              pathToSSL[2],
+                                              fLI::FLAGS_port,
+                                              fLI::FLAGS_workers);
 
     Service service;
     service.publish(resource);
-    service.schedule(handle_inactive_sessions, 1s);
+    service.schedule(handleInactiveSessions, 1s);
     service.start(settings);
 
     return EXIT_SUCCESS;
