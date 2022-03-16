@@ -9,6 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(PostgreSQL REQUIRED)
 
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 FetchContent_Declare(
         libpqxx
         GIT_REPOSITORY https://github.com/jtv/libpqxx.git
@@ -20,4 +23,4 @@ FetchContent_MakeAvailable(libpqxx)
 
 add_executable(RestaurantBES server.cpp admin.cpp owner.cpp client.cpp)
 
-target_link_libraries(RestaurantBES "${PQXX_LIBRARIES}")
+target_link_libraries(RestaurantBES "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)

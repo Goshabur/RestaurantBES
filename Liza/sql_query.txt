@@ -1,0 +1,73 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+GRANT ALL ON SCHEMA public TO postgres;
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE public."CLIENT"
+(
+    "CLIENT_ID" serial,
+    "EMAIL" text NOT NULL,
+    "PASSWORD" text NOT NULL,
+    "NAME" text NOT NULL,
+    PRIMARY KEY ("EMAIL")
+);
+
+CREATE TABLE public."ORDER"
+(
+    "ORDER_ID" serial,
+    "STATUS" integer NOT NULL,
+    "TIME" timestamp without time zone,
+    "ITEMS" jsonb,
+    "COMMENT" text,
+    "COST" integer
+);
+
+CREATE TABLE public."DISH"
+(
+    "DISH_ID" serial,
+    "DISH_NAME" text NOT NULL,
+    "IMAGE" text NOT NULL,
+    "PRICE" integer NOT NULL,
+    "INFO" text,
+    "STATUS" integer NOT NULL,
+    PRIMARY KEY ("IMAGE")
+);
+
+CREATE TABLE public."HISTORY"
+(
+    "CLIENT_ID" integer NOT NULL,
+    "ORDER_ID" integer NOT NULL
+);
+
+CREATE TABLE public."ACTIVE_ORDER"
+(
+    "CLIENT_ID" integer NOT NULL,
+    "ORDER_ID" integer NOT NULL
+);
+
+CREATE TABLE public."CART"
+(
+    "CLIENT_ID" integer NOT NULL,
+    "CART" jsonb,
+    "COST" integer NOT NULL
+);
+
+ALTER TABLE IF EXISTS public."HISTORY"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."CART"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."ACTIVE_ORDER"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."DISH"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."ORDER"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."CLIENT"
+    OWNER to postgres;

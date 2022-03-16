@@ -3,14 +3,15 @@
 #include "client.h"
 
 namespace restbes {
-    class Admin {
-    public:
-        Admin() = default;
 
-        static void change_order_status(int order_id, int set_status) noexcept;
+class Admin {
+public:
+    Admin() = default;
 
-        static void cancel_order(int order_id) noexcept;
+    static void change_order_status(id_t order_id, int set_status) noexcept;
 
-        static void accept_order(restbes::Client &user) noexcept;
-    };
+    static void cancel_order(id_t order_id) noexcept;
+
+    static void accept_order(id_t order_id) noexcept;
+};
 }  // namespace restbes
