@@ -9,3 +9,6 @@ HSE first grade project
 
 # Схема БД
 ![Схема БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBase%20UML.png)
+
+# Сервер и взаимодействие с БД
+![Сервер](https://github.com/Goshabur/RestaurantBES/blob/main/Server%20UML.png)
