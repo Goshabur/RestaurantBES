@@ -30,7 +30,8 @@ DEFINE_bool(silent, false, "Don't receive incoming messages");
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     std::string client_name = fLS::FLAGS_name;
-    std::string address = "https://" + fLS::FLAGS_server + ':' + std::to_string(fLI::FLAGS_port);
+    std::string address = "https://" + fLS::FLAGS_server + ':' +
+                          std::to_string(fLI::FLAGS_port);
     // make const
     auto cli = std::make_shared<httplib::Client>(address);
     cli->enable_server_certificate_verification(false);

@@ -4,8 +4,8 @@
 #include <gflags/gflags.h>
 #include <filesystem>
 
-using restbed::Session, restbed::Resource, restbed::SSLSettings, restbed::Service, restbed::Uri, restbed::Settings, restbed::Bytes;
 using namespace std::chrono_literals;
+using server_structure::createSettingsWithSSL;
 
 static bool ValidatePath(const char *flagname, const std::string &value) {
     bool key = std::filesystem::exists(value + "/server.key");
@@ -14,7 +14,9 @@ static bool ValidatePath(const char *flagname, const std::string &value) {
     if (key && certificate && diffie_hellman) {
         return true;
     }
-    printf("Invalid value for --%s: can't find some of the required files: \"server.key\", \"server.crt\", \"dh2048.pem\"\n",
+    printf("Invalid value for --%s: "
+           "can't find some of the required files: "
+           "\"server.key\", \"server.crt\", \"dh2048.pem\"\n",
            flagname);
     return false;
 }
@@ -55,14 +57,14 @@ int main(int argc, char **argv) {
                                    errorHandler,
                                    server);
 
-    std::string pathToSSL[] = { fLS::FLAGS_SSLkeys + "/server.key",
-                                fLS::FLAGS_SSLkeys + "/server.crt",
-                                fLS::FLAGS_SSLkeys + "/dh2048.pem" };
+    std::string pathToSSL[] = {fLS::FLAGS_SSLkeys + "/server.key",
+                               fLS::FLAGS_SSLkeys + "/server.crt",
+                               fLS::FLAGS_SSLkeys + "/dh2048.pem"};
     auto settings = createSettingsWithSSL(pathToSSL[0],
-                                              pathToSSL[1],
-                                              pathToSSL[2],
-                                              fLI::FLAGS_port,
-                                              fLI::FLAGS_workers);
+                                          pathToSSL[1],
+                                          pathToSSL[2],
+                                          fLI::FLAGS_port,
+                                          fLI::FLAGS_workers);
 
     server->addResource(resource);
     server->schedule(handleInactiveSessions, server, 1s);

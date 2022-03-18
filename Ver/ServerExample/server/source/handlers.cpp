@@ -1,6 +1,10 @@
 #include "handlers.h"
+#include "user.h"
 
-void getMethodHandler(std::shared_ptr<Session> session, std::shared_ptr<Server> server) {
+using server_structure::Connection;
+
+void getMethodHandler(std::shared_ptr<Session> session,
+                      std::shared_ptr<Server> server) {
     std::string name = session->get_request()->get_header("Name");
     if (server->getUser(name) == nullptr) {
         server->addUser(name, session);
@@ -12,7 +16,8 @@ void getMethodHandler(std::shared_ptr<Session> session, std::shared_ptr<Server> 
 }
 
 void postMethodHandler(std::shared_ptr<Session> session,
-                       const std::string &data, std::shared_ptr<Server> server) {
+                       const std::string &data,
+                       std::shared_ptr<Server> server) {
     auto request = session->get_request();
     std::string name = request->get_header("Name", "Anonymous");
 
@@ -25,10 +30,11 @@ void postMethodHandler(std::shared_ptr<Session> session,
 
 void errorHandler(const int code,
                   const std::exception &exception,
-                  std::shared_ptr<Session> session, std::shared_ptr<Server> server) {}
+                  std::shared_ptr<Session> session,
+                  std::shared_ptr<Server> server) {}
 
 void handleInactiveSessions(std::shared_ptr<Server> server) {
-    for (const auto &user : server->getUsers()) {
+    for (const auto &user: server->getUsers()) {
         user.second->eraseInactiveSessions();
     }
 }
