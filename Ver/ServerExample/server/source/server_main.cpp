@@ -51,11 +51,16 @@ int main(int argc, char **argv) {
 
     auto server = std::make_shared<Server>();
 
-    auto resource = createResource("/messenger",
-                                   getMethodHandler,
-                                   postMethodHandler,
-                                   errorHandler,
-                                   server);
+    auto echo = createResource("/echo",
+                               getMethodHandler,
+                               postEchoMethodHandler,
+                               errorHandler,
+                               server);
+    auto messenger = createResource("/messenger",
+                                    getMethodHandler,
+                                    postMessengerMethodHandler,
+                                    errorHandler,
+                                    server);
 
     std::string pathToSSL[] = {fLS::FLAGS_SSLkeys + "/server.key",
                                fLS::FLAGS_SSLkeys + "/server.crt",
@@ -66,7 +71,8 @@ int main(int argc, char **argv) {
                                           fLI::FLAGS_port,
                                           fLI::FLAGS_workers);
 
-    server->addResource(resource);
+    server->addResource(echo);
+    server->addResource(messenger);
     server->schedule(handleInactiveSessions, server, 1s);
     server->setSettings(settings);
     server->startServer();

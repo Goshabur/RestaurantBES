@@ -19,9 +19,9 @@ private:
     mutable std::shared_mutex mutex;
 
 public:
-    User(std::string nm, std::shared_ptr<Session> activeSession);
+    explicit User(std::string nm);
 
-    void yieldMessage(const std::string &message);
+    void yieldMessage(const std::string &message, const std::string &path);
 
     void addSession(std::shared_ptr<Session> session);
 

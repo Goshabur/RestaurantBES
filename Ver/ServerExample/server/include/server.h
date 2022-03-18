@@ -71,7 +71,7 @@ public:
     [[nodiscard]] std::shared_ptr<User>
     getUser(const std::string &name) const;
 
-    void addUser(const std::string &name, std::shared_ptr<Session> session);
+    void addUser(const std::string &name);
 
     void addResource(std::shared_ptr<Resource> resource);
 

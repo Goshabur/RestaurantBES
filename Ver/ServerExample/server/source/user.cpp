@@ -5,14 +5,14 @@ namespace user_structure {
 
 using server_structure::Connection;
 
-User::User(std::string nm, std::shared_ptr<Session> session) : name(
-        std::move(nm)), activeSessions({std::move(session)}) {}
+User::User(std::string nm) : name(
+        std::move(nm)) {}
 
-void User::yieldMessage(const std::string &message) {
+void User::yieldMessage(const std::string &message, const std::string &path) {
     auto response = generateResponse(message, Connection::KEEP_ALIVE);
     std::unique_lock lock(mutex);
     for (const auto &session: activeSessions) {
-        if (session->is_open()) {
+        if (session->is_open() && path == session->get_request()->get_path()) {
             session->yield(*response);
         }
     }

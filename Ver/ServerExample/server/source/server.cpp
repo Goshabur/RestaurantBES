@@ -21,13 +21,12 @@ std::shared_ptr<User> Server::getUser(const std::string &name) const {
     else return users.at(name);
 }
 
-void
-Server::addUser(const std::string &name, std::shared_ptr<Session> session) {
+void Server::addUser(const std::string &name) {
     std::shared_lock lock(mutexUsers);
     if (users.count(name) == 0) {
         lock.unlock();
         std::unique_lock uLock(mutexUsers);
-        users.insert({name, std::make_shared<User>(name, session)});
+        users.insert({name, std::make_shared<User>(name)});
     }
 }
 
@@ -68,8 +67,9 @@ generateResponse(const std::string &body, Connection connection) {
     return response;
 }
 
-restbed_HTTP_Handler Server::generatePostMethodHandler(const POST_Handler &callback,
-                                       std::shared_ptr<Server> server) {
+restbed_HTTP_Handler
+Server::generatePostMethodHandler(const POST_Handler &callback,
+                                  std::shared_ptr<Server> server) {
     return [callback, server](std::shared_ptr<Session> session) {
         int content_length = session->get_request()->get_header(
                 "Content-Length", 0);
@@ -84,22 +84,24 @@ restbed_HTTP_Handler Server::generatePostMethodHandler(const POST_Handler &callb
     };
 }
 
-restbed_HTTP_Handler Server::generateGetMethodHandler(const GET_Handler &callback,
-                                      std::shared_ptr<Server> server) {
+restbed_HTTP_Handler
+Server::generateGetMethodHandler(const GET_Handler &callback,
+                                 std::shared_ptr<Server> server) {
     return [callback, server](std::shared_ptr<Session> session) {
         callback(std::move(session), server);
     };
 }
 
-std::function<void(void)> Server::generateScheduledTask(const ScheduledTask &task,
-                                                std::shared_ptr<Server> server) {
+std::function<void(void)>
+Server::generateScheduledTask(const ScheduledTask &task,
+                              std::shared_ptr<Server> server) {
     return [task, server]() {
         task(server);
     };
 }
 
 restbed_ErrorHandler Server::generateErrorHandler(const ErrorHandler &callback,
-                                          std::shared_ptr<Server> server) {
+                                                  std::shared_ptr<Server> server) {
     return [callback, server](const int code,
                               const std::exception &exception,
                               std::shared_ptr<Session> session) {
@@ -115,12 +117,15 @@ std::shared_ptr<Resource> createResource(const std::string &path,
     auto resource = std::make_shared<Resource>();
     resource->set_path(path);
     resource->set_method_handler("GET",
-                                 Server::generateGetMethodHandler(getMethodHandler,
-                                                          server));
+                                 Server::generateGetMethodHandler(
+                                         getMethodHandler,
+                                         server));
     resource->set_method_handler("POST",
-                                 Server::generatePostMethodHandler(postMethodHandler,
-                                                           server));
-    resource->set_error_handler(Server::generateErrorHandler(errorHandler, server));
+                                 Server::generatePostMethodHandler(
+                                         postMethodHandler,
+                                         server));
+    resource->set_error_handler(
+            Server::generateErrorHandler(errorHandler, server));
     return resource;
 }
 

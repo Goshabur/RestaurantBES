@@ -9,8 +9,13 @@ using server_structure::Server;
 void getMethodHandler(std::shared_ptr<Session> session,
                       std::shared_ptr<Server> server);
 
-void postMethodHandler(std::shared_ptr<Session> session,
-                       const std::string &data, std::shared_ptr<Server> server);
+void postEchoMethodHandler(std::shared_ptr<Session> session,
+                           const std::string &data, std::shared_ptr<Server> server);
+
+
+void postMessengerMethodHandler(std::shared_ptr<Session> session,
+                                const std::string &data,
+                                std::shared_ptr<Server> server);
 
 void errorHandler(const int code,
                   const std::exception &exception,

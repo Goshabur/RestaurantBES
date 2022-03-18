@@ -23,6 +23,17 @@ DEFINE_validator(port, &ValidatePort);
 
 DEFINE_string(server, "localhost", "Domain to send requests to");
 
+static bool ValidateResource(const char *flagname, const std::string &value) {
+    if (value.empty()) {
+        printf("Invalid value for --%s: %s\n", flagname, value.c_str());
+        return false;
+    }
+    return true;
+}
+
+DEFINE_string(resource, "", "Path to the resource to send requests to");
+DEFINE_validator(resource, &ValidateResource);
+
 DEFINE_bool(count_seconds, false, "Send automated messages counting seconds");
 
 DEFINE_bool(silent, false, "Don't receive incoming messages");
@@ -47,7 +58,7 @@ int main(int argc, char **argv) {
             cli2->set_read_timeout(180);
 
             while (true) {
-                auto res = cli2->Get("/messenger", headers);
+                auto res = cli2->Get(fLS::FLAGS_resource.c_str(), headers);
                 if (res == nullptr) {
                     std::cout << "No response\n";
                     break;
@@ -73,7 +84,7 @@ int main(int argc, char **argv) {
         } else {
             std::getline(std::cin, message);
         }
-        auto res = cli->Post("/messenger", headers, message, "text/plain");
+        auto res = cli->Post(fLS::FLAGS_resource.c_str(), headers, message, "text/plain");
         if (res == nullptr) {
             std::cerr << "No response\n";
             return 1;
