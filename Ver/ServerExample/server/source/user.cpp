@@ -1,17 +1,15 @@
 #include "user.h"
-#include "chat.h"
-#include "message.h"
 #include "server.h"
 
 User::User(std::string nm, std::shared_ptr<Session> session) : name(std::move(nm)), activeSessions({std::move(session)}) {}
 
-void User::sendMessage(const std::string &text, std::shared_ptr<Chat> chat) const {
-    chat->addMessage(Message{name, text});
-}
+//void User::sendMessage(const std::string &text, std::shared_ptr<Chat> chat) const {
+//    chat->addMessage(Message{name, text});
+//}
 
-void User::yieldMessage(const Message &message) {
+void User::yieldMessage(const std::string &message) {
+    auto response = generateResponse(message, Connection::KEEP_ALIVE);
     std::unique_lock lock(mutex);
-    auto response = generateResponse(message.generateMessage(), Connection::KEEP_ALIVE);
     for (const auto &session : activeSessions) {
         if (session->is_open()) {
             session->yield(*response);

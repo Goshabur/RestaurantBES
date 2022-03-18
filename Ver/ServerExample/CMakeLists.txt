@@ -6,14 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(./server/include)
 
 add_executable(Server
-        server/source/message.cpp
-        server/source/chat.cpp
         server/source/user.cpp
         server/source/server.cpp
         server/source/server_main.cpp
-        )
+        server/source/handlers.cpp)
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
-#target_include_directories(Server PRIVATE $ENV{HOME}/folly)
 target_link_libraries(Server restbed crypto ssl pthread gflags)
 
 add_executable(Client

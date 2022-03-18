@@ -2,8 +2,7 @@
 #define RESTAURANTBES_FWD_H
 
 struct User;
-struct Chat;
-struct Message;
+struct Server;
 
 enum Connection {
     KEEP_ALIVE,

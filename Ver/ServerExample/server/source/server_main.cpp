@@ -1,4 +1,5 @@
 #include "server.h"
+#include "handlers.h"
 #include "restbed"
 #include <gflags/gflags.h>
 #include <filesystem>
@@ -22,7 +23,7 @@ DEFINE_string(SSLkeys, "", "Path to SSL keys");
 DEFINE_validator(SSLkeys, &ValidatePath);
 
 static bool ValidatePort(const char *flagname, gflags::int32 value) {
-    if (value > 0 && value < 32768) {
+    if (0 < value && value < 32768) {
         return true;
     }
     printf("Invalid value for --%s: %d\n", flagname, (int) value);
@@ -33,7 +34,7 @@ DEFINE_int32(port, 0, "What port to listen on");
 DEFINE_validator(port, &ValidatePort);
 
 static bool ValidateWorkers(const char *flagname, gflags::int32 value) {
-    if (value > 0 && value < 100) {
+    if (0 < value && value < 100) {
         return true;
     }
     printf("Invalid value for --%s: %d\n", flagname, (int) value);
@@ -46,10 +47,13 @@ DEFINE_validator(workers, &ValidateWorkers);
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
+    auto server = std::make_shared<Server>();
+
     auto resource = createResource("/messenger",
                                    getMethodHandler,
-                                   generatePostMethodHandler(postMethodHandler),
-                                   errorHandler);
+                                   postMethodHandler,
+                                   errorHandler,
+                                   server);
 
     std::string pathToSSL[] = { fLS::FLAGS_SSLkeys + "/server.key",
                                 fLS::FLAGS_SSLkeys + "/server.crt",
@@ -60,10 +64,10 @@ int main(int argc, char **argv) {
                                               fLI::FLAGS_port,
                                               fLI::FLAGS_workers);
 
-    Service service;
-    service.publish(resource);
-    service.schedule(handleInactiveSessions, 1s);
-    service.start(settings);
+    server->addResource(resource);
+    server->schedule(handleInactiveSessions, server, 1s);
+    server->setSettings(settings);
+    server->startServer();
 
     return EXIT_SUCCESS;
 }

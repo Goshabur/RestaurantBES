@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <shared_mutex>
 #include "fwd.h"
+#include "server.h"
 
 using restbed::Session;
 
@@ -17,8 +18,7 @@ private:
 
 public:
     User(std::string nm, std::shared_ptr<Session> activeSession);
-    void sendMessage(const std::string &text, std::shared_ptr<Chat> chat) const;
-    void yieldMessage(const Message &message);
+    void yieldMessage(const std::string &message);
     void addSession(std::shared_ptr<Session> session);
     void eraseInactiveSessions();
 
