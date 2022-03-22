@@ -13,6 +13,7 @@ private:
 
 public:
     id_t client_id;
+    // vvv -- тест - точка с запятой  здесь не нужна
     Cart() : client_id(0){};
 
     [[nodiscard]] std::map<std::string, int> get_cart() const {
