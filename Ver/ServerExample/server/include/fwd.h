@@ -1,3 +1,5 @@
+// TODO: в хедерах можно использовать pragma once
+
 #ifndef RESTAURANTBES_FWD_H
 #define RESTAURANTBES_FWD_H
 

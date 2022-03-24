@@ -1,5 +1,10 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
+// nit: лучше разбить на блоки. 
+// стандартные библиотеки
+// внешние библиотеки
+// местные хедеры
+
 #include "httplib.h"
 #include <iostream>
 #include <thread>
@@ -41,6 +46,8 @@ DEFINE_bool(silent, false, "Don't receive incoming messages");
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
     std::string client_name = fLS::FLAGS_name;
+
+    // TODO: Тут можно попробовать folly::sformat("http://{}:{}", server, port)
     std::string address = "https://" + fLS::FLAGS_server + ':' +
                           std::to_string(fLI::FLAGS_port);
     // make const
@@ -51,7 +58,11 @@ int main(int argc, char **argv) {
     };
 
     if (!fLB::FLAGS_silent) {
+        // TODO: по хорошему, лучше сохранять указатель тред. 
+        // Перед завершением дожидаться завершения треда через join.
+        // Внутрь добавить инструмент, чтобы завершить тред.
         std::thread([headers, address]() {
+            // nit: cli обычно обозначает command-line interface. Лучше уж client
             auto cli2 = std::make_shared<httplib::Client>(address);
             cli2->enable_server_certificate_verification(false);
             cli2->set_keep_alive(true);
@@ -60,6 +71,7 @@ int main(int argc, char **argv) {
             while (true) {
                 auto res = cli2->Get(fLS::FLAGS_resource.c_str(), headers);
                 if (res == nullptr) {
+                    // nit: Лучше LOG(WARNING) из glog
                     std::cout << "No response\n";
                     break;
                 }
