@@ -6,9 +6,15 @@
 #include <shared_mutex>
 #include <memory>
 
+// TODO: проект маленький. Лучше сделать один неймспейс типа restaurant
+
 namespace server_structure {
 
+// TODO: лучше перекинуть using-и внутрь класса Server
 using restbed::Session;
+
+// TODO: здесь много using-ов, которые используются ровно один раз. 
+// Можно их убрать
 using restbed::Response;
 using restbed::Resource;
 using restbed::Settings;

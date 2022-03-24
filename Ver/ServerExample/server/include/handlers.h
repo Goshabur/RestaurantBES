@@ -3,6 +3,7 @@
 
 #include "server.h"
 
+// TODO: не надо засорять общий неймспейс. Оберни в namespace проекта.
 using server_structure::Session;
 using server_structure::Server;
 

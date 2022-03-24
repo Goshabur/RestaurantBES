@@ -10,6 +10,7 @@ using restbed::Uri;
 
 Server::Server() : service(new Service()) {}
 
+// TODO: лучше убрать мьютексы, и просто обернуть класс в folly::Synchronized
 UserCollection Server::getUsers() const {
     std::shared_lock lock(mutexUsers);
     return users;
