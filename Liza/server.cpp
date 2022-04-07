@@ -1,6 +1,16 @@
+#include "server.h"
 #include <iostream>
+#include <restbed>
+#include "admin.h"
 #include "client.h"
 #include "fwd.h"
+#include "order.h"
+#include "server/include/fwd.h"
+#include "user.h"
+
+using restbed::Session;
+using server_structure::Connection;
+using server_structure::Server;
 
 namespace restbes {
 
@@ -54,6 +64,101 @@ void show_menu() {
     }
 }
 
+void show_order_status(id_t order_id) {
+    try {
+        std::string status = restbes::connect_to_db_get(
+            R"(SELECT "STATUS" FROM "ORDER" WHERE "ORDER_ID" = )" +
+            std::to_string(order_id));
+
+        std::cout << (status == "1" ? "Accepted\n"
+                                    : (status == "0" ? "Created\n"
+                                                     : "Cancelled\n"));
+
+    } catch (...) {
+        std::cout << "No such order.\n";
+    }
+}
+
+void getMethodHandler(std::shared_ptr<Session> session,
+                      std::shared_ptr<Server> server) {
+    std::string name = session->get_request()->get_header("Name");
+
+    if (server->getUser(name) == nullptr) {
+        server->addUser(name);
+    }
+
+    auto user = server->getUser(name);
+
+    if (user->getSession(session) == nullptr) {
+        user->addSession(session);
+    }
+}
+
+void postCartMethodHandler(std::shared_ptr<Session> session,
+                           const std::string &data,
+                           std::shared_ptr<Server> server) {
+    auto request = session->get_request();
+    std::string name = request->get_header("client_id_");
+
+    nlohmann::json data_ = data;
+    std::string command_ = data_.at("command");
+    id_t client_id_ = static_cast<id_t>(data_.at("client_id_"));
+    id_t product_id_ = static_cast<id_t>(data_.at("product_id_"));
+
+    Client client = Client(client_id_);
+    if (command_ == "add_to_cart") {
+        client.add_to_cart(
+            std::to_string(product_id_));  // TODO: change cart.h so it could process using dish_id
+        server->getUser(name)->yieldMessage(
+            "Added to cart: " + std::to_string(product_id_) + '\n',
+            request->get_path());
+
+    } else if (command_ == "delete_from_cart") {
+        client.delete_from_cart(std::to_string(product_id_));
+        server->getUser(name)->yieldMessage(
+            "Deleted from cart: " + std::to_string(product_id_) + '\n',
+            request->get_path());
+
+    } else if (command_ == "clear_cart") {
+        client.empty_cart();
+        server->getUser(name)->yieldMessage("Cart is empty\n",
+                                            request->get_path());
+
+    } else if (command_ == "show_cart") {
+        client.cart();  // TODO: send what? json?
+    }
+
+    // make const, send JSONs
+    std::string response_body = "PROCESSED, OK\n";
+    auto response = generateResponse(response_body, Connection::CLOSE);
+    session->close(*response);
+}
+
+void postOrderMethodHandler(std::shared_ptr<Session> session,
+                            const std::string &data,
+                            std::shared_ptr<Server> server) {
+    auto request = session->get_request();
+    std::string name = request->get_header("Name");
+
+    nlohmann::json data_ = data;
+    std::string command_ = data_.at("command");
+    id_t client_id_ = static_cast<id_t>(data_.at("client_id_"));
+    id_t order_id_ = static_cast<id_t>(data_.at("order_id_"));
+
+    Client client = Client(client_id_);
+    if (command_ == "create_order") {
+        client.create_order();
+
+    } else if (command_ == "show_order_status") {
+        show_order_status(order_id_);
+    }
+
+    // make const, send JSONs
+    std::string response_body = "PROCESSED, OK\n";
+    auto response = generateResponse(response_body, Connection::CLOSE);
+    session->close(*response);
+}
+
 bool check_user_exists(const std::string &email) {
     try {
         std::string tmp = restbes::connect_to_db_get(
@@ -72,6 +177,19 @@ bool check_sign_in(const std::string &email, const std::string &password) {
         std::string tmp = restbes::connect_to_db_get(
             R"(SELECT "CLIENT_ID" FROM "CLIENT" WHERE "EMAIL" = ')" + email +
             "' AND \"PASSWORD\" = crypt('" + password + "', \"PASSWORD\")");
+
+    } catch (...) {
+        return false;
+    }
+
+    return true;
+}
+
+bool check_admin(const std::string &password) {
+    try {
+        std::string tmp = restbes::connect_to_db_get(
+            R"(SELECT "ADMIN_ID" FROM "ADMINISTRATOR" WHERE "PASSWORD" = crypt(')" +
+            password + "', \"PASSWORD\")");
 
     } catch (...) {
         return false;
@@ -116,7 +234,7 @@ int main() {
             client = restbes::Client(name, email, password, false);
             std::cout << "Account created, you can now sign in\n";
 
-        } else if (input == "check_sign_in") {
+        } else if (input == "sign_in") {
             std::cout << "Enter your email: ";
             std::cin >> email;
             std::cout << "Password: ";
@@ -193,18 +311,50 @@ int main() {
 
         } else if (input == "show_order_status") {
             id_t order_id;
-            std::cout << "Enter ORDER_ID: ";
+            std::cout << "Enter order id: ";
             std::cin >> order_id;
 
-            try {
-                std::string status = restbes::connect_to_db_get(
-                    R"(SELECT "STATUS" FROM "ORDER" WHERE "ORDER_ID" = )" +
-                    std::to_string(order_id));
-                std::cout << "Created.\n";  // TODO: get from DB (need to wait
-                                            // for admin's change)
+            restbes::show_order_status(order_id);
 
-            } catch (...) {
-                std::cout << "No such order.\n";
+        } else if (input == "log_in_as_admin") {
+            std::cout << "Password: ";
+            std::cin >> password;
+
+            if (restbes::check_admin(password)) {
+                std::cout << "Success.\n";
+
+            } else {
+                std::cout << "Denied.\n";
+                continue;
+            }
+
+            while (std::getline(std::cin, input)) {
+                id_t id;
+                int new_price;
+
+                if (input == "accept_order") {
+                    std::cout << "Order id: ";
+                    std::cin >> id;
+                    restbes::Admin::accept_order(id);
+
+                    std::cout << "Successfully changed\n";
+
+                } else if (input == "cancel_order") {
+                    std::cout << "Order id: ";
+                    std::cin >> id;
+                    restbes::Admin::cancel_order(id);
+
+                    std::cout << "Successfully changed\n";
+
+                } else if (input == "change_dish_price") {
+                    std::cout << "Dish name: ";
+                    std::cin >> name;
+                    std::cout << "New price: ";
+                    std::cin >> new_price;
+                    restbes::Admin::change_dish_price(name, new_price);
+
+                    std::cout << "Successfully changed\n";
+                }
             }
         }
     }
