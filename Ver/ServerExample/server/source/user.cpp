@@ -9,9 +9,10 @@ User::User(std::string nm) : name(
         std::move(nm)) {}
 
 void User::yieldMessage(const std::string &message, const std::string &path) {
-    auto response = generateResponse(message, "text/plain", Connection::KEEP_ALIVE);
-    std::unique_lock lock(mutex);
-    for (const auto &session: activeSessions) {
+    auto response = generateResponse(message, "text/plain",
+                                     Connection::KEEP_ALIVE);
+    auto lockedSessions = activeSessions.rlock();
+    for (const auto &session: *lockedSessions) {
         if (session->is_open() && path == session->get_request()->get_path()) {
             session->yield(*response);
         }
@@ -19,16 +20,15 @@ void User::yieldMessage(const std::string &message, const std::string &path) {
 }
 
 void User::addSession(std::shared_ptr<Session> session) {
-    std::unique_lock lock(mutex);
-    activeSessions.insert(std::move(session));
+    activeSessions.wlock()->insert(std::move(session));
 }
 
 void User::eraseInactiveSessions() {
-    std::unique_lock lock(mutex);
-    for (auto session = activeSessions.begin();
-         session != activeSessions.end();) {
+    auto lockedSessions = activeSessions.wlock();
+    for (auto session = lockedSessions->begin();
+         session != lockedSessions->end();) {
         if ((*session)->is_closed()) {
-            session = activeSessions.erase(session);
+            session = lockedSessions->erase(session);
         } else {
             ++session;
         }
@@ -37,20 +37,17 @@ void User::eraseInactiveSessions() {
 
 std::shared_ptr<Session>
 User::getSession(std::shared_ptr<Session> session) const {
-    std::shared_lock lock(mutex);
-    if (activeSessions.count(session) == 0) return nullptr;
+    if (activeSessions.rlock()->count(session) == 0) return nullptr;
     else return session;
 }
 
-const std::unordered_set<std::shared_ptr<Session>> &
+std::unordered_set<std::shared_ptr<Session>>
 User::getActiveSessions() const {
-    std::shared_lock lock(mutex);
-    return activeSessions;
+    return *(activeSessions.rlock());
 }
 
 const std::string &User::getName() const {
-    std::shared_lock lock(mutex);
-    return name;
+    return *(name.rlock());
 }
 
 } //user_structure

@@ -3,10 +3,10 @@
 #include "fwd.h"
 
 #include <corvusoft/restbed/session.hpp>
+#include <folly/Synchronized.h>
 
 #include <string>
 #include <unordered_set>
-#include <shared_mutex>
 #include <memory>
 
 namespace restbes::user_structure {
@@ -15,9 +15,8 @@ using restbed::Session;
 
 struct User {
 private:
-    std::string name;
-    std::unordered_set<std::shared_ptr<Session>> activeSessions;
-    mutable std::shared_mutex mutex;
+    folly::Synchronized<std::string> name;
+    folly::Synchronized<std::unordered_set<std::shared_ptr<Session>>> activeSessions;
 
 public:
     explicit User(std::string nm);
@@ -31,7 +30,7 @@ public:
     [[nodiscard]] std::shared_ptr<Session>
     getSession(std::shared_ptr<Session> session) const;
 
-    [[nodiscard]] const std::unordered_set<std::shared_ptr<Session>> &
+    [[nodiscard]] std::unordered_set<std::shared_ptr<Session>>
     getActiveSessions() const;
 
     [[nodiscard]] const std::string &getName() const;

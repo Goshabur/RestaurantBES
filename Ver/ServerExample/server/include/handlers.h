@@ -5,9 +5,6 @@
 using restbes::server_structure::Session;
 using restbes::server_structure::Server;
 
-void getOpenAPIMethodHandler(std::shared_ptr<Session> session,
-                             std::shared_ptr<Server> server);
-
 void getMethodHandler(std::shared_ptr<Session> session,
                       std::shared_ptr<Server> server);
 

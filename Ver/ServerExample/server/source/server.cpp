@@ -8,22 +8,17 @@ namespace restbes::server_structure {
 Server::Server() : service(new restbed::Service()) {}
 
 Server::UserCollection Server::getUsers() const {
-    std::shared_lock lock(mutexUsers);
-    return users;
+    return *(users.rlock());
 }
 
 std::shared_ptr<User> Server::getUser(const std::string &name) const {
-    std::shared_lock lock(mutexUsers);
-    if (users.count(name) == 0) return nullptr;
-    else return users.at(name);
+    if (users.rlock()->count(name) == 0) return nullptr;
+    else return users.rlock()->at(name);
 }
 
 void Server::addUser(const std::string &name) {
-    std::shared_lock lock(mutexUsers);
-    if (users.count(name) == 0) {
-        lock.unlock();
-        std::unique_lock uLock(mutexUsers);
-        users.insert({name, std::make_shared<User>(name)});
+    if (users.rlock()->count(name) == 0) {
+        users.wlock()->insert({name, std::make_shared<User>(name)});
     }
 }
 

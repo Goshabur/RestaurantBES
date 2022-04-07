@@ -3,8 +3,8 @@
 #include "fwd.h"
 
 #include <restbed>
+#include <folly/Synchronized.h>
 
-#include <shared_mutex>
 #include <memory>
 
 namespace restbes::server_structure {
@@ -33,8 +33,8 @@ struct Server {
     using UserCollection = std::unordered_map<std::string, std::shared_ptr<User>>;
 
 private:
-    UserCollection users;
-    mutable std::shared_mutex mutexUsers;
+    folly::Synchronized<UserCollection> users;
+//    mutable std::shared_mutex mutexUsers;
 
     std::shared_ptr<restbed::Settings> settings;
     std::shared_ptr<restbed::Service> service;
@@ -55,19 +55,19 @@ private:
     generateErrorHandler(const ErrorHandler &callback,
                          std::shared_ptr<Server> server);
 
-    friend std::shared_ptr<restbed::Resource> createResource(const std::string &path,
-                                                    const GET_Handler &getMethodHandler,
-                                                    const POST_Handler &postMethodHandler,
-                                                    const ErrorHandler &errorHandler,
-                                                    std::shared_ptr<Server> server);
+    friend std::shared_ptr<restbed::Resource>
+    createResource(const std::string &path,
+                   const GET_Handler &getMethodHandler,
+                   const POST_Handler &postMethodHandler,
+                   const ErrorHandler &errorHandler,
+                   std::shared_ptr<Server> server);
 
 public:
     Server();
 
     [[nodiscard]] UserCollection getUsers() const;
 
-    [[nodiscard]] std::shared_ptr<User>
-    getUser(const std::string &name) const;
+    [[nodiscard]] std::shared_ptr<User> getUser(const std::string &name) const;
 
     void addUser(const std::string &name);
 
@@ -88,10 +88,10 @@ generateResponse(const std::string &body,
                  Connection connection = Connection::CLOSE);
 
 std::shared_ptr<restbed::Resource> createResource(const std::string &path,
-                                         const Server::GET_Handler &getMethodHandler,
-                                         const Server::POST_Handler &postMethodHandler,
-                                         const Server::ErrorHandler &errorHandler,
-                                         std::shared_ptr<Server> server);
+                                                  const Server::GET_Handler &getMethodHandler,
+                                                  const Server::POST_Handler &postMethodHandler,
+                                                  const Server::ErrorHandler &errorHandler,
+                                                  std::shared_ptr<Server> server);
 
 std::shared_ptr<restbed::Settings>
 createSettingsWithSSL(const std::string &SSL_ServerKey,
