@@ -15,6 +15,7 @@ private:
 
 public:
     Client() : m_id(0), m_cart({}){};
+    explicit Client(id_t client_id) : m_id(client_id), m_cart({}){};
 
     explicit Client(const std::string &name,
                     const std::string &email,

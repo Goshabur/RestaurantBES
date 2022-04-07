@@ -67,18 +67,6 @@ public:
                                         final + R"(' WHERE "CLIENT_ID" = )" +
                                         std::to_string(client_id));
         }
-
-        int cost = std::stoi(restbes::connect_to_db_get(
-            R"(SELECT "COST" FROM "CART" WHERE "CLIENT_ID" = )" +
-            std::to_string(client_id)));
-
-        cost += std::stoi(restbes::connect_to_db_get(
-            R"(SELECT "PRICE" FROM "DISH" WHERE "DISH_NAME" = ')" + dish_name +
-            "'"));
-
-        restbes::connect_to_db_exec(
-            R"(UPDATE "CART" SET "COST" = )" + std::to_string(cost) +
-            R"( WHERE "CLIENT_ID" = )" + std::to_string(client_id));
     }
 
     void del(const std::string &dish_name) noexcept {
@@ -146,20 +134,20 @@ public:
     }
 
     [[nodiscard]] int total_price() const {
-        int total = std::stoi(restbes::connect_to_db_get(
-            R"(SELECT "COST" FROM "CART" WHERE "CLIENT_ID" = )" +
-            std::to_string(client_id)));
+        int cost = 0;
 
-        //            for (const auto &row: cart) {
-        //                total += row.second * std::stoi(
-        //                        restbes::connect_to_db_get(R"(SELECT "PRICE"
-        //                        FROM "DISH" WHERE "DISH_NAME" = ')" +
-        //                        row.first +
-        //                                                   "'"));
-        //            }  // TODO: needed if the client is not logged in
-        //            (therefore no data is stored for them)
+        std::string j = restbes::connect_to_db_get(
+            R"(SELECT "CART" FROM "CART" WHERE "CLIENT_ID" = )" +
+            std::to_string(client_id));
 
-        return total;
+        auto json_parsed = nlohmann::json::parse(j);
+        for (auto &el : json_parsed.items()) {
+            cost += std::stoi(restbes::connect_to_db_get(
+                R"(SELECT "PRICE" FROM "DISH" WHERE "DISH_NAME" = ')" + el.key() +
+                "'")) * std::stoi(el.value().dump());
+        }
+
+        return cost;
     }
 };
 
