@@ -1,14 +1,12 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 
 #include "httplib.h"
+#include <gflags/gflags.h>
+
 #include <iostream>
 #include <thread>
-#include <gflags/gflags.h>
-#include <iostream>
 
 using namespace std::chrono_literals;
-
-DEFINE_string(name, "Anonymous", "Username");
 
 static bool ValidatePort(const char *flagname, gflags::int32 value) {
     if (value > 0 && value < 32768) {
@@ -18,11 +16,6 @@ static bool ValidatePort(const char *flagname, gflags::int32 value) {
     return false;
 }
 
-DEFINE_int32(port, 0, "What port to listen on");
-DEFINE_validator(port, &ValidatePort);
-
-DEFINE_string(server, "localhost", "Domain to send requests to");
-
 static bool ValidateResource(const char *flagname, const std::string &value) {
     if (value.empty()) {
         printf("Invalid value for --%s: %s\n", flagname, value.c_str());
@@ -31,12 +24,15 @@ static bool ValidateResource(const char *flagname, const std::string &value) {
     return true;
 }
 
+DEFINE_string(name, "Anonymous", "Username");
+DEFINE_int32(port, 0, "What port to listen on");
+DEFINE_string(server, "localhost", "Domain to send requests to");
 DEFINE_string(resource, "", "Path to the resource to send requests to");
-DEFINE_validator(resource, &ValidateResource);
-
 DEFINE_bool(count_seconds, false, "Send automated messages counting seconds");
-
 DEFINE_bool(silent, false, "Don't receive incoming messages");
+
+DEFINE_validator(port, &ValidatePort);
+DEFINE_validator(resource, &ValidateResource);
 
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -44,21 +40,22 @@ int main(int argc, char **argv) {
     std::string address = "https://" + fLS::FLAGS_server + ':' +
                           std::to_string(fLI::FLAGS_port);
     // make const
-    auto cli = std::make_shared<httplib::Client>(address);
-    cli->enable_server_certificate_verification(false);
+    auto postingClient = std::make_shared<httplib::Client>(address);
+    postingClient->set_read_timeout(180);
+    postingClient->enable_server_certificate_verification(false);
     httplib::Headers headers = {
             {"Name", client_name}
     };
 
     if (!fLB::FLAGS_silent) {
         std::thread([headers, address]() {
-            auto cli2 = std::make_shared<httplib::Client>(address);
-            cli2->enable_server_certificate_verification(false);
-            cli2->set_keep_alive(true);
-            cli2->set_read_timeout(180);
+            auto pollingClient = std::make_shared<httplib::Client>(address);
+            pollingClient->enable_server_certificate_verification(false);
+            pollingClient->set_keep_alive(true);
+            pollingClient->set_read_timeout(180);
 
             while (true) {
-                auto res = cli2->Get(fLS::FLAGS_resource.c_str(), headers);
+                auto res = pollingClient->Get(fLS::FLAGS_resource.c_str(), headers);
                 if (res == nullptr) {
                     std::cout << "No response\n";
                     break;
@@ -84,7 +81,7 @@ int main(int argc, char **argv) {
         } else {
             std::getline(std::cin, message);
         }
-        auto res = cli->Post(fLS::FLAGS_resource.c_str(), headers, message, "text/plain");
+        auto res = postingClient->Post(fLS::FLAGS_resource.c_str(), headers, message, "text/plain");
         if (res == nullptr) {
             std::cerr << "No response\n";
             return 1;

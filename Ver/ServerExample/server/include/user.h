@@ -1,14 +1,15 @@
-#ifndef RESTAURANTBES_USER_H
-#define RESTAURANTBES_USER_H
+#pragma once
+
+#include "fwd.h"
 
 #include <corvusoft/restbed/session.hpp>
+
 #include <string>
 #include <unordered_set>
 #include <shared_mutex>
 #include <memory>
-#include "fwd.h"
 
-namespace user_structure {
+namespace restbes::user_structure {
 
 using restbed::Session;
 
@@ -37,5 +38,3 @@ public:
 };
 
 } //user_structure
-
-#endif //RESTAURANTBES_USER_H

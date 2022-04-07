@@ -1,16 +1,13 @@
 #include "server.h"
-#include <utility>
 #include "user.h"
 
-namespace server_structure {
+#include <utility>
 
-using restbed::Bytes;
-using restbed::SSLSettings;
-using restbed::Uri;
+namespace restbes::server_structure {
 
-Server::Server() : service(new Service()) {}
+Server::Server() : service(new restbed::Service()) {}
 
-UserCollection Server::getUsers() const {
+Server::UserCollection Server::getUsers() const {
     std::shared_lock lock(mutexUsers);
     return users;
 }
@@ -30,11 +27,11 @@ void Server::addUser(const std::string &name) {
     }
 }
 
-void Server::addResource(std::shared_ptr<Resource> resource) {
+void Server::addResource(std::shared_ptr<restbed::Resource> resource) {
     service->publish(resource);
 }
 
-void Server::setSettings(std::shared_ptr<Settings> newSettings) {
+void Server::setSettings(std::shared_ptr<restbed::Settings> newSettings) {
     settings = std::move(newSettings);
 }
 
@@ -48,11 +45,12 @@ void Server::startServer() {
     service->start(settings);
 }
 
-std::shared_ptr<Response>
-generateResponse(const std::string &body, Connection connection) {
-    auto response = std::make_shared<Response>();
+std::shared_ptr<restbed::Response>
+generateResponse(const std::string &body, const std::string &content_type, Connection connection) {
+    auto response = std::make_shared<restbed::Response>();
     response->set_body(body);
     response->set_header("Content-Length", std::to_string(body.size()));
+    response->set_header("Content-Type", content_type);
     switch (connection) {
         case Connection::KEEP_ALIVE:
             response->set_header("Connection", "keep-alive");
@@ -77,7 +75,7 @@ Server::generatePostMethodHandler(const POST_Handler &callback,
                 content_length,
                 [callback, server](
                         const std::shared_ptr<Session> session,
-                        const Bytes &body) {
+                        const restbed::Bytes &body) {
                     std::string data = std::string(body.begin(), body.end());
                     callback(session, data, server);
                 });
@@ -109,12 +107,12 @@ restbed_ErrorHandler Server::generateErrorHandler(const ErrorHandler &callback,
     };
 }
 
-std::shared_ptr<Resource> createResource(const std::string &path,
-                                         const GET_Handler &getMethodHandler,
-                                         const POST_Handler &postMethodHandler,
-                                         const ErrorHandler &errorHandler,
+std::shared_ptr<restbed::Resource> createResource(const std::string &path,
+                                         const Server::GET_Handler &getMethodHandler,
+                                         const Server::POST_Handler &postMethodHandler,
+                                         const Server::ErrorHandler &errorHandler,
                                          std::shared_ptr<Server> server) {
-    auto resource = std::make_shared<Resource>();
+    auto resource = std::make_shared<restbed::Resource>();
     resource->set_path(path);
     resource->set_method_handler("GET",
                                  Server::generateGetMethodHandler(
@@ -129,22 +127,22 @@ std::shared_ptr<Resource> createResource(const std::string &path,
     return resource;
 }
 
-std::shared_ptr<Settings> createSettingsWithSSL(
+std::shared_ptr<restbed::Settings> createSettingsWithSSL(
         const std::string &SSL_ServerKey,
         const std::string &SSL_Certificate,
         const std::string &SSL_DHKey,
         const int port,
         const int workers) {
-    auto ssl_settings = std::make_shared<SSLSettings>();
+    auto ssl_settings = std::make_shared<restbed::SSLSettings>();
     ssl_settings->set_http_disabled(true);
     ssl_settings->set_private_key(
-            Uri("file://" + SSL_ServerKey));
+            restbed::Uri("file://" + SSL_ServerKey));
     ssl_settings->set_certificate(
-            Uri("file://" + SSL_Certificate));
+            restbed::Uri("file://" + SSL_Certificate));
     ssl_settings->set_temporary_diffie_hellman(
-            Uri("file://" + SSL_DHKey));
+            restbed::Uri("file://" + SSL_DHKey));
     ssl_settings->set_port(port);
-    auto settings = std::make_shared<Settings>();
+    auto settings = std::make_shared<restbed::Settings>();
     settings->set_ssl_settings(ssl_settings);
     settings->set_worker_limit(workers);
     return settings;

@@ -1,7 +1,7 @@
 #include "user.h"
 #include "server.h"
 
-namespace user_structure {
+namespace restbes::user_structure {
 
 using server_structure::Connection;
 
@@ -9,7 +9,7 @@ User::User(std::string nm) : name(
         std::move(nm)) {}
 
 void User::yieldMessage(const std::string &message, const std::string &path) {
-    auto response = generateResponse(message, Connection::KEEP_ALIVE);
+    auto response = generateResponse(message, "text/plain", Connection::KEEP_ALIVE);
     std::unique_lock lock(mutex);
     for (const auto &session: activeSessions) {
         if (session->is_open() && path == session->get_request()->get_path()) {

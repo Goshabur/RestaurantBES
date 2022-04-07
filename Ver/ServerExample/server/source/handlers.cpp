@@ -1,7 +1,7 @@
 #include "handlers.h"
 #include "user.h"
 
-using server_structure::Connection;
+using restbes::server_structure::Connection;
 
 void getMethodHandler(std::shared_ptr<Session> session,
                       std::shared_ptr<Server> server) {
@@ -35,7 +35,7 @@ void postEchoMethodHandler(std::shared_ptr<Session> session,
                                         request->get_path());
     // make const, send JSONs
     std::string response_body = "PROCESSED, OK\n";
-    auto response = generateResponse(response_body, Connection::CLOSE);
+    auto response = generateResponse(response_body, "text/plain", Connection::CLOSE);
     session->close(*response);
 }
 
@@ -51,7 +51,7 @@ void postMessengerMethodHandler(std::shared_ptr<Session> session,
     }
     // make const, send JSONs
     std::string response_body = "PROCESSED, OK\n";
-    auto response = generateResponse(response_body, Connection::CLOSE);
+    auto response = generateResponse(response_body, "text/plain", Connection::CLOSE);
     session->close(*response);
 }
 

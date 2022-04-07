@@ -1,10 +1,12 @@
-#ifndef RESTAURANTBES_HANDLERS_H
-#define RESTAURANTBES_HANDLERS_H
+#pragma once
 
 #include "server.h"
 
-using server_structure::Session;
-using server_structure::Server;
+using restbes::server_structure::Session;
+using restbes::server_structure::Server;
+
+void getOpenAPIMethodHandler(std::shared_ptr<Session> session,
+                             std::shared_ptr<Server> server);
 
 void getMethodHandler(std::shared_ptr<Session> session,
                       std::shared_ptr<Server> server);
@@ -23,6 +25,3 @@ void errorHandler(const int code,
                   std::shared_ptr<Server> server);
 
 void handleInactiveSessions(std::shared_ptr<Server> server);
-
-
-#endif //RESTAURANTBES_HANDLERS_H

@@ -1,9 +1,10 @@
-#ifndef RESTAURANTBES_FWD_H
-#define RESTAURANTBES_FWD_H
+#pragma once
+
+namespace restbes {
 
 namespace user_structure {
 struct User;
-}
+} // user_structure
 
 namespace server_structure {
 enum Connection {
@@ -12,6 +13,6 @@ enum Connection {
 };
 
 struct Server;
-}
+} // server_structure
 
-#endif //RESTAURANTBES_FWD_H
+} // restbes
