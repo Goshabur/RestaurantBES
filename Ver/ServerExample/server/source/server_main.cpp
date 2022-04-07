@@ -1,11 +1,12 @@
 #include "server.h"
 #include "handlers.h"
-#include "restbed"
+
 #include <gflags/gflags.h>
+
 #include <filesystem>
 
 using namespace std::chrono_literals;
-using server_structure::createSettingsWithSSL;
+using restbes::server_structure::createSettingsWithSSL;
 
 static bool ValidatePath(const char *flagname, const std::string &value) {
     bool key = std::filesystem::exists(value + "/server.key");
@@ -21,9 +22,6 @@ static bool ValidatePath(const char *flagname, const std::string &value) {
     return false;
 }
 
-DEFINE_string(SSLkeys, "", "Path to SSL keys");
-DEFINE_validator(SSLkeys, &ValidatePath);
-
 static bool ValidatePort(const char *flagname, gflags::int32 value) {
     if (0 < value && value < 32768) {
         return true;
@@ -31,9 +29,6 @@ static bool ValidatePort(const char *flagname, gflags::int32 value) {
     printf("Invalid value for --%s: %d\n", flagname, (int) value);
     return false;
 }
-
-DEFINE_int32(port, 0, "What port to listen on");
-DEFINE_validator(port, &ValidatePort);
 
 static bool ValidateWorkers(const char *flagname, gflags::int32 value) {
     if (0 < value && value < 100) {
@@ -43,7 +38,12 @@ static bool ValidateWorkers(const char *flagname, gflags::int32 value) {
     return false;
 }
 
+DEFINE_string(SSLkeys, "", "Path to SSL keys");
+DEFINE_int32(port, 0, "What port to listen on");
 DEFINE_int32(workers, 10, "Number of workers");
+
+DEFINE_validator(SSLkeys, &ValidatePath);
+DEFINE_validator(port, &ValidatePort);
 DEFINE_validator(workers, &ValidateWorkers);
 
 int main(int argc, char **argv) {
