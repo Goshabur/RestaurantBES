@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>LeftNavigationDrawer.qml</file>
+        <file>Fragment1.qml</file>
+        <file>Fragment2.qml</file>
+        <file>Fragment3.qml</file>
+        <file>RightNavigationDrawer.qml</file>
+        <file>TestPage.qml</file>
+        <file>LoginForm.qml</file>
+        <file>RegisterForm.qml</file>
+        <file>Information.qml</file>
+        <file>Profile.qml</file>
+    </qresource>
+</RCC>
