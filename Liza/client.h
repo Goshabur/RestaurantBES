@@ -8,8 +8,7 @@ namespace restbes {
 class Client {
 private:
     id_t m_id;
-    std::string
-        m_email;  // TODO: probably unnecessary? We can just take it from DB
+    std::string m_email;
     std::string m_name;
     Cart m_cart;
 
@@ -46,15 +45,15 @@ public:
 
     void create_order();
 
-    std::map<std::string, int> cart();
+    [[nodiscard]] std::map<std::string, int> cart() const;
 
-    [[nodiscard]] id_t get_client_id() const;
+    [[nodiscard]] id_t get_client_id() const noexcept;
 
-    void add_to_cart(const std::string &dish_name) noexcept;
+    void add_to_cart(id_t dish_id) const noexcept;
 
-    void delete_from_cart(const std::string &dish_name) noexcept;
+    void delete_from_cart(id_t dish_id) const noexcept;
 
-    void empty_cart() noexcept;
+    void empty_cart() const noexcept;
 };
 
 }  // namespace restbes
