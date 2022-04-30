@@ -9,11 +9,11 @@ add_executable(Server
         server/source/user.cpp
         server/source/server.cpp
         server/source/server_main.cpp
-        server/source/handlers.cpp)
+        server/source/handlers.cpp
+        server/source/session.cpp)
 target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
 
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
-
 target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
 target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
 

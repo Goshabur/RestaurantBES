@@ -40,22 +40,19 @@ int main(int argc, char **argv) {
     std::string address = "https://" + fLS::FLAGS_server + ':' +
                           std::to_string(fLI::FLAGS_port);
     // make const
-    auto postingClient = std::make_shared<httplib::Client>(address);
-    postingClient->set_read_timeout(180);
-    postingClient->enable_server_certificate_verification(false);
-    httplib::Headers headers = {
-            {"Name", client_name}
-    };
 
     if (!fLB::FLAGS_silent) {
-        std::thread([headers, address]() {
+        std::thread([client_name, address]() {
             auto pollingClient = std::make_shared<httplib::Client>(address);
             pollingClient->enable_server_certificate_verification(false);
             pollingClient->set_keep_alive(true);
             pollingClient->set_read_timeout(180);
+            httplib::Headers headers = {
+                    {"Name", client_name}
+            };
 
             while (true) {
-                auto res = pollingClient->Get(fLS::FLAGS_resource.c_str(), headers);
+                auto res = pollingClient->Get("/get", headers);
                 if (res == nullptr) {
                     std::cout << "No response\n";
                     break;
@@ -72,6 +69,12 @@ int main(int argc, char **argv) {
         }).detach();
     }
 
+    auto postingClient = std::make_shared<httplib::Client>(address);
+    postingClient->set_read_timeout(180);
+    postingClient->enable_server_certificate_verification(false);
+    httplib::Headers headers = {
+            {"Name", client_name}
+    };
     int i = 0;
     std::string message;
     while (++i) {
@@ -81,7 +84,8 @@ int main(int argc, char **argv) {
         } else {
             std::getline(std::cin, message);
         }
-        auto res = postingClient->Post(fLS::FLAGS_resource.c_str(), headers, message, "text/plain");
+        auto res = postingClient->Post(fLS::FLAGS_resource.c_str(), headers,
+                                       message, "text/plain");
         if (res == nullptr) {
             std::cerr << "No response\n";
             return 1;

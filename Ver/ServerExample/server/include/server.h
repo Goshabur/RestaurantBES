@@ -9,32 +9,32 @@
 
 namespace restbes::server_structure {
 
-using restbed::Session;
 using user_structure::User;
-using restbed_HTTP_Handler = std::function<void(std::shared_ptr<Session>)>;
+using restbed_HTTP_Handler = std::function<void(
+        std::shared_ptr<restbed::Session>)>;
 using restbed_ErrorHandler = std::function<void(const int,
                                                 const std::exception &,
-                                                std::shared_ptr<Session>)>;
+                                                std::shared_ptr<restbed::Session>)>;
 
 enum ResponseCode {
     OK = 200
 };
 
 struct Server {
-    using GET_Handler = std::function<void(std::shared_ptr<Session>,
-                                           std::shared_ptr<Server> server)>;
-    using POST_Handler = std::function<void(std::shared_ptr<Session>,
+    using GET_Handler = std::function<void(
+            std::shared_ptr<session_structure::Session>,
+            std::shared_ptr<Server> server)>;
+    using POST_Handler = std::function<void(std::shared_ptr<restbed::Session>,
                                             const std::string &,
                                             std::shared_ptr<Server> server)>;
     using ErrorHandler = std::function<void(const int, const std::exception &,
-                                            std::shared_ptr<Session>,
+                                            std::shared_ptr<restbed::Session>,
                                             std::shared_ptr<Server>)>;
     using ScheduledTask = std::function<void(std::shared_ptr<Server> server)>;
     using UserCollection = std::unordered_map<std::string, std::shared_ptr<User>>;
 
 private:
     folly::Synchronized<UserCollection> users;
-//    mutable std::shared_mutex mutexUsers;
 
     std::shared_ptr<restbed::Settings> settings;
     std::shared_ptr<restbed::Service> service;
@@ -44,8 +44,7 @@ private:
                               std::shared_ptr<Server> server);
 
     [[nodiscard]] static restbed_HTTP_Handler
-    generateGetMethodHandler(const GET_Handler &callback,
-                             std::shared_ptr<Server> server);
+    generateGetMethodHandler(std::shared_ptr<Server> server);
 
     [[nodiscard]] static std::function<void(void)>
     generateScheduledTask(const ScheduledTask &task,
@@ -57,10 +56,14 @@ private:
 
     friend std::shared_ptr<restbed::Resource>
     createResource(const std::string &path,
-                   const GET_Handler &getMethodHandler,
                    const POST_Handler &postMethodHandler,
                    const ErrorHandler &errorHandler,
                    std::shared_ptr<Server> server);
+
+    friend std::shared_ptr<restbed::Resource>
+    createGetResource(const std::string &path,
+                      const ErrorHandler &errorHandler,
+                      std::shared_ptr<Server> server);
 
 public:
     Server();
@@ -82,16 +85,11 @@ public:
     void startServer();
 };
 
+
 [[nodiscard]] std::shared_ptr<restbed::Response>
 generateResponse(const std::string &body,
                  const std::string &content_type,
                  Connection connection = Connection::CLOSE);
-
-std::shared_ptr<restbed::Resource> createResource(const std::string &path,
-                                                  const Server::GET_Handler &getMethodHandler,
-                                                  const Server::POST_Handler &postMethodHandler,
-                                                  const Server::ErrorHandler &errorHandler,
-                                                  std::shared_ptr<Server> server);
 
 std::shared_ptr<restbed::Settings>
 createSettingsWithSSL(const std::string &SSL_ServerKey,

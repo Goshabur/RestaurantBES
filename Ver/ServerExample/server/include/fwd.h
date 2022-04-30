@@ -15,4 +15,8 @@ enum Connection {
 struct Server;
 } // server_structure
 
+namespace session_structure {
+struct Session;
+}
+
 } // restbes

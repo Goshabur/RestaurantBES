@@ -6,34 +6,35 @@
 #include <folly/Synchronized.h>
 
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <memory>
+#include <queue>
 
 namespace restbes::user_structure {
 
-using restbed::Session;
+using session_structure::Session;
 
 struct User {
 private:
-    folly::Synchronized<std::string> name;
-    folly::Synchronized<std::unordered_set<std::shared_ptr<Session>>> activeSessions;
+    folly::Synchronized<std::string> id;
+    folly::Synchronized<std::unordered_map<std::shared_ptr<restbed::Session>, std::shared_ptr<Session>>> activeSessions;
 
 public:
     explicit User(std::string nm);
 
-    void yieldMessage(const std::string &message, const std::string &path);
+    void pushMessage(std::shared_ptr<restbed::Response> response);
 
-    void addSession(std::shared_ptr<Session> session);
+    void addSession(std::shared_ptr<restbed::Session> session);
 
     void eraseInactiveSessions();
 
     [[nodiscard]] std::shared_ptr<Session>
-    getSession(std::shared_ptr<Session> session) const;
+    getSession(std::shared_ptr<restbed::Session>) const;
 
-    [[nodiscard]] std::unordered_set<std::shared_ptr<Session>>
+    [[nodiscard]] std::unordered_map<std::shared_ptr<restbed::Session>, std::shared_ptr<Session>>
     getActiveSessions() const;
 
-    [[nodiscard]] const std::string &getName() const;
+    [[nodiscard]] const std::string &getId() const;
 };
 
 } //user_structure

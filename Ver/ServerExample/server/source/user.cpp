@@ -1,33 +1,29 @@
 #include "user.h"
 #include "server.h"
+#include "session.h"
 
 namespace restbes::user_structure {
 
 using server_structure::Connection;
 
-User::User(std::string nm) : name(
-        std::move(nm)) {}
+User::User(std::string nm) : id(std::move(nm)) {}
 
-void User::yieldMessage(const std::string &message, const std::string &path) {
-    auto response = generateResponse(message, "text/plain",
-                                     Connection::KEEP_ALIVE);
+void User::pushMessage(std::shared_ptr<restbed::Response> response) {
     auto lockedSessions = activeSessions.rlock();
     for (const auto &session: *lockedSessions) {
-        if (session->is_open() && path == session->get_request()->get_path()) {
-            session->yield(*response);
-        }
+        session.second->push(response);
     }
 }
 
-void User::addSession(std::shared_ptr<Session> session) {
-    activeSessions.wlock()->insert(std::move(session));
+void User::addSession(std::shared_ptr<restbed::Session> session) {
+    activeSessions.wlock()->insert({session, std::make_shared<Session>(session, id.copy())});
 }
 
 void User::eraseInactiveSessions() {
     auto lockedSessions = activeSessions.wlock();
     for (auto session = lockedSessions->begin();
          session != lockedSessions->end();) {
-        if ((*session)->is_closed()) {
+        if (session->second->is_closed()) {
             session = lockedSessions->erase(session);
         } else {
             ++session;
@@ -36,18 +32,20 @@ void User::eraseInactiveSessions() {
 }
 
 std::shared_ptr<Session>
-User::getSession(std::shared_ptr<Session> session) const {
-    if (activeSessions.rlock()->count(session) == 0) return nullptr;
-    else return session;
+User::getSession(std::shared_ptr<restbed::Session> ss) const {
+    auto lockedSessions = activeSessions.rlock();
+    auto session = lockedSessions->find(ss);
+    if (session != lockedSessions->end()) return session->second;
+    return nullptr;
 }
 
-std::unordered_set<std::shared_ptr<Session>>
+std::unordered_map<std::shared_ptr<restbed::Session>, std::shared_ptr<Session>>
 User::getActiveSessions() const {
     return *(activeSessions.rlock());
 }
 
-const std::string &User::getName() const {
-    return *(name.rlock());
+const std::string &User::getId() const {
+    return *(id.rlock());
 }
 
 } //user_structure
