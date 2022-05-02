@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 using namespace std::chrono_literals;
 
@@ -24,7 +26,7 @@ static bool ValidateResource(const char *flagname, const std::string &value) {
     return true;
 }
 
-DEFINE_string(name, "Anonymous", "Username");
+DEFINE_string(name, "", "Username");
 DEFINE_int32(port, 0, "What port to listen on");
 DEFINE_string(server, "localhost", "Domain to send requests to");
 DEFINE_string(resource, "", "Path to the resource to send requests to");
@@ -39,23 +41,35 @@ int main(int argc, char **argv) {
     std::string client_name = fLS::FLAGS_name;
     std::string address = "https://" + fLS::FLAGS_server + ':' +
                           std::to_string(fLI::FLAGS_port);
-    // make const
+
+    auto pollingClient = std::make_shared<httplib::Client>(address);
+    pollingClient->enable_server_certificate_verification(false);
+    pollingClient->set_keep_alive(true);
+    pollingClient->set_read_timeout(180);
+    unsigned int session_id = 0;
+
+    while (session_id == 0) {
+        auto res = pollingClient->Get("/get");
+        if (res == nullptr) {
+            std::cout << "No response\n";
+        } else if (res->status != 200) {
+            std::cout << "Bad response " << res->status << '\n';
+        } else session_id = std::stoi(res->get_header_value("Session-ID"));
+    }
+    std::cout << session_id << std::endl;
+
+    httplib::Headers headers = {
+            {"User-ID",    client_name},
+            {"Session-ID", std::to_string(session_id)}
+    };
 
     if (!fLB::FLAGS_silent) {
-        std::thread([client_name, address]() {
-            auto pollingClient = std::make_shared<httplib::Client>(address);
-            pollingClient->enable_server_certificate_verification(false);
-            pollingClient->set_keep_alive(true);
-            pollingClient->set_read_timeout(180);
-            httplib::Headers headers = {
-                    {"Name", client_name}
-            };
-
+        std::thread([&pollingClient, &headers]() {
             while (true) {
                 auto res = pollingClient->Get("/get", headers);
                 if (res == nullptr) {
                     std::cout << "No response\n";
-                    break;
+                    return 1;
                 }
                 if (res->status != 200) {
                     std::cout << "Bad response " << res->status << '\n';
@@ -64,20 +78,14 @@ int main(int argc, char **argv) {
                 std::cout << res->body;
                 std::cout.flush();
             }
-
-            return 0;
         }).detach();
     }
 
     auto postingClient = std::make_shared<httplib::Client>(address);
     postingClient->set_read_timeout(180);
     postingClient->enable_server_certificate_verification(false);
-    httplib::Headers headers = {
-            {"Name", client_name}
-    };
-    int i = 0;
     std::string message;
-    while (++i) {
+    for (int i = 0; true; ++i) {
         if (fLB::FLAGS_count_seconds) {
             message = std::to_string(i);
             std::this_thread::sleep_for(1s);

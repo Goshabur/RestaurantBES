@@ -8,18 +8,19 @@
 #include <memory>
 #include <queue>
 
-namespace restbes::session_structure {
+namespace restbes {
 
 struct Session {
 private:
     std::shared_ptr<restbed::Session> session;
     folly::Synchronized<std::string> user_id;
-//    folly::Synchronized<unsigned int> session_id;
+    folly::Synchronized<unsigned int> session_id;
     folly::Synchronized<std::queue<std::shared_ptr<restbed::Response>>> responseQueue;
-//    inline static std::atomic<unsigned int> counter{0};
 
 public:
     Session(std::shared_ptr<restbed::Session> ss, std::string uid);
+
+    void setUser(std::string uid);
 
     [[nodiscard]] bool is_open() const;
 
@@ -33,9 +34,9 @@ public:
 
     [[nodiscard]] std::shared_ptr<restbed::Session> getSession() const;
 
-//    [[nodiscard]] unsigned int getId() const;
+    [[nodiscard]] unsigned int getId() const;
 
 
 };
 
-} // namespace restbes::session_structure
+} // namespace restbes

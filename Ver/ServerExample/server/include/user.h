@@ -6,35 +6,31 @@
 #include <folly/Synchronized.h>
 
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <queue>
 
-namespace restbes::user_structure {
-
-using session_structure::Session;
+namespace restbes {
 
 struct User {
 private:
+    std::shared_ptr<Server> server;
     folly::Synchronized<std::string> id;
-    folly::Synchronized<std::unordered_map<std::shared_ptr<restbed::Session>, std::shared_ptr<Session>>> activeSessions;
+    folly::Synchronized<std::unordered_set<unsigned int>> activeSessions;
 
 public:
-    explicit User(std::string nm);
+    explicit User(std::string nm, std::shared_ptr<Server> serv);
 
     void pushMessage(std::shared_ptr<restbed::Response> response);
 
-    void addSession(std::shared_ptr<restbed::Session> session);
+    void addSession(unsigned int session_id);
 
     void eraseInactiveSessions();
 
     [[nodiscard]] std::shared_ptr<Session>
-    getSession(std::shared_ptr<restbed::Session>) const;
+    getSession(unsigned int session_id) const;
 
-    [[nodiscard]] std::unordered_map<std::shared_ptr<restbed::Session>, std::shared_ptr<Session>>
-    getActiveSessions() const;
-
-    [[nodiscard]] const std::string &getId() const;
+    [[nodiscard]] std::string getId() const;
 };
 
-} //user_structure
+} //restbes

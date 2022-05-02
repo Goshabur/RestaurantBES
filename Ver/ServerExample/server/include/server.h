@@ -7,9 +7,8 @@
 
 #include <memory>
 
-namespace restbes::server_structure {
+namespace restbes {
 
-using user_structure::User;
 using restbed_HTTP_Handler = std::function<void(
         std::shared_ptr<restbed::Session>)>;
 using restbed_ErrorHandler = std::function<void(const int,
@@ -22,7 +21,7 @@ enum ResponseCode {
 
 struct Server {
     using GET_Handler = std::function<void(
-            std::shared_ptr<session_structure::Session>,
+            std::shared_ptr<Session>,
             std::shared_ptr<Server> server)>;
     using POST_Handler = std::function<void(std::shared_ptr<restbed::Session>,
                                             const std::string &,
@@ -32,12 +31,16 @@ struct Server {
                                             std::shared_ptr<Server>)>;
     using ScheduledTask = std::function<void(std::shared_ptr<Server> server)>;
     using UserCollection = std::unordered_map<std::string, std::shared_ptr<User>>;
+    using SessionCollection = std::unordered_map<unsigned int, std::shared_ptr<Session>>;
 
 private:
     folly::Synchronized<UserCollection> users;
+    folly::Synchronized<SessionCollection> sessions;
 
     std::shared_ptr<restbed::Settings> settings;
     std::shared_ptr<restbed::Service> service;
+
+    inline static std::atomic<unsigned int> sessionCounter{0};
 
     [[nodiscard]] static restbed_HTTP_Handler
     generatePostMethodHandler(const POST_Handler &callback,
@@ -68,11 +71,30 @@ private:
 public:
     Server();
 
-    [[nodiscard]] UserCollection getUsers() const;
+    [[nodiscard]] folly::Synchronized<UserCollection>::ConstRLockedPtr
+    getUsers() const;
+
+    folly::Synchronized<UserCollection>::WLockedPtr getUsersW();
+
+    [[nodiscard]] folly::Synchronized<SessionCollection>::ConstRLockedPtr
+    getSessions() const;
+
+    [[nodiscard]] folly::Synchronized<SessionCollection>::WLockedPtr
+    getSessionsW();
+
+    [[nodiscard]] std::shared_ptr<Session>
+    getSession(unsigned int session_id) const;
+
+//    void addSession(std::shared_ptr<restbed::Session> session);
+
+    unsigned int
+    addSession(std::shared_ptr<restbed::Session> session, std::string user_id);
+
+    void assignSession(unsigned int session_id, std::string user_id);
 
     [[nodiscard]] std::shared_ptr<User> getUser(const std::string &name) const;
 
-    void addUser(const std::string &name);
+    static void addUser(const std::string &name, std::shared_ptr<Server> serv);
 
     void addResource(std::shared_ptr<restbed::Resource> resource);
 
@@ -98,4 +120,4 @@ createSettingsWithSSL(const std::string &SSL_ServerKey,
                       const int port,
                       const int workers);
 
-} //server_structure
+} //restbes

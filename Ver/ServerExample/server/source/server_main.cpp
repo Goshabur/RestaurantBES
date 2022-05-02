@@ -6,7 +6,6 @@
 #include <filesystem>
 
 using namespace std::chrono_literals;
-using restbes::server_structure::createSettingsWithSSL;
 
 static bool ValidatePath(const char *flagname, const std::string &value) {
     bool key = std::filesystem::exists(value + "/server.key");
@@ -49,7 +48,7 @@ DEFINE_validator(workers, &ValidateWorkers);
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-    auto server = std::make_shared<Server>();
+    auto server = std::make_shared<restbes::Server>();
 
     auto echo = createResource("/echo",
                                postEchoMethodHandler,
@@ -66,16 +65,17 @@ int main(int argc, char **argv) {
     std::string pathToSSL[] = {fLS::FLAGS_SSLkeys + "/server.key",
                                fLS::FLAGS_SSLkeys + "/server.crt",
                                fLS::FLAGS_SSLkeys + "/dh2048.pem"};
-    auto settings = createSettingsWithSSL(pathToSSL[0],
-                                          pathToSSL[1],
-                                          pathToSSL[2],
-                                          fLI::FLAGS_port,
-                                          fLI::FLAGS_workers);
+    auto settings = restbes::createSettingsWithSSL(pathToSSL[0],
+                                                   pathToSSL[1],
+                                                   pathToSSL[2],
+                                                   fLI::FLAGS_port,
+                                                   fLI::FLAGS_workers);
 
     server->addResource(echo);
     server->addResource(messenger);
     server->addResource(get);
     server->schedule(handleInactiveSessions, server, 1s);
+    server->schedule(cleanUpUserSessions, server, 2s);
     server->setSettings(settings);
     server->startServer();
 

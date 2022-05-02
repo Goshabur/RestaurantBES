@@ -4,12 +4,48 @@
 
 #include <utility>
 
-namespace restbes::server_structure {
+namespace restbes {
 
 Server::Server() : service(new restbed::Service()) {}
 
-Server::UserCollection Server::getUsers() const {
-    return *(users.rlock());
+folly::Synchronized<Server::UserCollection>::ConstRLockedPtr
+Server::getUsers() const {
+    return users.rlock();
+}
+
+folly::Synchronized<Server::UserCollection>::WLockedPtr Server::getUsersW() {
+    return users.wlock();
+}
+
+folly::Synchronized<Server::SessionCollection>::ConstRLockedPtr
+Server::getSessions() const {
+    return sessions.rlock();
+}
+
+folly::Synchronized<Server::SessionCollection>::WLockedPtr
+Server::getSessionsW() {
+    return sessions.wlock();
+}
+
+std::shared_ptr<Session> Server::getSession(unsigned int session_id) const {
+    if (session_id == 0) return nullptr;
+    auto lockedSessions = sessions.rlock();
+    auto session = lockedSessions->find(session_id);
+    if (session != lockedSessions->end()) return session->second;
+    return nullptr;
+}
+
+unsigned int Server::addSession(std::shared_ptr<restbed::Session> session,
+                                std::string user_id) {
+    auto ss = std::make_shared<Session>(std::move(session), std::move(user_id));
+    auto session_id = ++sessionCounter;
+    sessions.wlock()->insert({session_id, std::move(ss)});
+    return session_id;
+}
+
+void Server::assignSession(unsigned int session_id, std::string user_id) {
+    getSession(session_id)->setUser(user_id);
+    getUser(user_id)->addSession(session_id);
 }
 
 std::shared_ptr<User> Server::getUser(const std::string &name) const {
@@ -17,9 +53,9 @@ std::shared_ptr<User> Server::getUser(const std::string &name) const {
     else return users.rlock()->at(name);
 }
 
-void Server::addUser(const std::string &name) {
-    if (users.rlock()->count(name) == 0) {
-        users.wlock()->insert({name, std::make_shared<User>(name)});
+void Server::addUser(const std::string &name, std::shared_ptr<Server> serv) {
+    if (serv->users.rlock()->count(name) == 0) {
+        serv->users.wlock()->insert({name, std::make_shared<User>(name, serv)});
     }
 }
 
@@ -82,18 +118,27 @@ Server::generatePostMethodHandler(const POST_Handler &callback,
 restbed_HTTP_Handler
 Server::generateGetMethodHandler(std::shared_ptr<Server> server) {
     return [server](std::shared_ptr<restbed::Session> session) {
-        using session_structure::Session;
+//        using session_structure::Session;
 
-        std::string user_id = session->get_request()->get_header("Name",
-                                                                 "Anonymous");
-        if (server->getUser(user_id) == nullptr)
-            server->addUser(user_id);
-        auto user = server->getUser(user_id);
-        if (user->getSession(session) == nullptr) {
-            user->addSession(session);
-            auto response = generateResponse("New receiving session for " + user_id + '\n', "text/plain",
-                                             Connection::KEEP_ALIVE);
-            user->getSession(session)->push(response);
+        std::string user_id = session->get_request()->get_header("User-ID",
+                                                                 "");
+        unsigned int session_id = session->get_request()->get_header(
+                "Session-ID",
+                0);
+
+        if (!user_id.empty() && server->getUser(user_id) == nullptr)
+            server->addUser(user_id, server);
+        auto realSession = server->getSession(session_id);
+        if (realSession == nullptr) {
+            session_id = server->addSession(session, user_id);
+            auto response = generateResponse(
+                    "New Session-ID: " + std::to_string(session_id) + '\n',
+                    "text/plain",
+                    Connection::KEEP_ALIVE);
+            response->set_header("Session-ID", std::to_string(session_id));
+            server->getSession(session_id)->push(response);
+        } else if (!user_id.empty() && realSession->getUserId().empty()) {
+            server->assignSession(session_id, user_id);
         }
     };
 }
@@ -163,4 +208,4 @@ std::shared_ptr<restbed::Settings> createSettingsWithSSL(
     return settings;
 }
 
-} //server_structure
+} //restbes
