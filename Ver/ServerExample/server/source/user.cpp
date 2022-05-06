@@ -8,7 +8,7 @@ User::User(std::string nm, std::shared_ptr<Server> serv) : id(std::move(nm)),
                                                            server(std::move(
                                                                    serv)) {}
 
-void User::pushMessage(std::shared_ptr<restbed::Response> response) {
+void User::push(std::shared_ptr<restbed::Response> response) {
     auto lockedSessions = activeSessions.rlock();
     for (auto session_id: *lockedSessions) {
         auto session = server->getSession(session_id);

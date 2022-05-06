@@ -60,7 +60,7 @@ void postEchoMethodHandler(std::shared_ptr<restbed::Session> session,
     }
     auto response = generateResponse("Your message: " + data + '\n',
                                      "text/plain", Connection::KEEP_ALIVE);
-    if (user != nullptr) user->pushMessage(response);
+    if (user != nullptr) user->push(response);
     else receivingSession->push(response);
 
     // make const, send JSONs
