@@ -8,11 +8,8 @@ class Admin {
 public:
     Admin() = default;
 
-    static void change_order_status(id_t order_id, int set_status) noexcept;
-
-    static void cancel_order(id_t order_id) noexcept;
-
-    static void accept_order(id_t order_id) noexcept;
+    static void change_order_status(id_t order_id,
+                                    OrderStatus set_status) noexcept;
 
     static void change_dish_status(const std::string &dish_name,
                                    int set_status);

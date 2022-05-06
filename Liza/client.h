@@ -3,6 +3,9 @@
 #include "cart.h"
 #include "fwd.h"
 
+using restbes::connectExec;
+using restbes::connectGet;
+
 namespace restbes {
 
 class Client {
@@ -13,47 +16,36 @@ private:
     Cart m_cart;
 
 public:
-    Client() : m_id(0), m_cart({}){};
-    explicit Client(id_t client_id) : m_id(client_id), m_cart({}){};
+    Client() : m_id(0), m_cart(){};
+
+    explicit Client(id_t client_id) : m_id(client_id), m_cart(){};
 
     explicit Client(const std::string &name,
                     const std::string &email,
-                    const std::string &passwd,
-                    bool exist)
-        : m_name(name), m_email(email) {
-        if (exist) {
-            m_id = std::stoi(restbes::connect_to_db_get(
-                R"(SELECT "CLIENT_ID" FROM "CLIENT" WHERE "EMAIL" = ')" +
-                email + "' AND \"PASSWORD\" = crypt('" + passwd +
-                "', \"PASSWORD\")"));
+                    const std::string &password,
+                    const std::string &cart)
+        : m_name(name), m_email(email), m_cart() {
+        m_id = std::stoi(connectGet(
+            R"(INSERT INTO "CLIENT" ("EMAIL", "NAME", "PASSWORD") VALUES (')" +
+            email + "', '" + name + "', " + "crypt('" + password +
+            "', gen_salt('bf'))) RETURNING \"CLIENT_ID\""));
 
-            m_cart.client_id = m_id;
-
-        } else {
-            m_id = std::stoi(restbes::connect_to_db_get(
-                R"(INSERT INTO "CLIENT" ("EMAIL", "NAME", "PASSWORD") VALUES (')" +
-                email + "', '" + name + "', " + "crypt('" + passwd +
-                "', gen_salt('bf'))) RETURNING \"CLIENT_ID\""));
-
-            restbes::connect_to_db_exec(
-                R"(INSERT INTO "CART" ("CLIENT_ID", "COST", "CART") VALUES ()" +
-                std::to_string(m_id) + ", 0, '{}')");
-
-            m_cart.client_id = m_id;
-        }
+        m_cart = Cart(m_id, cart);
     };
 
-    void create_order();
+    [[nodiscard]] std::string get_client_id() const;
 
-    [[nodiscard]] std::map<std::string, int> cart() const;
+    std::string create_order();
 
-    [[nodiscard]] id_t get_client_id() const noexcept;
+    [[nodiscard]] std::string cart() const;
 
     void add_to_cart(id_t dish_id) const noexcept;
 
     void delete_from_cart(id_t dish_id) const noexcept;
 
     void empty_cart() const noexcept;
+
+    static std::string show_order_status(id_t order_id);
 };
 
 }  // namespace restbes

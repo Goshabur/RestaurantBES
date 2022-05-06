@@ -3,15 +3,9 @@
 #include "fwd.h"
 #include "nlohmann/json.hpp"
 
-namespace restbes {
+using restbes::connectGet;
 
-enum OrderStatus {
-    CREATED = 0,
-    ACCEPTED = 1,
-    CANCELLED = 2,
-    IN_PROGRESS = 3,
-    COMPLETED = 4
-};
+namespace restbes {
 
 class Order {
 private:
@@ -21,15 +15,15 @@ private:
 
 public:
     explicit Order(id_t client_id) : m_client_id(client_id) {
-        std::string cart = restbes::connect_to_db_get(
-            R"(SELECT "CART" FROM "CART" WHERE "CLIENT_ID" = )" +
-            std::to_string(m_client_id));
+        std::string cart =
+            connectGet(R"(SELECT "CART" FROM "CART" WHERE "CLIENT_ID" = )" +
+                       std::to_string(m_client_id));
 
-        std::string cost = restbes::connect_to_db_get(
-            R"(SELECT "COST" FROM "CART" WHERE "CLIENT_ID" = )" +
-            std::to_string(m_client_id));
+        std::string cost =
+            connectGet(R"(SELECT "COST" FROM "CART" WHERE "CLIENT_ID" = )" +
+                       std::to_string(m_client_id));
 
-        m_order_id = std::stoi(restbes::connect_to_db_get(
+        m_order_id = std::stoi(connectGet(
             R"(INSERT INTO "ORDER" ("ITEMS", "COST", "STATUS", "TIME") VALUES (')" +
             cart + "', " + cost + ", " + std::to_string(m_order_status) +
             ", NOW()) RETURNING \"ORDER_ID\""));
