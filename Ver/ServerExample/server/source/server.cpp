@@ -43,7 +43,8 @@ unsigned int Server::addSession(std::shared_ptr<restbed::Session> session,
     return session_id;
 }
 
-void Server::assignSession(unsigned int session_id, std::string user_id) {
+void Server::assignSession(unsigned int session_id,
+                           const std::string &user_id) const {
     getSession(session_id)->setUser(user_id);
     getUser(user_id)->addSession(session_id);
 }
@@ -99,6 +100,14 @@ generateResponse(const std::string &body, const std::string &content_type,
 }
 
 restbed_HTTP_Handler
+Server::generateGetMethodHandler(const GET_Handler &callback,
+                                  std::shared_ptr<Server> server) {
+    return [callback, server](std::shared_ptr<restbed::Session> session) {
+            callback(std::move(session), server);
+    };
+}
+
+restbed_HTTP_Handler
 Server::generatePostMethodHandler(const POST_Handler &callback,
                                   std::shared_ptr<Server> server) {
     return [callback, server](std::shared_ptr<restbed::Session> session) {
@@ -112,34 +121,6 @@ Server::generatePostMethodHandler(const POST_Handler &callback,
                     std::string data = std::string(body.begin(), body.end());
                     callback(session, data, server);
                 });
-    };
-}
-
-restbed_HTTP_Handler
-Server::generateGetMethodHandler(std::shared_ptr<Server> server) {
-    return [server](std::shared_ptr<restbed::Session> session) {
-//        using session_structure::Session;
-
-        std::string user_id = session->get_request()->get_header("User-ID",
-                                                                 "");
-        unsigned int session_id = session->get_request()->get_header(
-                "Session-ID",
-                0);
-
-        if (!user_id.empty() && server->getUser(user_id) == nullptr)
-            server->addUser(user_id, server);
-        auto realSession = server->getSession(session_id);
-        if (realSession == nullptr) {
-            session_id = server->addSession(session, user_id);
-            auto response = generateResponse(
-                    "New Session-ID: " + std::to_string(session_id) + '\n',
-                    "text/plain",
-                    Connection::KEEP_ALIVE);
-            response->set_header("Session-ID", std::to_string(session_id));
-            server->getSession(session_id)->push(response);
-        } else if (!user_id.empty() && realSession->getUserId().empty()) {
-            server->assignSession(session_id, user_id);
-        }
     };
 }
 
@@ -161,27 +142,21 @@ restbed_ErrorHandler Server::generateErrorHandler(const ErrorHandler &callback,
 }
 
 std::shared_ptr<restbed::Resource> createResource(const std::string &path,
-                                                  const Server::POST_Handler &postMethodHandler,
+                                                  const std::optional<Server::GET_Handler> &getMethodHandler,
+                                                  const std::optional<Server::POST_Handler> &postMethodHandler,
                                                   const Server::ErrorHandler &errorHandler,
                                                   std::shared_ptr<Server> server) {
     auto resource = std::make_shared<restbed::Resource>();
     resource->set_path(path);
-    resource->set_method_handler("POST",
-                                 Server::generatePostMethodHandler(
-                                         postMethodHandler,
-                                         server));
-    resource->set_error_handler(
-            Server::generateErrorHandler(errorHandler, server));
-    return resource;
-}
-
-std::shared_ptr<restbed::Resource> createGetResource(const std::string &path,
-                                                     const Server::ErrorHandler &errorHandler,
-                                                     std::shared_ptr<Server> server) {
-    auto resource = std::make_shared<restbed::Resource>();
-    resource->set_path(path);
-    resource->set_method_handler("GET",
-                                 Server::generateGetMethodHandler(server));
+    if (getMethodHandler)
+        resource->set_method_handler("GET",
+                                     Server::generateGetMethodHandler(
+                                             getMethodHandler.value(), server));
+    if (postMethodHandler)
+        resource->set_method_handler("POST",
+                                     Server::generatePostMethodHandler(
+                                             postMethodHandler.value(),
+                                             server));
     resource->set_error_handler(
             Server::generateErrorHandler(errorHandler, server));
     return resource;

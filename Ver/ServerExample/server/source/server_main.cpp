@@ -51,16 +51,21 @@ int main(int argc, char **argv) {
     auto server = std::make_shared<restbes::Server>();
 
     auto echo = createResource("/echo",
+                               std::nullopt,
                                postEchoMethodHandler,
                                errorHandler,
                                server);
     auto messenger = createResource("/messenger",
+                                    std::nullopt,
                                     postMessengerMethodHandler,
                                     errorHandler,
                                     server);
-    auto get = createGetResource("/get",
-                                 errorHandler,
-                                 server);
+
+    auto get = createResource("/get",
+                              pollingHandler,
+                              std::nullopt,
+                              errorHandler,
+                              server);
 
     std::string pathToSSL[] = {fLS::FLAGS_SSLkeys + "/server.key",
                                fLS::FLAGS_SSLkeys + "/server.crt",

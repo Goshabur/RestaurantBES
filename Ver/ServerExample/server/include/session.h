@@ -17,10 +17,14 @@ private:
     folly::Synchronized<unsigned int> session_id;
     folly::Synchronized<std::queue<std::shared_ptr<restbed::Response>>> responseQueue;
 
+    void yieldFromQueue();
+
 public:
     Session(std::shared_ptr<restbed::Session> ss, std::string uid);
 
     void setUser(std::string uid);
+
+    void setSession(std::shared_ptr<restbed::Session> ss);
 
     [[nodiscard]] bool is_open() const;
 
