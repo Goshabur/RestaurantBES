@@ -30,7 +30,7 @@ DEFINE_string(name, "", "Username");
 DEFINE_int32(port, 0, "What port to listen on");
 DEFINE_string(server, "localhost", "Domain to send requests to");
 DEFINE_string(resource, "", "Path to the resource to send requests to");
-DEFINE_bool(count_seconds, false, "Send automated messages counting seconds");
+DEFINE_int32(count, 0, "Send automated messages counting seconds");
 DEFINE_bool(silent, false, "Don't receive incoming messages");
 
 DEFINE_validator(port, &ValidatePort);
@@ -54,9 +54,12 @@ int main(int argc, char **argv) {
             std::cout << "No response\n";
         } else if (res->status != 200) {
             std::cout << "Bad response " << res->status << '\n';
-        } else session_id = std::stoi(res->get_header_value("Session-ID"));
+        } else {
+            session_id = std::stoi(res->get_header_value("Session-ID"));
+            std::cout << res->body;
+            std::cout.flush();
+        }
     }
-    std::cout << session_id << std::endl;
 
     httplib::Headers headers = {
             {"User-ID",    client_name},
@@ -86,9 +89,9 @@ int main(int argc, char **argv) {
     postingClient->enable_server_certificate_verification(false);
     std::string message;
     for (int i = 0; true; ++i) {
-        if (fLB::FLAGS_count_seconds) {
+        if (fLI::FLAGS_count != 0) {
             message = std::to_string(i);
-            std::this_thread::sleep_for(1s);
+            std::this_thread::sleep_for(std::chrono::milliseconds(fLI::FLAGS_count));
         } else {
             std::getline(std::cin, message);
         }

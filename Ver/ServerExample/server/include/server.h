@@ -21,7 +21,7 @@ enum ResponseCode {
 
 struct Server {
     using GET_Handler = std::function<void(
-            std::shared_ptr<Session>,
+            std::shared_ptr<restbed::Session>,
             std::shared_ptr<Server> server)>;
     using POST_Handler = std::function<void(std::shared_ptr<restbed::Session>,
                                             const std::string &,
@@ -47,7 +47,8 @@ private:
                               std::shared_ptr<Server> server);
 
     [[nodiscard]] static restbed_HTTP_Handler
-    generateGetMethodHandler(std::shared_ptr<Server> server);
+    generateGetMethodHandler(const GET_Handler &callback,
+                             std::shared_ptr<Server> server);
 
     [[nodiscard]] static std::function<void(void)>
     generateScheduledTask(const ScheduledTask &task,
@@ -59,14 +60,10 @@ private:
 
     friend std::shared_ptr<restbed::Resource>
     createResource(const std::string &path,
-                   const POST_Handler &postMethodHandler,
+                   const std::optional<GET_Handler> &getMethodHandler,
+                   const std::optional<POST_Handler> &postMethodHandler,
                    const ErrorHandler &errorHandler,
                    std::shared_ptr<Server> server);
-
-    friend std::shared_ptr<restbed::Resource>
-    createGetResource(const std::string &path,
-                      const ErrorHandler &errorHandler,
-                      std::shared_ptr<Server> server);
 
 public:
     Server();
@@ -85,12 +82,11 @@ public:
     [[nodiscard]] std::shared_ptr<Session>
     getSession(unsigned int session_id) const;
 
-//    void addSession(std::shared_ptr<restbed::Session> session);
-
     unsigned int
     addSession(std::shared_ptr<restbed::Session> session, std::string user_id);
 
-    void assignSession(unsigned int session_id, std::string user_id);
+    void
+    assignSession(unsigned int session_id, const std::string &user_id) const;
 
     [[nodiscard]] std::shared_ptr<User> getUser(const std::string &name) const;
 
@@ -117,7 +113,7 @@ std::shared_ptr<restbed::Settings>
 createSettingsWithSSL(const std::string &SSL_ServerKey,
                       const std::string &SSL_Certificate,
                       const std::string &SSL_DHKey,
-                      const int port,
-                      const int workers);
+                      int port,
+                      int workers);
 
 } //restbes

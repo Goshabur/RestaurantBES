@@ -21,7 +21,7 @@ private:
 public:
     explicit User(std::string nm, std::shared_ptr<Server> serv);
 
-    void pushMessage(std::shared_ptr<restbed::Response> response);
+    void push(std::shared_ptr<restbed::Response> response);
 
     void addSession(unsigned int session_id);
 
