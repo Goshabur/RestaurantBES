@@ -7,12 +7,30 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#define TOKEN "5385672949:AAEbqM0JjpCmDlAOMYveRxsUhCohnX582AE"
-#define map_bool std::unordered_map<int64_t, bool>
-#define map_int std::unordered_map<int64_t, int>
+#include <fstream>
 
 using namespace TgBot;
+
+std::ifstream infile("TOKEN.txt");
+const std::string TOKEN;
+std::getline(infile, TOKEN);
+
+class StateClass {
+    bool logged;
+    bool waitOrderId;
+    bool waitOrderStatus;
+    int orderId;
+    int orderStatus;
+    bool waitDishId;
+    bool waitDishStatus;
+    bool waitDishPrice;
+    int dishId;
+    int dishStatus;
+    int dishPrice;
+    bool toChangeDishStatus;
+    bool toChangeDishPrice;
+};
+std::unordered_map<int64_t, StateClass> state;
 
 bool check_admin(const std::string &password) {
     // TODO: DB
@@ -32,7 +50,7 @@ bool check_dish_id(int id) {
 int main() {
     Bot bot(TOKEN);
 
-    std::vector<BotCommand::Ptr> commands;
+    std::vector <BotCommand::Ptr> commands;
 
     BotCommand::Ptr cmdArray(new BotCommand);
     cmdArray->command = "start";
@@ -55,7 +73,7 @@ int main() {
     commands.push_back(cmdArray);
 
     bot.getApi().setMyCommands(commands);
-    std::vector<BotCommand::Ptr> vectCmd;
+    std::vector <BotCommand::Ptr> vectCmd;
 
     map_bool logged;
     map_bool waitOrderId;
@@ -76,8 +94,8 @@ int main() {
             bot.getApi().sendMessage(message->chat->id, "Already logged in.");
         } else
             bot.getApi().sendMessage(
-                message->chat->id,
-                "Enter password to log in as an administrator.");
+                    message->chat->id,
+                    "Enter password to log in as an administrator.");
     });
 
     bot.getEvents().onCommand("order", [&](const Message::Ptr &message) {
@@ -189,13 +207,10 @@ int main() {
     });
 
     try {
-        // printf("Bot username: %s\n",
-        // bot.getApi().getMe()->username.c_str());
         bot.getApi().deleteWebhook();
 
         TgLongPoll longPoll(bot);
         while (true) {
-            // printf("Long poll started\n");
             longPoll.start();
         }
     } catch (std::exception &e) {
