@@ -11,14 +11,11 @@ std::string Client::get_client_id() const {
 std::string Client::create_order() {
     restbes::Order order(m_id);
     m_cart.clear();
+    restbes::connectExec(
+        R"(INSERT INTO "HISTORY" ("ORDER_ID", "CLIENT_ID") VALUES ()" +
+        std::to_string(order.get_order_id()) + ", " + std::to_string(m_id) +
+        ")");
     return std::to_string(order.get_order_id());
-
-    // зачем вообще эта таблица "ACTIVE ORDER"?
-    //    restbes::connectExec(
-    //        R"(INSERT INTO "ACTIVE_ORDER" ("ORDER_ID", "CLIENT_ID") VALUES ()"
-    //        + std::to_string(order.get_order_id()) + ", " +
-    //        std::to_string(m_id) +
-    //        ")");
 }
 
 void Client::add_to_cart(id_t dish_id) const noexcept {
@@ -42,7 +39,7 @@ std::string Client::show_order_status(id_t order_id) {
         connectGet(R"(SELECT "STATUS" FROM "ORDER" WHERE "ORDER_ID" = )" +
                    std::to_string(order_id)));
 
-    return Statuses[status];
+    return orderStatuses[status];
 }
 
 }  // namespace restbes

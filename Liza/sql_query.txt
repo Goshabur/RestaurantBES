@@ -17,7 +17,7 @@ CREATE TABLE public."CLIENT"
 CREATE TABLE public."ORDER"
 (
     "ORDER_ID" serial,
-    "STATUS" integer NOT NULL,
+    "STATUS" text NOT NULL,
     "TIME" timestamp without time zone,
     "ITEMS" jsonb,
     "COMMENT" text,
@@ -31,7 +31,7 @@ CREATE TABLE public."DISH"
     "IMAGE" text NOT NULL,
     "PRICE" integer NOT NULL,
     "INFO" text,
-    "STATUS" integer NOT NULL,
+    "STATUS" text NOT NULL,
     PRIMARY KEY ("IMAGE")
 );
 
@@ -47,6 +47,12 @@ CREATE TABLE public."ACTIVE_ORDER"
     "ORDER_ID" integer NOT NULL
 );
 
+CREATE TABLE public."ADMINISTRATOR"
+(
+    "ADMIN_ID" serial,
+    "PASSWORD" text NOT NULL
+);
+
 CREATE TABLE public."CART"
 (
     "CLIENT_ID" integer NOT NULL,
@@ -55,6 +61,9 @@ CREATE TABLE public."CART"
 );
 
 ALTER TABLE IF EXISTS public."HISTORY"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."ADMINISTRATOR"
     OWNER to postgres;
 
 ALTER TABLE IF EXISTS public."CART"
