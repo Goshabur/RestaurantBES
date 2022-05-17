@@ -15,7 +15,7 @@ add_executable(QtMessenger
         src/main.cpp
         src/qml.qrc
         src/images.qrc
-        src/client.cpp
+#        src/client.cpp
         include/MenuList.h
         src/MenuList.cpp
         include/MenuModel.h
