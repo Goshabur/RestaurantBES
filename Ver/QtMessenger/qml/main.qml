@@ -20,6 +20,17 @@ Window {
 
     Header {
         id: header
+	}
+
+    Loader {
+        id: mainLoader
+        anchors {
+            left: parent.left
+            right: parent.right
+            top: header.bottom
+            bottom: parent.bottom
+        }
+        source: "MenuPage.qml"
     }
 }
 

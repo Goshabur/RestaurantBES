@@ -1,19 +1,25 @@
 #include <QApplication>
 #include <QtQml/QQmlApplicationEngine>
 #include <QStringLiteral>
-#include "client.h"
+#include <QQmlContext>
+#include "MenuList.h"
+#include "MenuModel.h"
+//#include "client.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    qmlRegisterType<restbes::Client>("Ver", 1, 0, "Client");
+//    qmlRegisterType<restbes::Client>("Ver", 1, 0, "Client");
+    qmlRegisterType<restbes::MenuModel>("Ver", 1, 0, "MenuModel");
+    qmlRegisterType<restbes::MenuList>("Ver", 1, 0, "MenuList");
+
+    restbes::MenuList menu;
 
     QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty(QStringLiteral("menu"), &menu);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl){
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
+
     engine.load(url);
 
     return app.exec();

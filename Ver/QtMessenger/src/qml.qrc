@@ -2,5 +2,7 @@
     <qresource>
         <file alias="main.qml">../qml/main.qml</file>
         <file alias="Header.qml">../qml/Header.qml</file>
+        <file alias="MenuPage.qml">../qml/MenuPage.qml</file>
+        <file alias="Menu.qml">../qml/Menu.qml</file>
     </qresource>
 </RCC>
