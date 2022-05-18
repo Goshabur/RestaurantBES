@@ -12,10 +12,12 @@
 using TgBot::BotCommand;
 using TgBot::Message;
 
-template<class T>
+template <class T>
 struct aggregate_adapter : public T {
-    template<class... Args>
-    aggregate_adapter(Args&&... args) : T{ std::forward<Args>(args)... } {}
+    template <class... Args>
+    explicit aggregate_adapter(Args &&...args)
+        : T{std::forward<Args>(args)...} {
+    }
 };
 
 class StateClass {
@@ -67,7 +69,8 @@ void createKeyboard(const std::vector<std::vector<std::string>> &buttonLayout,
 }
 
 int main() {
-    std::ifstream infile("/home/lizaerem/RestaurantBES/Liza/Telegram_Bot/TOKEN.txt");
+    std::ifstream infile(
+        "/home/lizaerem/RestaurantBES/Liza/Telegram_Bot/TOKEN.txt");
     std::string TOKEN;
     infile >> TOKEN;
     TgBot::Bot bot(TOKEN);
@@ -87,7 +90,8 @@ int main() {
     commands.push_back(cmd);
     cmd = std::make_shared<aggregate_adapter<BotCommand>>("exit", "Log out");
     commands.push_back(cmd);
-    cmd = std::make_shared<BotCommand>("set_order_status", "Change order status");
+    cmd =
+        std::make_shared<BotCommand>("set_order_status", "Change order status");
     commands.push_back(cmd);
     cmd = std::make_shared<BotCommand>("set_dish_status", "Change dish status");
     commands.push_back(cmd);
