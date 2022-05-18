@@ -23,32 +23,6 @@ using restbes::Session;
 
 namespace restbes {
 
-//void connectExec(const std::string &sql) {
-//    pqxx::connection C(
-//        "dbname=testdb user=postgres password=restbes2022 hostaddr=127.0.0.1 "
-//        "port=5432");
-//
-//    pqxx::work W(C);
-//    W.exec(sql);
-//    W.commit();
-//
-//    // TODO: signal that something has changed and/or executed successfully
-//
-//    C.disconnect();
-//}
-
-//std::string connectGet(const std::string &sql) {
-//    pqxx::connection C(
-//        "dbname=testdb user=postgres password=restbes2022 hostaddr=127.0.0.1 "
-//        "port=5432");
-//
-//    pqxx::nontransaction N(C);
-//    pqxx::result result(N.exec(sql));
-//    C.disconnect();
-//
-//    return result[0][0].c_str();
-//}
-
 std::string show_menu() {
     std::string sqlRequest = R"(SELECT * FROM "DISH" WHERE "STATUS" = 1)";
     pqxx::connection C(
@@ -80,9 +54,8 @@ std::string show_order_status(id_t order_id) {
 
 bool check_user_exists(const std::string &email) {
     try {
-        connectGet(
-            R"(SELECT "CLIENT_ID" FROM "CLIENT" WHERE "EMAIL" = ')" + email +
-            "'");
+        connectGet(R"(SELECT "CLIENT_ID" FROM "CLIENT" WHERE "EMAIL" = ')" +
+                   email + "'");
     } catch (const pqxx::pqxx_exception &e) {
         server_error_log << e.base().what() << std::endl;
         const auto *s = dynamic_cast<const pqxx::sql_error *>(&e.base());
@@ -96,9 +69,9 @@ bool check_user_exists(const std::string &email) {
 
 bool check_sign_in(const std::string &email, const std::string &password) {
     try {
-        connectGet(
-            R"(SELECT "CLIENT_ID" FROM "CLIENT" WHERE "EMAIL" = ')" + email +
-            "' AND \"PASSWORD\" = crypt('" + password + "', \"PASSWORD\")");
+        connectGet(R"(SELECT "CLIENT_ID" FROM "CLIENT" WHERE "EMAIL" = ')" +
+                   email + "' AND \"PASSWORD\" = crypt('" + password +
+                   "', \"PASSWORD\")");
     } catch (const pqxx::pqxx_exception &e) {
         server_error_log << e.base().what() << std::endl;
         const auto *s = dynamic_cast<const pqxx::sql_error *>(&e.base());
@@ -110,23 +83,6 @@ bool check_sign_in(const std::string &email, const std::string &password) {
     }
     return true;
 }
-
-//bool check_admin(const std::string &password) {
-//    try {
-//        restbes::connectGet(
-//            R"(SELECT "ADMIN_ID" FROM "ADMINISTRATOR" WHERE "PASSWORD" = crypt(')" +
-//            password + "', \"PASSWORD\")");
-//    } catch (const pqxx::pqxx_exception &e) {
-//        server_error_log << e.base().what() << std::endl;
-//        const auto *s = dynamic_cast<const pqxx::sql_error *>(&e.base());
-//        if (s)
-//            server_request_log
-//                << "Failed attempt to log in as an administrator, request: "
-//                << s->query() << std::endl;
-//        return false;
-//    }
-//    return true;
-//}
 
 void postAuthorizationMethodHandler(
     const std::shared_ptr<restbed::Session> &session,

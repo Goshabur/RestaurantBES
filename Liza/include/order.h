@@ -25,7 +25,7 @@ public:
 
         m_order_id = std::stoi(connectGet(
             R"(INSERT INTO "ORDER" ("ITEMS", "COST", "STATUS", "TIME") VALUES (')" +
-            cart + "', " + cost + ", " + orderStatuses[m_order_id] +
+            cart + "', " + cost + ", " + orderStatuses[m_order_status] +
             ", NOW()) RETURNING \"ORDER_ID\""));
     }
 
