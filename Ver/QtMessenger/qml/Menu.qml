@@ -1,5 +1,6 @@
 import QtQuick 2.5
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.1
 import Ver 1.0
 
 Rectangle {
@@ -7,6 +8,7 @@ Rectangle {
         horizontalCenter: parent.horizontalCenter
     }
     width: parent.width/2
+    color: "pink"
     GridView {
         id: menuView
         anchors {
@@ -22,25 +24,14 @@ Rectangle {
         boundsBehavior: Flickable.StopAtBounds
         clip: true
         model: MenuModel { list: menu }
-		/*
-        ListModel {
-            ListElement {
-                name: "Lasagna"
-                colorCode: "light blue"
-            }
-            ListElement {
-                name: "Steak"
-                colorCode: "light pink"
-            }
-        }
-        */
         cellWidth: parent.width/2 - menuView.anchors.rightMargin
-        cellHeight: parent.width/2
+        cellHeight: menuView.cellWidth * 5/4
 
         delegate: Item {
             width: menuView.cellWidth
             height: menuView.cellHeight
             Rectangle {
+                id: frame
                 anchors {
                     fill: parent
                     leftMargin: 10
@@ -48,14 +39,91 @@ Rectangle {
                     topMargin: 20
                     bottomMargin: 0
                 }
-                color: "lightblue"
-                Label {
-                    id: courseName
-                    anchors.centerIn: parent
-                    text: name
-                    font.bold: true
-                    font.pixelSize: 20
+                color: "white"
+
+                ColumnLayout {
+                    anchors {
+                        top: frame.top
+                        topMargin: 10
+                        horizontalCenter: frame.horizontalCenter
+                        leftMargin: 10
+                        rightMargin: 10
+                    }
+
+                    // Image
+                    Rectangle {
+                        Layout.preferredWidth: frame.width - 20
+                        Layout.preferredHeight: (frame.width - 20) *4/5
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        clip: true
+	                    Image {
+	                        sourceSize.height: parent.height
+	                        anchors.centerIn: parent
+	                        source: image
+	                    }
+                    }
+                    // Name of the dish
+                    Label {
+	                    Layout.maximumWidth: frame.width - 20
+                        wrapMode: Text.WordWrap
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        text: name
+                        font.pointSize: 1 + frame.height /20
+                        font.bold: true
+                    }
+                    // Price
+                    Label {
+                        Layout.maximumWidth: frame.width *2/3 - 10
+                        Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                        text: price
+                        font.pointSize: 1 + frame.height /20
+                        font.bold: false
+                    }
                 }
+
+                // Adding/removing items to/from the cart
+                RowLayout {
+	                anchors {
+	                    horizontalCenter: frame.horizontalCenter
+	                    bottomMargin: 15
+	                    bottom: frame.bottom
+	                }
+	                spacing: 10
+
+	                // Left button
+	                Rectangle {
+	                    Layout.preferredWidth: frame.width/10
+	                    Layout.preferredHeight: frame.width/10
+	                    radius: frame.width/10
+	                    color: "pink"
+	                    Text {
+	                        anchors.centerIn: parent
+	                        font.pixelSize: parent.height
+	                        text: "-"
+	                    }
+	                }
+
+	                // Number of the items in the cart
+	                Label {
+	                    Layout.alignment: Qt.AlignHCenter | Qt.AlightVCenter
+	                    text: "0"
+	                    font.pointSize: 1 + frame.height /20
+	                    font.bold: false
+	                }
+
+	                // Right button
+	                Rectangle {
+	                    Layout.preferredWidth: frame.width/10
+	                    Layout.preferredHeight: frame.width/10
+	                    radius: frame.width/10
+	                    color: "pink"
+	                    Text {
+	                        anchors.centerIn: parent
+	                        font.pixelSize: parent.height
+	                        text: "+"
+	                    }
+	                }
+	            }
             }
         }
     }

@@ -39,6 +39,8 @@ public:
 
     void setList(MenuList *list);
 
+    void updatePersistentIndexList(const QModelIndexList &newList);
+
 private:
     MenuList *mList;
 };

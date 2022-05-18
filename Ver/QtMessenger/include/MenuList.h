@@ -42,6 +42,8 @@ public:
 
     MenuItem getItemAt(int index);
 
+    void resetList(std::map<int, MenuItem> newList);
+
 signals:
 
     void beginChangeLayout();

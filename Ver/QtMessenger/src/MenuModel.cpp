@@ -133,4 +133,8 @@ void MenuModel::setList(MenuList *list) {
     endResetModel();
 }
 
+void MenuModel::updatePersistentIndexList(const QModelIndexList &newList) {
+    changePersistentIndexList(persistentIndexList(), newList);
+}
+
 }
