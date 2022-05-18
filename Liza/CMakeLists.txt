@@ -33,7 +33,7 @@ set(PQXX_LIBRARIES pqxx_static)
 
 FetchContent_MakeAvailable(libpqxx)
 
-add_executable(RestaurantBES server.cpp admin.cpp client.cpp #Telegram_Bot/tgBot.cpp
+add_executable(RestaurantBES src/server.cpp src/admin.cpp src/client.cpp #Telegram_Bot/tgBot.cpp
         server/source/user.cpp
         server/source/server.cpp
         server/source/server_main.cpp
@@ -56,7 +56,7 @@ target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/restbed/sour
 target_link_libraries(RestaurantBES restbed crypto ssl pthread gflags folly double-conversion dl fmt glog)
 target_link_libraries(RestaurantBES "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)
 
-add_executable(TelegramBot tgBot.cpp admin.cpp)
+add_executable(TelegramBot Telegram_Bot/tgBot.cpp src/admin.cpp)
 
 if (CURL_FOUND)
     include_directories(${CURL_INCLUDE_DIRS})
