@@ -1,7 +1,7 @@
 #pragma once
 
-#include "folly/dynamic.h"
-#include "folly/json.h"
+#include "../../../folly_installed/installed/folly/include/folly/dynamic.h"
+#include "../../../folly_installed/installed/folly/include/folly/json.h"
 #include "fwd.h"
 #include "nlohmann/json.hpp"
 
