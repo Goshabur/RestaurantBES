@@ -15,9 +15,11 @@ add_executable(QtMessenger
         src/main.cpp
         src/qml.qrc
         src/images.qrc
-        include/client.h
-        src/client.cpp
-        )
+#        src/client.cpp
+        include/MenuList.h
+        src/MenuList.cpp
+        include/MenuModel.h
+        src/MenuModel.cpp)
 
 target_link_libraries(QtMessenger crypto ssl pthread)
 target_link_libraries(QtMessenger Qt5::Widgets Qt5::Quick Qt5::Qml)
