@@ -12,6 +12,11 @@ Rectangle {
     }
     color: "#FFC0CB"
 
+    CartDrawer {
+        id: cartDrawer
+        height: parent.height
+    }
+
 
     Item {
         id: navigation
@@ -87,6 +92,13 @@ Rectangle {
             width: height
             radius: width
             color: "#F5F5DC"
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+					cartDrawer.open()
+                }
+            }
         }
         Label {
             anchors {

@@ -7,8 +7,7 @@ namespace restbes {
 
 class MenuModel : public QAbstractListModel {
 Q_OBJECT
-    Q_PROPERTY(restbes::MenuList *list READ list WRITE setList)
-
+    Q_PROPERTY(restbes::MenuList *list READ list WRITE setList NOTIFY listChanged)
 public:
     explicit MenuModel(QObject *parent = nullptr);
 
@@ -18,7 +17,8 @@ public:
         ImageRole,
         PriceRole,
         InfoRole,
-        StatusRole
+        StatusRole,
+        CountRole
     };
 
     // Basic functionality:
@@ -41,8 +41,13 @@ public:
 
     void updatePersistentIndexList(const QModelIndexList &newList);
 
+signals:
+    void listChanged();
+
+    void menuChanged();
+
 private:
-    MenuList *mList;
+    MenuList *menuList;
 };
 
 }

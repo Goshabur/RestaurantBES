@@ -101,12 +101,19 @@ Rectangle {
 	                        font.pixelSize: parent.height
 	                        text: "-"
 	                    }
+
+	                    MouseArea {
+	                        anchors.fill: parent
+	                        onClicked: {
+	                            count = count - 1
+	                        }
+	                    }
 	                }
 
 	                // Number of the items in the cart
 	                Label {
 	                    Layout.alignment: Qt.AlignHCenter | Qt.AlightVCenter
-	                    text: "0"
+	                    text: count
 	                    font.pointSize: 1 + frame.height /20
 	                    font.bold: false
 	                }
@@ -122,6 +129,13 @@ Rectangle {
 	                        font.pixelSize: parent.height
 	                        text: "+"
 	                    }
+
+	                    MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                count = count + 1
+                            }
+                        }
 	                }
 	            }
             }

@@ -1,51 +1,42 @@
 #pragma once
 
 #include <QObject>
-#include <map>
+#include <QModelIndex>
+#include <set>
+#include <memory>
+#include "fwd.h"
+#include "MenuData.h"
 
 namespace restbes {
-
-struct MenuItem {
-    int id;
-    QString name;
-    QString image;
-    int price;
-    QString info;
-    int status;
-
-    friend bool operator!=(const MenuItem &a, const MenuItem &b) {
-        return a.id != b.id ||
-               a.price != b.price ||
-               a.status != b.status ||
-               a.info != b.info ||
-               a.image != b.image ||
-               a.name != b.name;
-    }
-
-    friend bool operator==(const MenuItem &a, const MenuItem &b) {
-        return !(a != b);
-    }
-};
 
 class MenuList : public QObject {
 Q_OBJECT
 public:
     explicit MenuList(QObject *parent = nullptr);
 
-    [[nodiscard]] std::map<int, MenuItem> items() const;
+    [[nodiscard]] std::shared_ptr<MenuData> getMenuData() const;
+
+    [[nodiscard]] std::shared_ptr<CartList> getCartList() const;
 
     [[nodiscard]] int size() const;
 
-    bool setItemAt(int index, const MenuItem &item);
+    [[nodiscard]] int getItemCount(int id) const;
 
-    std::map<int, MenuItem>::iterator findItemAt(int index);
+    [[nodiscard]] int getId(int index) const;
+
+    [[nodiscard]] int getIndex(int index) const;
+
+    bool setItemAt(int index, const MenuItem &item);
 
     MenuItem getItemAt(int index);
 
-    void resetList(std::map<int, MenuItem> newList);
+    void setMenu(std::shared_ptr<MenuData> newData);
+
+    void setCart(std::shared_ptr<CartList> newData);
+
+    bool setItemCount(int id, int value);
 
 signals:
-
     void beginChangeLayout();
 
     void endChangeLayout();
@@ -58,14 +49,20 @@ signals:
 
     void endRemoveItem();
 
+    void itemChanged(int id);
+
 public slots:
 
-    void insertItem(MenuItem item);
+    void insertItem(restbes::MenuItem item);
+
+    void removeItem(int id);
 
     void removeUnavailableItems();
 
 private:
-    std::map<int, MenuItem> mItems;
+    std::set<int> items;
+    std::shared_ptr<MenuData> menuData;
+    std::shared_ptr<CartList> cartList;
 };
 
 }
