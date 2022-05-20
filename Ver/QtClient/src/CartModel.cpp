@@ -6,26 +6,27 @@
 namespace restbes {
 
 CartModel::CartModel(QObject *parent)
-        : QAbstractListModel(parent), cartList(nullptr) {
+        : QAbstractListModel(parent), cartList(nullptr), menuList(nullptr) {
 }
 
 int CartModel::rowCount(const QModelIndex &parent) const {
     // For list models only the root node (an invalid parent) should return the list's size. For all
     // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
-    if (parent.isValid() || !cartList)
+    if (parent.isValid() || !cartList || !menuList)
         return 0;
 
     return cartList->size();
 }
 
 QVariant CartModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || !cartList)
+    if (!index.isValid() || !cartList || !menuList)
         return {};
 
-    MenuItem menuItem = cartList->getMenuItemAt(index.row());
+    int id = cartList->getId(index.row());
+    MenuItem menuItem = menuList->getItem(id);
     switch (role) {
         case IdRole:
-            return {menuItem.id};
+            return {id};
         case NameRole:
             return {menuItem.name};
         case ImageRole:
@@ -37,7 +38,7 @@ QVariant CartModel::data(const QModelIndex &index, int role) const {
         case StatusRole:
             return {menuItem.status};
         case CountRole:
-            return {cartList->getCartItemAt(index.row()).count};
+            return {cartList->getItemAt(index.row()).count};
         default:
             return {};
     }
@@ -45,10 +46,10 @@ QVariant CartModel::data(const QModelIndex &index, int role) const {
 
 bool
 CartModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-    if (!cartList)
+    if (!cartList || !menuList)
         return false;
 
-    CartItem cartItem = cartList->getCartItemAt(index.row());
+    CartItem cartItem = cartList->getItemAt(index.row());
     if (role == CountRole &&
         cartList->setItemCount(cartItem.item_id, value.toInt())) {
         emit dataChanged(index, index, QVector<int>() << role);
@@ -76,17 +77,21 @@ QHash<int, QByteArray> CartModel::roleNames() const {
     return names;
 }
 
-CartList *CartModel::list() const {
+CartList *CartModel::getCartList() const {
     return cartList;
 }
 
-void CartModel::setList(CartList *list) {
+MenuList *CartModel::getMenuList() const {
+    return menuList;
+}
+
+void CartModel::setCartList(CartList *cList) {
     beginResetModel();
 
     if (cartList)
         cartList->disconnect(this);
 
-    cartList = list;
+    cartList = cList;
 
     if (cartList) {
         connect(cartList,
@@ -127,11 +132,25 @@ void CartModel::setList(CartList *list) {
                 [=]() {
                     layoutChanged();
                 });
+    }
 
-        connect(cartList->getMenuList().get(),
+    endResetModel();
+}
+
+void CartModel::setMenuList(MenuList *mList) {
+    beginResetModel();
+
+    if (menuList)
+        menuList->disconnect(this);
+
+    menuList = mList;
+
+    if (menuList) {
+        connect(menuList,
                 &MenuList::itemChanged,
                 this,
                 [=](int id) {
+                    if (!cartList) return;
                     auto ind = index(cartList->getIndex(id), 0);
                     QVector<int> roles {
                             IdRole,

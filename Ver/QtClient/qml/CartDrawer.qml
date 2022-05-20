@@ -34,7 +34,8 @@ Drawer {
 					boundsBehavior: Flickable.StopAtBounds
 					clip: true
 					model: CartModel {
-						list: theCart
+						menuList: menu
+						cartList: theCart
 					}
 
 					delegate: Item {

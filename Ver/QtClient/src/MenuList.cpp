@@ -27,10 +27,6 @@ std::shared_ptr<MenuData> MenuList::getMenuData() const {
     return menuData;
 }
 
-std::shared_ptr<CartList> MenuList::getCartList() const {
-    return cartList;
-}
-
 int MenuList::size() const {
     return menuData->data.size();
 }
@@ -53,8 +49,12 @@ bool MenuList::setItemAt(int index, const MenuItem &item) {
 // O(n)!
 MenuItem MenuList::getItemAt(int index) {
     if (index < 0 || index >= items.size())
-        throw std::runtime_error("MenuList::getCartItemAt: index out of range");
+        throw std::runtime_error("MenuList::getItemAt: index out of range");
     return menuData->getItem(getId(index));
+}
+
+MenuItem MenuList::getItem(int id) {
+    return menuData->getItem(id);
 }
 
 void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
@@ -76,25 +76,6 @@ void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
     }
     emit endChangeLayout();
 }
-
-void MenuList::setCart(std::shared_ptr<CartList> newData) {
-    cartList = std::move(newData);
-    if (parent()) {
-        auto *p = qobject_cast<MenuModel *>(parent());
-        p->emit dataChanged(p->index(0, 0),
-                            p->index(p->rowCount() - 1, 0),
-                            QVector<int>() << p->CountRole);
-    }
-}
-
-bool MenuList::setItemCount(int id, int value) {
-    return cartList->setItemCount(id, value);
-}
-
-int MenuList::getItemCount(int id) const {
-    return cartList->getItemCount(id);
-}
-
 
 // O(n)!
 void MenuList::insertItem(MenuItem item) {

@@ -6,20 +6,20 @@
 namespace restbes {
 
 MenuModel::MenuModel(QObject *parent)
-        : QAbstractListModel(parent), menuList(nullptr) {
+        : QAbstractListModel(parent), menuList(nullptr), cartList(nullptr) {
 }
 
 int MenuModel::rowCount(const QModelIndex &parent) const {
     // For list models only the root node (an invalid parent) should return the list's size. For all
     // other (valid) parents, rowCount() should return 0 so that it does not become a tree model.
-    if (parent.isValid() || !menuList)
+    if (parent.isValid() || !menuList || !cartList)
         return 0;
 
     return menuList->size();
 }
 
 QVariant MenuModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || !menuList)
+    if (!index.isValid() || !menuList || !cartList)
         return {};
 
     const MenuItem item = menuList->getItemAt(index.row());
@@ -37,7 +37,7 @@ QVariant MenuModel::data(const QModelIndex &index, int role) const {
         case StatusRole:
             return {item.status};
         case CountRole:
-            return {menuList->getItemCount(item.id)};
+            return {cartList->getItemCount(item.id)};
         default:
             return {};
     }
@@ -45,13 +45,13 @@ QVariant MenuModel::data(const QModelIndex &index, int role) const {
 
 bool
 MenuModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-    if (!menuList)
+    if (!menuList || !cartList)
         return false;
 
     MenuItem item = menuList->getItemAt(index.row());
     switch (role) {
         case CountRole:
-            return menuList->setItemCount(item.id, value.toInt());
+            return cartList->setItemCount(item.id, value.toInt());
         case IdRole:
             item.id = value.toInt();
             break;
@@ -101,17 +101,21 @@ QHash<int, QByteArray> MenuModel::roleNames() const {
     return names;
 }
 
-MenuList *MenuModel::list() const {
+MenuList *MenuModel::getMenuList() const {
     return menuList;
 }
 
-void MenuModel::setList(MenuList *list) {
+CartList *MenuModel::getCartList() const {
+    return cartList;
+}
+
+void MenuModel::setMenuList(MenuList *mList) {
     beginResetModel();
 
     if (menuList)
         menuList->disconnect(this);
 
-    menuList = list;
+    menuList = mList;
 
     if (menuList) {
         connect(menuList, &MenuList::beginInsertItem, this, [=](int index) {
@@ -134,14 +138,28 @@ void MenuModel::setList(MenuList *list) {
         connect(menuList, &MenuList::endChangeLayout, this, [=]() {
             layoutChanged();
         });
+    }
 
-        connect(menuList->getCartList().get(), &CartList::itemCountChanged, this,
+    endResetModel();
+}
+
+void MenuModel::setCartList(CartList *cList) {
+    beginResetModel();
+
+    if (cartList)
+        cartList->disconnect(this);
+
+    cartList = cList;
+
+    if (cartList) {
+        connect(cartList, &CartList::itemCountChanged, this,
                 [=](int id) {
+                    if (!menuList) return;
                     int ind = menuList->getIndex(id);
                     dataChanged(index(ind, 0), index(ind, 0),
                                 QVector<int>() << CountRole);
                 });
-        connect(menuList->getCartList().get(), &CartList::endChangeLayout, this,
+        connect(cartList, &CartList::endChangeLayout, this,
                 [=]() {
                     dataChanged(index(0, 0), index(rowCount() - 1, 0),
                                 QVector<int>() << CountRole);

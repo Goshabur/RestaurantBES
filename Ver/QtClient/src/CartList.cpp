@@ -8,29 +8,12 @@ namespace restbes {
 CartList::CartList(QObject *parent) : QObject(parent) {
 }
 
-void CartList::setMenuList(std::shared_ptr<MenuList> data) {
-    menuList = std::move(data);
-    menuData = menuList->getMenuData();
-}
-
 int CartList::size() const {
     return items.rlock()->size();
 }
 
-CartItem CartList::getCartItemAt(int index) const {
+CartItem CartList::getItemAt(int index) const {
     return items.rlock()->at(index);
-}
-
-MenuItem CartList::getMenuItemAt(int index) const {
-    return menuData->getItem(getId(index));
-}
-
-std::shared_ptr<MenuList> CartList::getMenuList() const {
-    return menuList;
-}
-
-std::shared_ptr<MenuData> CartList::getMenuData() const {
-    return menuData;
 }
 
 void CartList::updateIndexes() {

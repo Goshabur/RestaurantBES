@@ -22,17 +22,9 @@ Q_OBJECT
 public:
     explicit CartList(QObject *parent = nullptr);
 
-    void setMenuList(std::shared_ptr<MenuList> data);
-
     [[nodiscard]] int size() const;
 
-    [[nodiscard]] CartItem getCartItemAt(int index) const;
-
-    [[nodiscard]] MenuItem getMenuItemAt(int index) const;
-
-    [[nodiscard]] std::shared_ptr<MenuList> getMenuList() const;
-
-    [[nodiscard]] std::shared_ptr<MenuData> getMenuData() const;
+    [[nodiscard]] CartItem getItemAt(int index) const;
 
     [[nodiscard]] int getIndex(int id) const;
 
@@ -68,8 +60,6 @@ public slots:
 private:
     folly::Synchronized<std::vector<CartItem>> items;
     folly::Synchronized<std::unordered_map<int, int>> indexes;
-    std::shared_ptr<MenuData> menuData;
-    std::shared_ptr<MenuList> menuList;
 };
 
 }

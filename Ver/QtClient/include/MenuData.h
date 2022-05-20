@@ -9,12 +9,12 @@
 namespace restbes {
 
 struct MenuItem {
-    int id;
-    QString name;
-    QString image;
-    int price;
-    QString info;
-    int status;
+    int id = -1;
+    QString name = "DELETED";
+    QString image = "";
+    int price = 0;
+    QString info = "This item doesn't exist";
+    int status = 1;
 
     friend bool operator!=(const MenuItem &a, const MenuItem &b) {
         return a.id != b.id ||

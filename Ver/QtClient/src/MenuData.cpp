@@ -9,6 +9,7 @@ MenuData::MenuData(std::unordered_map<int, MenuItem> _data) : data(std::move(_da
 }
 
 MenuItem MenuData::getItem(int id) const {
+    if (data.count(id) == 0) return {};
     return data.at(id);
 }
 

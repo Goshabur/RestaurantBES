@@ -2,11 +2,11 @@
     <qresource>
         <file alias="pasta.jpg">../images/pasta.jpg</file>
         <file alias="steak.jpg">../images/steak.jpg</file>
-        <file alias="aa.png">../images/aa.png</file>
-        <file alias="lips.png">../images/lips.png</file>
-        <file alias="profile.png">../images/profile.png</file>
-        <file alias="cart.png">../images/cart.png</file>
-        <file alias="cart.jpg">../images/cart.jpg</file>
-        <file alias="info.png">../images/info.png</file>
+<!--        <file alias="aa.png">../images/aa.png</file>-->
+<!--        <file alias="lips.png">../images/lips.png</file>-->
+<!--        <file alias="profile.png">../images/profile.png</file>-->
+<!--        <file alias="cart.png">../images/cart.png</file>-->
+<!--        <file alias="cart.jpg">../images/cart.jpg</file>-->
+<!--        <file alias="info.png">../images/info.png</file>-->
     </qresource>
 </RCC>

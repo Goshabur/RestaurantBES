@@ -2,8 +2,10 @@
 
 #include <QObject>
 #include <QModelIndex>
+
 #include <set>
 #include <memory>
+
 #include "fwd.h"
 #include "MenuData.h"
 
@@ -16,11 +18,7 @@ public:
 
     [[nodiscard]] std::shared_ptr<MenuData> getMenuData() const;
 
-    [[nodiscard]] std::shared_ptr<CartList> getCartList() const;
-
     [[nodiscard]] int size() const;
-
-    [[nodiscard]] int getItemCount(int id) const;
 
     [[nodiscard]] int getId(int index) const;
 
@@ -30,11 +28,9 @@ public:
 
     MenuItem getItemAt(int index);
 
+    MenuItem getItem(int id);
+
     void setMenu(std::shared_ptr<MenuData> newData);
-
-    void setCart(std::shared_ptr<CartList> newData);
-
-    bool setItemCount(int id, int value);
 
 signals:
     void beginChangeLayout();
@@ -62,7 +58,6 @@ public slots:
 private:
     std::set<int> items;
     std::shared_ptr<MenuData> menuData;
-    std::shared_ptr<CartList> cartList;
 };
 
 }

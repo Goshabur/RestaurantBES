@@ -7,8 +7,8 @@ namespace restbes {
 
 class CartModel : public QAbstractListModel {
 Q_OBJECT
-    Q_PROPERTY(restbes::CartList *list READ list WRITE setList NOTIFY listChanged)
-
+    Q_PROPERTY(restbes::MenuList *menuList READ getMenuList WRITE setMenuList NOTIFY menuListChanged);
+    Q_PROPERTY(restbes::CartList *cartList READ getCartList WRITE setCartList NOTIFY cartListChanged);
 public:
     explicit CartModel(QObject *parent = nullptr);
 
@@ -36,18 +36,25 @@ public:
 
     virtual QHash<int, QByteArray> roleNames() const override;
 
-    CartList *list() const;
+    [[nodiscard]] MenuList *getMenuList() const;
 
-    void setList(CartList *list);
+    [[nodiscard]] CartList *getCartList() const;
+
+    void setMenuList(MenuList *mList);
+
+    void setCartList(CartList *cList);
 
     void updatePersistentIndexList(const QModelIndexList &newList);
 
 signals:
-    void listChanged();
+    void menuListChanged();
 
-//    void cartChanged();
+    void cartListChanged();
+
+    void cartChanged();
 
 private:
+    MenuList *menuList;
     CartList *cartList;
 };
 
