@@ -44,45 +44,12 @@ bool check_number(const std::string &num) {
                        [](char x) { return isdigit(x); });
 }
 
-void createOneColumnKeyboard(const std::vector<std::string> &buttonStrings,
-                             TgBot::ReplyKeyboardMarkup::Ptr &kb) {
-    for (const auto &buttonString : buttonStrings) {
-        std::vector<TgBot::KeyboardButton::Ptr> row;
-        TgBot::KeyboardButton::Ptr button(new TgBot::KeyboardButton);
-        button->text = buttonString;
-        row.push_back(button);
-        kb->keyboard.push_back(row);
-    }
-}
-
-void createKeyboard(const std::vector<std::vector<std::string>> &buttonLayout,
-                    TgBot::ReplyKeyboardMarkup::Ptr &kb) {
-    for (const auto &i : buttonLayout) {
-        std::vector<TgBot::KeyboardButton::Ptr> row;
-        for (const auto &j : i) {
-            TgBot::KeyboardButton::Ptr button(new TgBot::KeyboardButton);
-            button->text = j;
-            row.push_back(button);
-        }
-        kb->keyboard.push_back(row);
-    }
-}
-
 int main() {
     std::ifstream infile(
         "/home/lizaerem/RestaurantBES/Liza/Telegram_Bot/TOKEN.txt");
     std::string TOKEN;
     infile >> TOKEN;
     TgBot::Bot bot(TOKEN);
-
-    TgBot::ReplyKeyboardMarkup::Ptr keyboardDishStatus(
-        new TgBot::ReplyKeyboardMarkup);
-    createOneColumnKeyboard({"AVAILABLE", "UNAVAILABLE"}, keyboardDishStatus);
-
-    TgBot::ReplyKeyboardMarkup::Ptr keyboardOrderStatus(
-        new TgBot::ReplyKeyboardMarkup);
-    createKeyboard({{"ACCEPTED", "IN_PROGRESS"}, {"CANCELLED"}, {"COMPLETED"}},
-                   keyboardOrderStatus);
 
     std::vector<BotCommand::Ptr> commands;
 
@@ -101,32 +68,41 @@ int main() {
     bot.getApi().setMyCommands(commands);
     std::vector<BotCommand::Ptr> vectCmd;
 
-    TgBot::InlineKeyboardMarkup::Ptr keyboard(new TgBot::InlineKeyboardMarkup);
-    std::vector<TgBot::InlineKeyboardButton::Ptr> row0;
-    TgBot::InlineKeyboardButton::Ptr checkButton(
+    TgBot::InlineKeyboardMarkup::Ptr keyboardDishStatus(
+        new TgBot::InlineKeyboardMarkup);
+    std::vector<TgBot::InlineKeyboardButton::Ptr> row00;
+    TgBot::InlineKeyboardButton::Ptr dishStatusButton(
         new TgBot::InlineKeyboardButton);
-    checkButton->text = "AVAILABLE";
-    checkButton->callbackData = "AVAILABLE";
-    row0.push_back(checkButton);
-    checkButton = std::make_shared<TgBot::InlineKeyboardButton>();
-    checkButton->text = "UNAVAILABLE";
-    checkButton->callbackData = "UNAVAILABLE";
-    row0.push_back(checkButton);
-    keyboard->inlineKeyboard.push_back(row0);
+    dishStatusButton->text = "AVAILABLE";
+    dishStatusButton->callbackData = "AVAILABLE";
+    row00.push_back(dishStatusButton);
+    dishStatusButton = std::make_shared<TgBot::InlineKeyboardButton>();
+    dishStatusButton->text = "UNAVAILABLE";
+    dishStatusButton->callbackData = "UNAVAILABLE";
+    row00.push_back(dishStatusButton);
+    keyboardDishStatus->inlineKeyboard.push_back(row00);
 
-    //    bot.getEvents().onCommand("start", [&bot, &keyboard](const
-    //    Message::Ptr& message) {
-    //        bot.getApi().sendMessage(message->chat->id, "Choose new status:",
-    //        false, 0, keyboard);
-    //    });
-    //    bot.getEvents().onCallbackQuery([&bot, &keyboard](const
-    //    TgBot::CallbackQuery::Ptr& query) {
-    //        if (StringTools::startsWith(query->data, "AVAILABLE")) {
-    //            std::string response = "ok";
-    //            bot.getApi().sendMessage(query->message->chat->id, response,
-    //            false, 0, keyboard, "Markdown");
-    //        }
-    //    });
+    TgBot::InlineKeyboardMarkup::Ptr keyboardOrderStatus(
+        new TgBot::InlineKeyboardMarkup);
+    std::vector<TgBot::InlineKeyboardButton::Ptr> row01;
+    TgBot::InlineKeyboardButton::Ptr orderStatusButton(
+        new TgBot::InlineKeyboardButton);
+    orderStatusButton->text = "ACCEPTED";
+    orderStatusButton->callbackData = "ACCEPTED";
+    row01.push_back(orderStatusButton);
+    orderStatusButton = std::make_shared<TgBot::InlineKeyboardButton>();
+    orderStatusButton->text = "IN_PROGRESS";
+    orderStatusButton->callbackData = "IN_PROGRESS";
+    row01.push_back(orderStatusButton);
+    orderStatusButton = std::make_shared<TgBot::InlineKeyboardButton>();
+    orderStatusButton->text = "CANCELLED";
+    orderStatusButton->callbackData = "CANCELLED";
+    row01.push_back(orderStatusButton);
+    orderStatusButton = std::make_shared<TgBot::InlineKeyboardButton>();
+    orderStatusButton->text = "COMPLETED";
+    orderStatusButton->callbackData = "COMPLETED";
+    row01.push_back(orderStatusButton);
+    keyboardOrderStatus->inlineKeyboard.push_back(row01);
 
     bot.getEvents().onCommand("start", [&](const Message::Ptr &message) {
         if (state[message->chat->id].logged) {
@@ -145,23 +121,105 @@ int main() {
     bot.getEvents().onCommand(
         "set_order_status", [&](const Message::Ptr &message) {
             if (state[message->chat->id].logged) {
-                bot.getApi().sendMessage(message->chat->id, "Enter order id.");
-                state[message->chat->id].waitOrderId = true;
+                std::stringstream ss(message->text);
+                std::string command, number;
+                ss >> command;
+                ss >> number;
+                if (number.empty()) {
+                    bot.getApi().sendMessage(message->chat->id,
+                                             "Enter order id.");
+                    state[message->chat->id].waitOrderId = true;
+                } else {
+                    if (!restbes::check_order_exists(number)) {
+                        bot.getApi().sendMessage(message->chat->id,
+                                                 "No order with such id.");
+                        state[message->chat->id].waitOrderId = true;
+                    } else {
+                        bot.getApi().sendMessage(
+                            message->chat->id,
+                            "Choose new status (current status: \"" +
+                                restbes::Admin::getOrderStatus(number) + "\").",
+                            false, 0, keyboardOrderStatus);
+                        state[message->chat->id].orderId = std::stoi(number);
+                        state[message->chat->id].waitOrderId = false;
+                        state[message->chat->id].waitOrderStatus = true;
+                    }
+                }
             } else {
                 bot.getApi().sendMessage(message->chat->id,
                                          "Access denied. Enter password.");
             }
         });
 
+    bot.getEvents().onCallbackQuery(
+        [&bot](const TgBot::CallbackQuery::Ptr &query) {
+            if (state[query->message->chat->id].waitOrderStatus) {
+                std::string orderStatus = query->data;
+                std::string oldStatus = restbes::Admin::getOrderStatus(
+                    std::to_string(state[query->message->chat->id].orderId));
+                if (oldStatus == query->data) {
+                    bot.getApi().sendMessage(query->message->chat->id,
+                                             "Nothing to change.");
+                } else {
+                    restbes::Admin::change_order_status(
+                        std::to_string(state[query->message->chat->id].orderId),
+                        query->data);
+                    bot.getApi().sendMessage(query->message->chat->id,
+                                             "Changed from \"" + oldStatus +
+                                                 "\" to \"" + orderStatus +
+                                                 "\".");
+                }
+                state[query->message->chat->id].waitOrderStatus = false;
+            } else if (state[query->message->chat->id].waitDishStatus) {
+                std::string dishStatus = query->data;
+                std::string oldStatus = restbes::Admin::getDishStatus(
+                    std::to_string(state[query->message->chat->id].dishId));
+                if (oldStatus == query->data) {
+                    bot.getApi().sendMessage(query->message->chat->id,
+                                             "Nothing to change.");
+                } else {
+                    restbes::Admin::change_order_status(
+                        std::to_string(state[query->message->chat->id].dishId),
+                        query->data);
+                    bot.getApi().sendMessage(query->message->chat->id,
+                                             "Changed from \"" + oldStatus +
+                                                 "\" to \"" + dishStatus +
+                                                 "\".");
+                }
+                state[query->message->chat->id].waitDishStatus = false;
+            }
+        });
+
     bot.getEvents().onCommand(
         "set_dish_status", [&](const Message::Ptr &message) {
             if (state[message->chat->id].logged) {
-                bot.getApi().sendMessage(
-                    message->chat->id,
-                    "Enter dish id. You entered " + message->text);
-
-                state[message->chat->id].waitDishId = true;
-                state[message->chat->id].toChangeDishStatus = true;
+                std::stringstream ss(message->text);
+                std::string command, number;
+                ss >> command;
+                ss >> number;
+                if (number.empty()) {
+                    bot.getApi().sendMessage(message->chat->id,
+                                             "Enter order id.");
+                    state[message->chat->id].waitDishId = true;
+                } else {
+                    if (!restbes::check_dish_exists(number)) {
+                        bot.getApi().sendMessage(message->chat->id,
+                                                 "No dish with such id.");
+                        state[message->chat->id].waitDishId = true;
+                    } else {
+                        state[message->chat->id].dishId = std::stoi(number);
+                        bot.getApi().sendMessage(
+                            message->chat->id,
+                            "Choose new status for " +
+                                restbes::Admin::getDishName(number) +
+                                " (id: " + number + ", current status: \"" +
+                                restbes::Admin::getDishStatus(number) +
+                                "\").\n",
+                            false, 0, keyboardDishStatus);
+                        state[message->chat->id].waitDishStatus = true;
+                        state[message->chat->id].waitDishId = false;
+                    }
+                }
             } else {
                 bot.getApi().sendMessage(message->chat->id,
                                          "Access denied. Enter password.");
@@ -171,9 +229,32 @@ int main() {
     bot.getEvents().onCommand(
         "set_dish_price", [&](const Message::Ptr &message) {
             if (state[message->chat->id].logged) {
-                bot.getApi().sendMessage(message->chat->id, "Enter dish id.");
-                state[message->chat->id].waitDishId = true;
-                state[message->chat->id].toChangeDishPrice = true;
+                std::stringstream ss(message->text);
+                std::string command, number;
+                ss >> command;
+                ss >> number;
+                if (number.empty()) {
+                    bot.getApi().sendMessage(message->chat->id,
+                                             "Enter dish id.");
+                    state[message->chat->id].waitDishId = true;
+                    state[message->chat->id].toChangeDishPrice = true;
+                } else {
+                    if (!restbes::check_dish_exists(number)) {
+                        bot.getApi().sendMessage(message->chat->id,
+                                                 "No dish with such id.");
+                        state[message->chat->id].waitDishId = true;
+                    } else {
+                        state[message->chat->id].dishId = std::stoi(number);
+                        bot.getApi().sendMessage(
+                            message->chat->id,
+                            "Enter new price for " +
+                                restbes::Admin::getDishName(number) +
+                                " (id: " + number + ", current price: " +
+                                restbes::Admin::getPrice(number) + ").");
+                        state[message->chat->id].waitDishPrice = true;
+                        state[message->chat->id].waitDishId = false;
+                    }
+                }
             } else {
                 bot.getApi().sendMessage(message->chat->id,
                                          "Access denied. Enter password.");
@@ -322,6 +403,4 @@ int main() {
             printf("error: %s\n", e.what());
         }
     }
-
-    return 0;
 }
