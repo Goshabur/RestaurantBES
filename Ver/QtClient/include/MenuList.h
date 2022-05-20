@@ -1,13 +1,12 @@
 #pragma once
 
 #include <QObject>
-#include <QModelIndex>
+
+#include "fwd.h"
+#include "MenuItem.h"
 
 #include <set>
 #include <memory>
-
-#include "fwd.h"
-#include "MenuData.h"
 
 namespace restbes {
 

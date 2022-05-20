@@ -1,7 +1,5 @@
 #include "CartList.h"
-#include "CartModel.h"
-#include "MenuList.h"
-#include <QDebug>
+#include "MenuModel.h"
 
 namespace restbes {
 
@@ -30,8 +28,8 @@ void CartList::clearCart() {
     emit beginChangeLayout();
     items.wlock()->clear();
     indexes.wlock()->clear();
-    auto *p = qobject_cast<CartModel *>(parent());
-    if (p) p->updatePersistentIndexList({});
+    auto *p = qobject_cast<MenuModel *>(parent());
+    if (p && p->getDisplayMode() == MenuModel::ShowCart) p->updatePersistentIndexList({});
     emit endChangeLayout();
 }
 
@@ -41,12 +39,10 @@ bool CartList::setItemCount(int id, int value) {
         auto item_count = items.rlock()->at(index).count;
         if (item_count == value) return false;
         if (value > 0) {
-            qDebug() << "Changing count of item --> id:" << id << " index:" << index;
             items.wlock()->at(index).count = value;
             goto SUCCESS;
         } else if (value == 0) {
             emit beginRemoveItem(index);
-            qDebug() << "Removing item --> id:" << id << " index:" << index;
             auto it = std::next(items.rlock()->begin(), index);
             items.wlock()->erase(it);
             updateIndexes();
@@ -55,7 +51,6 @@ bool CartList::setItemCount(int id, int value) {
         }
     } else if (value > 0) {
         emit beginInsertItem(size());
-        qDebug() << "Inserting item --> id:" << id << " index:" << size();
         indexes.wlock()->insert({id, size()});
         items.wlock()->push_back({id, value});
         emit endInsertItem();
@@ -64,12 +59,6 @@ bool CartList::setItemCount(int id, int value) {
     return false;
 
     SUCCESS:
-    qDebug() << "SUCCESS";
-    auto lockedItems = items.rlock();
-    int index = 0;
-    for (auto ind : *lockedItems) {
-        qDebug() << "index: " << index++ << " id:" << ind.item_id << " count:" << ind.count;
-    }
     emit itemCountChanged(id);
     return true;
 }
@@ -80,6 +69,7 @@ int CartList::getItemCount(int id) const {
 }
 
 int CartList::getIndex(int id) const {
+    if (indexes.rlock()->count(id) == 0) return -1;
     return indexes.rlock()->at(id);
 }
 

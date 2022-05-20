@@ -25,9 +25,7 @@ add_executable(QtClient
         include/CartList.h
         src/CartList.cpp
 
-        include/CartModel.h
-        src/CartModel.cpp
-
+        include/MenuItem.h
         include/MenuData.h
         src/MenuData.cpp)
 

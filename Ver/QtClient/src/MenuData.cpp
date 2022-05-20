@@ -13,6 +13,10 @@ MenuItem MenuData::getItem(int id) const {
     return data.at(id);
 }
 
+int MenuData::size() const {
+    return data.size();
+}
+
 bool MenuData::setItem(int id, const MenuItem &newItem) {
     if (data.count(id) == 0) return false;
 

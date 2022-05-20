@@ -9,17 +9,14 @@
 #include "MenuModel.h"
 #include "MenuData.h"
 #include "CartList.h"
-#include "CartModel.h"
 
 using namespace std::chrono_literals;
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    qmlRegisterType<restbes::CartModel>("Ver", 1, 0, "CartModel");
     qmlRegisterType<restbes::CartList>("Ver", 1, 0, "CartList");
     qmlRegisterType<restbes::MenuModel>("Ver", 1, 0, "MenuModel");
     qmlRegisterType<restbes::MenuList>("Ver", 1, 0, "MenuList");
-
 
     restbes::MenuItem item[2] =
             {{1,

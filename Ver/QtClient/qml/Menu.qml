@@ -24,6 +24,7 @@ Rectangle {
         boundsBehavior: Flickable.StopAtBounds
         clip: true
         model: MenuModel {
+            id: menuModel
             menuList: menu
             cartList: theCart
         }
@@ -108,7 +109,7 @@ Rectangle {
 	                    MouseArea {
 	                        anchors.fill: parent
 	                        onClicked: {
-	                            count = count - 1
+	                            menuModel.decreaseItemCount(id)
 	                        }
 	                    }
 	                }
@@ -136,7 +137,7 @@ Rectangle {
 	                    MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                count = count + 1
+                                menuModel.increaseItemCount(id)
                             }
                         }
 	                }

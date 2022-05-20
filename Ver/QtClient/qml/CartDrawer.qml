@@ -33,9 +33,11 @@ Drawer {
 					spacing: 20
 					boundsBehavior: Flickable.StopAtBounds
 					clip: true
-					model: CartModel {
+					model: MenuModel {
+						id: cartModel
 						menuList: menu
 						cartList: theCart
+						displayMode: MenuModel.ShowCart
 					}
 
 					delegate: Item {
@@ -112,7 +114,7 @@ Drawer {
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        count = count + 1
+                                        cartModel.increaseItemCount(id)
                                     }
                                 }
                             }
@@ -151,7 +153,7 @@ Drawer {
                                 MouseArea {
                                     anchors.fill: parent
                                     onClicked: {
-                                        count = count - 1
+                                        cartModel.decreaseItemCount(id)
                                     }
                                 }
                             }

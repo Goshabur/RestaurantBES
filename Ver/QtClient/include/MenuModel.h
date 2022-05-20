@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+
 #include "fwd.h"
 
 namespace restbes {
@@ -9,6 +10,7 @@ class MenuModel : public QAbstractListModel {
 Q_OBJECT
     Q_PROPERTY(restbes::MenuList *menuList READ getMenuList WRITE setMenuList NOTIFY menuListChanged);
     Q_PROPERTY(restbes::CartList *cartList READ getCartList WRITE setCartList NOTIFY cartListChanged);
+    Q_PROPERTY(int displayMode READ getDisplayMode WRITE setDisplayMode);
 public:
     explicit MenuModel(QObject *parent = nullptr);
 
@@ -22,17 +24,16 @@ public:
         CountRole
     };
 
-    // Basic functionality:
+    enum MenuDisplayMode {
+        ShowCart,
+        ShowMenu
+    };
+    Q_ENUM(MenuDisplayMode);
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant
     data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
-    // Editable:
-    bool setData(const QModelIndex &index, const QVariant &value,
-                 int role = Qt::EditRole) override;
-
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     virtual QHash<int, QByteArray> roleNames() const override;
 
@@ -40,11 +41,21 @@ public:
 
     [[nodiscard]] CartList *getCartList() const;
 
+    [[nodiscard]] int getDisplayMode() const;
+
     void setMenuList(MenuList *mList);
 
     void setCartList(CartList *cList);
 
+    void setDisplayMode(int mode);
+
     void updatePersistentIndexList(const QModelIndexList &newList);
+
+    Q_INVOKABLE void setItemCount(int id, int value);
+
+    Q_INVOKABLE void increaseItemCount(int id);
+
+    Q_INVOKABLE void decreaseItemCount(int id);
 
 signals:
     void menuListChanged();
@@ -54,8 +65,9 @@ signals:
     void menuChanged();
 
 private:
-    MenuList *menuList;
-    CartList *cartList;
+    MenuList *menuList = nullptr;
+    CartList *cartList = nullptr;
+    int displayMode = ShowMenu;
 };
 
 }

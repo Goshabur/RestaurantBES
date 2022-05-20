@@ -1,7 +1,8 @@
 #include "MenuList.h"
-#include "MenuModel.h"
 #include "MenuData.h"
-#include "CartList.h"
+#include "MenuItem.h"
+#include "MenuModel.h"
+
 #include <QAbstractItemModel>
 
 namespace restbes {
@@ -28,7 +29,7 @@ std::shared_ptr<MenuData> MenuList::getMenuData() const {
 }
 
 int MenuList::size() const {
-    return menuData->data.size();
+    return menuData->size();
 }
 
 // O(n)!
@@ -57,6 +58,7 @@ MenuItem MenuList::getItem(int id) {
     return menuData->getItem(id);
 }
 
+// TODO: Integrate with displayMode==ShowCart
 void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
     emit beginChangeLayout();
     items.clear();
@@ -64,10 +66,10 @@ void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
     for (const auto &it: menuData->data) {
         items.insert(it.first);
     }
-    QModelIndexList newIndexList;
-    newIndexList.reserve(size());
-    if (parent()) {
-        auto *parentModel = qobject_cast<MenuModel *>(parent());
+    auto *parentModel = qobject_cast<MenuModel *>(parent());
+    if (parentModel && parentModel->getDisplayMode() == MenuModel::ShowMenu) {
+        QModelIndexList newIndexList;
+        newIndexList.reserve(size());
         int index = 0;
         for (auto elm = items.begin(); elm != items.end(); ++elm, ++index) {
             newIndexList.push_back(parentModel->index(index, 0));
