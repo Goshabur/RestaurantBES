@@ -1,7 +1,5 @@
 #include "MenuList.h"
-#include "MenuData.h"
 #include "MenuItem.h"
-#include "MenuModel.h"
 
 #include <QAbstractItemModel>
 
@@ -24,6 +22,14 @@ int MenuList::getIndex(int id) const {
     return index;
 }
 
+std::set<int>::const_iterator MenuList::begin() const {
+    return items.begin();
+}
+
+std::set<int>::const_iterator MenuList::end() const {
+    return items.end();
+}
+
 std::shared_ptr<MenuData> MenuList::getMenuData() const {
     return menuData;
 }
@@ -38,24 +44,24 @@ bool MenuList::setItemAt(int index, const MenuItem &item) {
         return false;
 
     int id = getId(index);
-    MenuItem oldItem = menuData->getItem(id);
-    if (item.id != id || item == oldItem) return false;
+    if (menuData->count(id) == 0 || menuData->at(id) == item)
+        return false;
 
-    if (menuData->setItem(id, item)) {
-        emit itemChanged(id);
-        return true;
-    } else return false;
+    menuData->at(id) = item;
+    emit itemChanged(id);
+    return true;
 }
 
 // O(n)!
-MenuItem MenuList::getItemAt(int index) {
+MenuItem MenuList::getItemAt(int index) const {
     if (index < 0 || index >= items.size())
         throw std::runtime_error("MenuList::getItemAt: index out of range");
-    return menuData->getItem(getId(index));
+    int id = getId(index);
+    return getItem(id);
 }
 
-MenuItem MenuList::getItem(int id) {
-    return menuData->getItem(id);
+MenuItem MenuList::getItem(int id) const {
+    return (menuData->count(id)) ? menuData->at(id) : MenuItem{};
 }
 
 // TODO: Integrate with displayMode==ShowCart
@@ -63,25 +69,15 @@ void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
     emit beginChangeLayout();
     items.clear();
     menuData = std::move(newData);
-    for (const auto &it: menuData->data) {
+    for (const auto &it: *menuData) {
         items.insert(it.first);
-    }
-    auto *parentModel = qobject_cast<MenuModel *>(parent());
-    if (parentModel && parentModel->getDisplayMode() == MenuModel::ShowMenu) {
-        QModelIndexList newIndexList;
-        newIndexList.reserve(size());
-        int index = 0;
-        for (auto elm = items.begin(); elm != items.end(); ++elm, ++index) {
-            newIndexList.push_back(parentModel->index(index, 0));
-        }
-        parentModel->updatePersistentIndexList(newIndexList);
     }
     emit endChangeLayout();
 }
 
 // O(n)!
 void MenuList::insertItem(MenuItem item) {
-    if (menuData->data.count(item.id) > 0)
+    if (menuData->count(item.id) > 0)
         throw std::runtime_error(
                 "MenuList::insertItem: item with this id already exists");
     int index = 0;
@@ -90,14 +86,14 @@ void MenuList::insertItem(MenuItem item) {
     }
 
     emit beginInsertItem(index);
-    menuData->insertItem(item);
+    menuData->insert({item.id, item});
     items.insert(item.id);
     emit endInsertItem();
 }
 
 // O(n)!
 void MenuList::removeItem(int id) {
-    if (menuData->data.count(id) == 0)
+    if (menuData->count(id) == 0)
         return;
     int index = 0;
     auto i = items.begin();
@@ -106,7 +102,7 @@ void MenuList::removeItem(int id) {
     }
 
     emit beginInsertItem(index);
-    menuData->removeItem(id);
+    menuData->erase(id);
     items.erase(i);
     emit endInsertItem();
 }
@@ -114,9 +110,9 @@ void MenuList::removeItem(int id) {
 void MenuList::removeUnavailableItems() {
     int index = 0;
     for (auto i = items.begin(); i != items.end(); ++index) {
-        if (menuData->getItem(*i).status == 0) {
+        if (getItem(*i).status == 0) {
             emit beginRemoveItem(index);
-            menuData->removeItem(*i);
+            removeItem(*i);
             i = items.erase(i);
             emit endRemoveItem();
         } else {

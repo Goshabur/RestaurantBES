@@ -24,3 +24,8 @@ void errorHandler(int code,
 void handleInactiveSessions(std::shared_ptr<Server> server);
 
 void cleanUpUserSessions(std::shared_ptr<Server> server);
+
+void getMenuHandler(std::shared_ptr<restbed::Session> session,
+                    std::shared_ptr<Server> server);
+
+void swapMenus(std::shared_ptr<Server> server);

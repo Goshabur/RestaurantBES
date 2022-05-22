@@ -101,6 +101,8 @@ public:
                   const std::chrono::duration<int64_t, std::ratio<1, 1000>> &interval = std::chrono::milliseconds::zero());
 
     void startServer();
+
+    void pushToAllSessions(std::shared_ptr<restbed::Response> response);
 };
 
 

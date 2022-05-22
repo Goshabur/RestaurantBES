@@ -23,10 +23,11 @@ Rectangle {
         }
         boundsBehavior: Flickable.StopAtBounds
         clip: true
+
         model: MenuModel {
             id: menuModel
-            menuList: menu
-            cartList: theCart
+            menuList: theClient.getMenu()
+            cartList: theClient.getCart()
         }
         cellWidth: parent.width/2 - menuView.anchors.rightMargin
         cellHeight: menuView.cellWidth * 5/4

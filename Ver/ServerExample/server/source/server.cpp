@@ -162,6 +162,13 @@ std::shared_ptr<restbed::Resource> createResource(const std::string &path,
     return resource;
 }
 
+void Server::pushToAllSessions(std::shared_ptr<restbed::Response> response) {
+    auto lockedSessions = getSessions();
+    for (const auto &session: *(lockedSessions)) {
+        session.second->push(response);
+    }
+}
+
 std::shared_ptr<restbed::Settings> createSettingsWithSSL(
         const std::string &SSL_ServerKey,
         const std::string &SSL_Certificate,

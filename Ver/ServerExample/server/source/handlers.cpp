@@ -2,6 +2,9 @@
 #include "user.h"
 #include "session.h"
 
+#include <fstream>
+#include <sstream>
+
 using restbes::Connection;
 using restbes::Session;
 using restbes::Server;
@@ -87,10 +90,7 @@ void postMessengerMethodHandler(std::shared_ptr<restbed::Session> session,
     if (name.empty()) name = "Anon" + std::to_string(session_id);
     auto response = generateResponse(name + ": " + data + '\n', "text/plain",
                                      Connection::KEEP_ALIVE);
-    auto lockedSessions = server->getSessions();
-    for (const auto &other_session: *(lockedSessions)) {
-        other_session.second->push(response);
-    }
+    server->pushToAllSessions(response);
 
     // make const, send JSONs
     auto response2 = generateResponse("PROCESSED, OK\n", "text/plain",
@@ -118,4 +118,30 @@ void cleanUpUserSessions(std::shared_ptr<Server> server) {
     for (const auto &user: *lockedUsers) {
         user.second->eraseInactiveSessions();
     }
+}
+
+folly::Synchronized<std::string> &getMenu() {
+    static folly::Synchronized<std::string> menu;
+    return menu;
+}
+
+void getMenuHandler(std::shared_ptr<restbed::Session> session,
+                    std::shared_ptr<Server> server) {
+    auto response = generateResponse(*getMenu().rlock(), "application/json",
+                                     Connection::CLOSE);
+    session->close(*response);
+}
+
+void swapMenus(std::shared_ptr<Server> server) {
+    static std::string menuFiles[2] = {
+            "/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu.json",
+            "/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu2.json"
+    };
+    static int i = 0;
+    std::fstream fs(menuFiles[i++ & 1]);
+    std::stringstream sstream;
+    sstream << fs.rdbuf();
+    *getMenu().wlock() = sstream.str();
+    auto response = generateResponse(R"({"event":"reload_menu"})", "application/json", Connection::KEEP_ALIVE);
+    server->pushToAllSessions(response);
 }

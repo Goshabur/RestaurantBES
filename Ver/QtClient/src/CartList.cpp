@@ -28,8 +28,7 @@ void CartList::clearCart() {
     emit beginChangeLayout();
     items.wlock()->clear();
     indexes.wlock()->clear();
-    auto *p = qobject_cast<MenuModel *>(parent());
-    if (p && p->getDisplayMode() == MenuModel::ShowCart) p->updatePersistentIndexList({});
+    emit indexesChanged();
     emit endChangeLayout();
 }
 

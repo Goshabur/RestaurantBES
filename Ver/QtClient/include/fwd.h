@@ -1,10 +1,23 @@
 #pragma once
 
+#include <unordered_map>
+
 namespace restbes {
-struct MenuItem;
-struct CartItem;
-class MenuList;
-class MenuModel;
+struct CartItem; // item_id, count
 class CartList;
-class MenuData;
+
+// TODO:
+//  class Order;
+//  class OrderList;
+
+struct MenuItem;
+using MenuData = std::unordered_map<int, MenuItem>;
+class MenuList;
+class MenuModel; // MenuList* + CartList*
+
+// TODO:
+class Client; // CartList*
+
+// TODO:
+//  class jsonParser;
 }

@@ -1,0 +1,24 @@
+{
+  "item": "menu",
+  "timestamp": "2022/01/25 22:35:06",
+  "contents": [
+    {
+      "item": "dish",
+      "id": 1,
+      "name": "Салат \"Цезарь\"",
+      "image": "https://ogorodland.ru/wp-content/uploads/2021/11/salat-cezar-klassicheskii-s-kuricei_1611309080_15_max.jpg",
+      "price": 100,
+      "info": "This is a very long description, and extremely long description, so long that no one will ever read it",
+      "status": 1
+    },
+    {
+      "item": "dish",
+      "id": 2,
+      "name": "Гренки с чесноком",
+      "image": "https://kartinkin.net/uploads/posts/2021-03/1616105233_38-p-grenki-krasivaya-yeda-41.jpg",
+      "price": 200,
+      "info": "This is a very long description, and extremely long description, so long that no one will ever read it",
+      "status": 1
+    }
+  ]
+}

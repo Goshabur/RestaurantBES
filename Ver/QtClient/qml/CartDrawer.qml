@@ -4,10 +4,7 @@ import QtQuick.Layouts 1.1
 import Ver 1.0
 
 Drawer {
-	width: parent.width/3
-	edge: Qt.RightEdge
-
-	Rectangle {
+		Rectangle {
 		id: base
 		anchors.fill: parent
 		color: "lightyellow"
@@ -35,8 +32,8 @@ Drawer {
 					clip: true
 					model: MenuModel {
 						id: cartModel
-						menuList: menu
-						cartList: theCart
+						menuList: theClient.getMenu()
+						cartList: theClient.getCart()
 						displayMode: MenuModel.ShowCart
 					}
 

@@ -50,16 +50,22 @@ int main(int argc, char **argv) {
 
     auto server = std::make_shared<restbes::Server>();
 
-    auto echo = createResource("/echo",
-                               std::nullopt,
-                               postEchoMethodHandler,
-                               errorHandler,
-                               server);
-    auto messenger = createResource("/messenger",
-                                    std::nullopt,
-                                    postMessengerMethodHandler,
-                                    errorHandler,
-                                    server);
+//    auto echo = createResource("/echo",
+//                               std::nullopt,
+//                               postEchoMethodHandler,
+//                               errorHandler,
+//                               server);
+//    auto messenger = createResource("/messenger",
+//                                    std::nullopt,
+//                                    postMessengerMethodHandler,
+//                                    errorHandler,
+//                                    server);
+
+    auto menu = createResource("/menu",
+                                  getMenuHandler,
+                                  std::nullopt,
+                                  errorHandler,
+                                  server);
 
     auto get = createResource("/get",
                               pollingHandler,
@@ -76,11 +82,13 @@ int main(int argc, char **argv) {
                                                    fLI::FLAGS_port,
                                                    fLI::FLAGS_workers);
 
-    server->addResource(echo);
-    server->addResource(messenger);
+//    server->addResource(echo);
+//    server->addResource(messenger);
     server->addResource(get);
+    server->addResource(menu);
     server->schedule(handleInactiveSessions, server, 1s);
     server->schedule(cleanUpUserSessions, server, 2s);
+    server->schedule(swapMenus, server, 3s);
     server->setSettings(settings);
     server->startServer();
 

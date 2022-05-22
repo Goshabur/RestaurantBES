@@ -15,6 +15,8 @@ Rectangle {
     CartDrawer {
         id: cartDrawer
         height: parent.height
+        width: parent.width/3
+        edge: Qt.RightEdge
     }
 
 

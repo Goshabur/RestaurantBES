@@ -5,5 +5,7 @@
         <file alias="MenuPage.qml">../qml/MenuPage.qml</file>
         <file alias="Menu.qml">../qml/Menu.qml</file>
         <file alias="CartDrawer.qml">../qml/CartDrawer.qml</file>
+        <file alias="SignInPopup.qml">../qml/SignInPopup.qml</file>
+        <file alias="RegisterPopup.qml">../qml/RegisterPopup.qml</file>
     </qresource>
 </RCC>

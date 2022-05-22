@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QModelIndexList>
 
 #include <folly/Synchronized.h>
 
@@ -50,9 +51,7 @@ signals:
 
     void itemCountChanged(int id);
 
-    void cartCleared();
-
-public slots:
+    void indexesChanged();
 
 private:
     folly::Synchronized<std::vector<CartItem>> items;

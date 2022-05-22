@@ -5,7 +5,7 @@
 
 #define REFERENCE_CONCAT(x, y) & x :: y
 
-#define CONNECT_SIGNALS(source,sourceClass) \
+#define CONNECT_SIGNALS(source, sourceClass) \
 connect(source, REFERENCE_CONCAT(sourceClass,beginInsertItem), this, [=](int index) { \
     beginInsertRows(QModelIndex(), index, index); \
 }); \
@@ -21,7 +21,8 @@ connect(source, REFERENCE_CONCAT(sourceClass,endRemoveItem), this, [=]() { \
 connect(source, REFERENCE_CONCAT(sourceClass,beginChangeLayout), this, [=]() { \
     layoutAboutToBeChanged(); \
 }); \
-connect(source, REFERENCE_CONCAT(sourceClass,endChangeLayout),this, [=]() { \
+connect(source, REFERENCE_CONCAT(sourceClass,endChangeLayout),this, [=]() {           \
+    updatePersistentIndexList();                                         \
     layoutChanged(); \
 })
 
@@ -137,25 +138,36 @@ void MenuModel::setCartList(CartList *cList) {
 
     if (cartList) {
         if (displayMode == ShowMenu) {
-            connect(cartList, &CartList::itemCountChanged, this,
+            connect(cartList,
+                    &CartList::itemCountChanged,
+                    this,
                     [=](int id) {
                         int ind = menuList->getIndex(id);
                         dataChanged(index(ind, 0), index(ind, 0),
                                     QVector<int>() << CountRole);
                     });
-            connect(cartList, &CartList::endChangeLayout, this,
+            connect(cartList,
+                    &CartList::indexesChanged,
+                    this,
                     [=]() {
                         dataChanged(index(0, 0), index(rowCount() - 1, 0),
                                     QVector<int>() << CountRole);
                     });
+
         } else {
-            connect(cartList, &CartList::itemCountChanged, this,
+            connect(cartList,
+                    &CartList::itemCountChanged,
+                    this,
                     [=](int id) {
                         int ind = cartList->getIndex(id);
                         if (ind == -1) return;
                         dataChanged(index(ind, 0), index(ind, 0),
                                     QVector<int>() << CountRole);
                     });
+            connect(cartList,
+                    &CartList::indexesChanged,
+                    this,
+                    &MenuModel::updatePersistentIndexList);
             CONNECT_SIGNALS(cartList, CartList);
         }
     }
@@ -179,7 +191,15 @@ void MenuModel::decreaseItemCount(int id) {
     cartList->setItemCount(id, cartList->getItemCount(id) - 1);
 }
 
-void MenuModel::updatePersistentIndexList(const QModelIndexList &newList) {
+void MenuModel::updatePersistentIndexList() {
+    QModelIndexList newList{};
+    if (displayMode == ShowMenu) {
+        newList.reserve(menuList->size());
+        int ind = 0;
+        for (auto elm = menuList->begin(); elm != menuList->end(); ++elm, ++ind) {
+            newList.push_back(index(ind, 0));
+        }
+    }
     changePersistentIndexList(persistentIndexList(), newList);
 }
 }

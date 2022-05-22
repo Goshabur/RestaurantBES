@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QModelIndexList>
 
 #include "fwd.h"
 #include "MenuItem.h"
@@ -13,6 +14,7 @@ namespace restbes {
 class MenuList : public QObject {
 Q_OBJECT
 public:
+
     explicit MenuList(QObject *parent = nullptr);
 
     [[nodiscard]] std::shared_ptr<MenuData> getMenuData() const;
@@ -23,11 +25,15 @@ public:
 
     [[nodiscard]] int getIndex(int index) const;
 
+    [[nodiscard]] std::set<int>::const_iterator begin() const;
+
+    [[nodiscard]] std::set<int>::const_iterator end() const;
+
     bool setItemAt(int index, const MenuItem &item);
 
-    MenuItem getItemAt(int index);
+    [[nodiscard]] MenuItem getItemAt(int index) const;
 
-    MenuItem getItem(int id);
+    [[nodiscard]] MenuItem getItem(int id) const;
 
     void setMenu(std::shared_ptr<MenuData> newData);
 
@@ -47,7 +53,6 @@ signals:
     void itemChanged(int id);
 
 public slots:
-
     void insertItem(restbes::MenuItem item);
 
     void removeItem(int id);

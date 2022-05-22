@@ -49,8 +49,6 @@ public:
 
     void setDisplayMode(int mode);
 
-    void updatePersistentIndexList(const QModelIndexList &newList);
-
     Q_INVOKABLE void setItemCount(int id, int value);
 
     Q_INVOKABLE void increaseItemCount(int id);
@@ -63,6 +61,9 @@ signals:
     void cartListChanged();
 
     void menuChanged();
+
+private slots:
+    void updatePersistentIndexList();
 
 private:
     MenuList *menuList = nullptr;

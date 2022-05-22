@@ -1,3 +1,5 @@
+include(FetchContent)
+
 cmake_minimum_required(VERSION 3.20)
 project(RestaurantBES)
 
@@ -9,6 +11,9 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt5 COMPONENTS Widgets Quick Qml REQUIRED)
 
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 include_directories(include)
 
 add_executable(QtClient
@@ -16,6 +21,7 @@ add_executable(QtClient
         src/qml.qrc
         src/images.qrc
 
+        include/MenuItem.h
         include/MenuList.h
         src/MenuList.cpp
 
@@ -25,14 +31,17 @@ add_executable(QtClient
         include/CartList.h
         src/CartList.cpp
 
-        include/MenuItem.h
-        include/MenuData.h
-        src/MenuData.cpp)
+        include/Client.h
+        src/Client.cpp
+
+        src/jsonParser.cpp
+        )
 
 target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
 
 target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
 target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
 
-target_link_libraries(QtClient crypto ssl pthread folly dl fmt)
+target_link_libraries(QtClient crypto ssl pthread folly dl fmt gflags)
 target_link_libraries(QtClient Qt5::Widgets Qt5::Quick Qt5::Qml)
+target_link_libraries(QtClient nlohmann_json::nlohmann_json)
