@@ -178,7 +178,7 @@ int main() {
                     bot.getApi().sendMessage(query->message->chat->id,
                                              "Nothing to change.");
                 } else {
-                    restbes::Admin::change_order_status(
+                    restbes::Admin::change_dish_status(
                         std::to_string(state[query->message->chat->id].dishId),
                         query->data);
                     bot.getApi().sendMessage(query->message->chat->id,
@@ -199,8 +199,9 @@ int main() {
                 ss >> number;
                 if (number.empty()) {
                     bot.getApi().sendMessage(message->chat->id,
-                                             "Enter order id.");
+                                             "Enter dish id.");
                     state[message->chat->id].waitDishId = true;
+                    state[message->chat->id].toChangeDishStatus = true;
                 } else {
                     if (!restbes::check_dish_exists(number)) {
                         bot.getApi().sendMessage(message->chat->id,
