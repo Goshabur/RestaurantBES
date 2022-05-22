@@ -10,6 +10,7 @@ namespace restbes {
 
 namespace {
 enum OrderStatus { CREATED = 0, ACCEPTED, CANCELLED, IN_PROGRESS, COMPLETED };
+enum DishStatus { UNAVAILABLE = 0, AVAILABLE };
 
 [[maybe_unused]] std::vector<std::string> orderStatuses = {
     "CREATED", "ACCEPTED", "CANCELLED", "IN_PROGRESS", "COMPLETED"};
@@ -45,6 +46,18 @@ static std::string connectGet(const std::string &sql) {
     C.disconnect();
 
     return result[0][0].c_str();
+}
+
+static pqxx::result connectGet_pqxx_result(const std::string &sql) {
+    pqxx::connection C(
+        "dbname=testdb user=postgres password=restbes2022 hostaddr=127.0.0.1 "
+        "port=5432");
+
+    pqxx::nontransaction N(C);
+    pqxx::result result(N.exec(sql));
+    C.disconnect();
+
+    return result;
 }
 
 static bool check_admin(const std::string &password) {

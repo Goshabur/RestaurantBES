@@ -18,7 +18,7 @@ CREATE TABLE public."ORDER"
 (
     "ORDER_ID" serial,
     "STATUS" text NOT NULL,
-    "TIME" timestamp without time zone,
+    "TIMESTAMP" timestamp without time zone,
     "ITEMS" jsonb,
     "COMMENT" text,
     "COST" integer
@@ -33,6 +33,11 @@ CREATE TABLE public."DISH"
     "INFO" text,
     "STATUS" text NOT NULL,
     PRIMARY KEY ("IMAGE")
+);
+
+CREATE TABLE public."MENU_HISTORY"
+(
+    "TIMESTAMP" timestamp without time zone
 );
 
 CREATE TABLE public."HISTORY"
@@ -61,6 +66,9 @@ CREATE TABLE public."CART"
 );
 
 ALTER TABLE IF EXISTS public."HISTORY"
+    OWNER to postgres;
+
+ALTER TABLE IF EXISTS public."MENU_HISTORY"
     OWNER to postgres;
 
 ALTER TABLE IF EXISTS public."ADMINISTRATOR"

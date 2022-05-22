@@ -11,18 +11,21 @@ void Admin::change_order_status(const std::string &order_id,
 void Admin::change_dish_status(const std::string &dish_id, const std::string &set_status) {
     connectExec(R"(UPDATE "DISH" set "STATUS" = ')" + set_status +
                 "' where \"DISH_ID\"=" + dish_id);
+    connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = NOW())");
 }
 
 void Admin::change_dish_price(const std::string &dish_id,
                               const std::string &set_price) {
     connectExec(R"(UPDATE "DISH" set "PRICE" = )" + set_price +
                 " where \"DISH_ID\"= '" + dish_id + "'");
+    connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = NOW())");
 }
 
 void Admin::change_dish_info(const std::string &dish_id,
                              const std::string &set_info) {
     connectExec(R"(UPDATE "DISH" set "INFO" = ')" + set_info +
                 "' where \"DISH_ID\"= '" + dish_id + "'");
+    connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = NOW())");
 }
 
 std::string Admin::getPrice(const std::string &dish_id) {

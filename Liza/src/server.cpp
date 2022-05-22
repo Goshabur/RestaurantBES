@@ -25,23 +25,30 @@ namespace restbes {
 
 std::string show_menu() {
     std::string sqlRequest = R"(SELECT * FROM "DISH" WHERE "STATUS" = 1)";
-    pqxx::connection C(
-        "dbname=testdb user=postgres password=restbes2022 hostaddr=127.0.0.1 "
-        "port=5432");
+    pqxx::result result = connectGet_pqxx_result(sqlRequest);
 
-    pqxx::work W(C);
-    pqxx::result result(W.exec(sqlRequest));
-    C.disconnect();
+    dynamic response = dynamic::object;
+    response["query"] = "menu";
+    response["status_code"] = 0;
+    response["body"] = dynamic::object;
+    response["body"]["item"] = "menu";
+    response["body"]["timestamp"] =
+        connectGet(R"(SELECT "TIMESTAMP" FROM "MENU_HISTORY")");
+    response["body"]["contents"] = dynamic::array;
 
-    dynamic menu = dynamic::object;
     for (auto row : result) {
-        if (row[5].as<int>() == 1) {
-            menu[row[1].as<std::string>()] = row[3].as<int>();
-        }
+        dynamic item = dynamic::object;
+        item["item"] = "dish";
+        item["id"] = row[0].as<int>();
+        item["name"] = row[1].as<std::string>();
+        item["image"] = row[2].as<std::string>();
+        item["price"] = row[3].as<int>();
+        item["info"] = row[4].as<std::string>();
+        item["status"] = row[5].as<int>();
+        response["body"]["contents"].push_back(item);
     }
-    auto menuStr = folly::toJson(menu);
 
-    return menuStr;
+    return folly::toJson(response);
 }
 
 std::string show_order_status(id_t order_id) {
@@ -110,8 +117,14 @@ void postAuthorizationMethodHandler(
     std::string user_cart = values.at("cart");
 
     std::shared_ptr<restbed::Response> response;
+    dynamic responseJson = dynamic::object;
+    responseJson["status_code"] = 0;
+    responseJson["body"] = dynamic::object;
+    responseJson["body"]["item"] = "user";
 
     if (command == "sign_in") {
+        responseJson["query"] = "sign_in";
+
         if (check_sign_in(user_email, password)) {
             user_name = restbes::connectGet(
                 R"(SELECT "NAME" FROM "CLIENT" WHERE "EMAIL" = ')" +
@@ -123,26 +136,67 @@ void postAuthorizationMethodHandler(
                 user_email + R"(' AND "PASSWORD" = crypt(')" + password + R"(',
                     "PASSWORD"))");
 
-            dynamic responseJson =
-                dynamic::object(true, dynamic::array(user_id, user_name));
+            responseJson["body"]["user_id"] = std::stoi(user_id);
+            responseJson["body"]["name"] = user_name;
+            responseJson["body"]["email"] = user_email;
+            responseJson["body"]["orders"] = dynamic::array;
+
+            std::string sqlRequest =
+                R"(SELECT * FROM "HISTORY" WHERE "CLIENT_ID" = )" + user_id;
+            pqxx::result result = connectGet_pqxx_result(sqlRequest);
+
+            for (auto row : result) {
+                dynamic item = dynamic::object;
+                item["id"] = row[1].as<int>();
+                item["status"] = std::stoi(connectGet(
+                    R"(SELECT "STATUS" FROM "ORDER" WHERE "ORDER_ID" = )" +
+                    item["id"].asString()));
+                item["timestamp"] = connectGet(
+                    R"(SELECT "TIMESTAMP" FROM "ORDER" WHERE "ORDER_ID" = )" +
+                    item["id"].asString());
+                responseJson["body"]["orders"].push_back(item);
+            }
+
             response = generateResponse(folly::toJson(responseJson) + '\n',
                                         "text/plain", Connection::KEEP_ALIVE);
         } else {
-            dynamic responseJson = dynamic::object(false, dynamic::array(""));
+            // TODO: form an error
             response = generateResponse(folly::toJson(responseJson) + '\n',
                                         "text/plain", Connection::KEEP_ALIVE);
         }
 
     } else if (command == "sign_up") {
+        responseJson["query"] = "sign_up";
+
         if (restbes::check_user_exists(user_email)) {
-            dynamic responseJson = dynamic::object(false, dynamic::array(""));
+            // TODO: form an error
             response = generateResponse(folly::toJson(responseJson) + '\n',
                                         "text/plain", Connection::KEEP_ALIVE);
         } else {
             Client client(user_name, user_email, password, user_cart);
 
-            dynamic responseJson =
-                dynamic::object(true, dynamic::array(client.get_client_id()));
+            responseJson["body"]["user_id"] = std::stoi(client.get_client_id());
+            responseJson["body"]["name"] = user_name;
+            responseJson["body"]["email"] = user_email;
+            responseJson["body"]["orders"] = dynamic::array;
+
+            std::string sqlRequest =
+                R"(SELECT * FROM "HISTORY" WHERE "CLIENT_ID" = )" +
+                client.get_client_id();
+            pqxx::result result = connectGet_pqxx_result(sqlRequest);
+
+            for (auto row : result) {
+                dynamic item = dynamic::object;
+                item["id"] = row[1].as<int>();
+                item["status"] = std::stoi(connectGet(
+                    R"(SELECT "STATUS" FROM "ORDER" WHERE "ORDER_ID" = )" +
+                    item["id"].asString()));
+                item["timestamp"] = connectGet(
+                    R"(SELECT "TIMESTAMP" FROM "ORDER" WHERE "ORDER_ID" = )" +
+                    item["id"].asString());
+                responseJson["body"]["orders"].push_back(item);
+            }
+
             response = generateResponse(folly::toJson(responseJson) + '\n',
                                         "text/plain", Connection::KEEP_ALIVE);
         }
@@ -176,6 +230,10 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
     Client client(user_id);
 
     std::shared_ptr<restbed::Response> response;
+    dynamic responseJson = dynamic::object;
+    responseJson["status_code"] = 0;
+    responseJson["body"] = dynamic::object;
+    responseJson["body"]["item"] = "cart";
 
     if (command == "add_to_cart") {
         client.add_to_cart(product_id);
@@ -187,7 +245,23 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
         client.empty_cart();
 
     } else if (command == "show_cart") {
-        response = generateResponse(restbes::Cart::get_cart(user_id) + '\n',
+        responseJson["body"]["query"] = "show_cart";
+        responseJson["body"]["contents"] = dynamic::array;
+
+        std::string sqlRequest =
+            R"(SELECT "CART" FROM "CART" WHERE "CLIENT_ID" = )" +
+            client.get_client_id();
+        std::string result = connectGet(sqlRequest);
+
+        json cart(result);
+        for (auto &el : cart.items()) {
+            dynamic item = dynamic::object;
+            item["id"] = el.key();
+            item["quantity"] = el.value();
+            responseJson["body"]["orders"].push_back(item);
+        }
+
+        response = generateResponse(folly::toJson(responseJson) + '\n',
                                     "text/plain", Connection::KEEP_ALIVE);
     }
 
