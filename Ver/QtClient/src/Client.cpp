@@ -150,32 +150,19 @@ void Client::startPolling() {
                     "event").get<std::string>();
             PollingEvent event = eventMap.at(stringEvent);
             switch (event) {
-                case ItemCountChanged: {
+                case CartChanged: {
                     break;
                 }
-                case OrderStatusChanged: {
+                case OrderChanged: {
                     break;
                 }
                 case NewOrder: {
                     break;
                 }
-                case AddMenuItem: {
-                    break;
-                }
-                case RemoveMenuItem: {
-                    break;
-                }
-                case ChangeMenuItem: {
-                    break;
-                }
-                case ReloadMenu: {
+                case MenuChanged: {
                     getMenuFromServer();
                     break;
                 }
-//                case ExampleEvent: {
-//                    emit exampleEvent();
-//                    break;
-//                }
                 default:
                     break;
             }

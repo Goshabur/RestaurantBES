@@ -2,7 +2,8 @@
 
 #include <QAbstractListModel>
 
-#include "fwd.h"
+#include "MenuList.h"
+#include "CartList.h"
 
 namespace restbes {
 

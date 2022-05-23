@@ -122,6 +122,22 @@ void MenuModel::setMenuList(MenuList *mList) {
                         };
                         dataChanged(ind, ind, roles);
                     });
+            connect(menuList,
+                    &MenuList::endChangeLayout,
+                    this,
+                    [=]() {
+                        QVector<int> roles{
+                                IdRole,
+                                NameRole,
+                                ImageRole,
+                                PriceRole,
+                                InfoRole,
+                                StatusRole
+                        };
+                        dataChanged(index(0, 0),
+                                    index(rowCount() - 1, 0),
+                                    roles);
+                    });
         }
     }
 
@@ -196,8 +212,8 @@ void MenuModel::updatePersistentIndexList() {
     if (displayMode == ShowMenu) {
         newList.reserve(menuList->size());
         int ind = 0;
-        for (auto elm = menuList->begin(); elm != menuList->end(); ++elm, ++ind) {
-            newList.push_back(index(ind, 0));
+        while (ind < menuList->size()) {
+            newList.push_back(index(ind++, 0));
         }
     }
     changePersistentIndexList(persistentIndexList(), newList);

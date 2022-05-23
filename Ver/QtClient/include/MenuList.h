@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QModelIndexList>
 
-#include "fwd.h"
 #include "MenuItem.h"
 
 #include <set>
@@ -11,10 +10,11 @@
 
 namespace restbes {
 
+using MenuData = std::unordered_map<int, MenuItem>;
+
 class MenuList : public QObject {
 Q_OBJECT
 public:
-
     explicit MenuList(QObject *parent = nullptr);
 
     [[nodiscard]] std::shared_ptr<MenuData> getMenuData() const;

@@ -7,8 +7,9 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 
-#include "fwd.h"
+#include "MenuList.h"
 #include "CartList.h"
+#include "OrderList.h"
 
 #include <memory>
 
@@ -66,8 +67,6 @@ signals:
 
     void sessionIdChanged();
 
-//    void exampleEvent();
-
 public slots:
 
 private:
@@ -80,33 +79,27 @@ private:
     int port;
     folly::Synchronized<httplib::Headers> headers;
     std::shared_ptr<CartList> cartList = std::make_shared<CartList>();
-
-    // remove after replacing all MenuList* with shared_ptrs in Qt
     std::shared_ptr<MenuList> menuList = nullptr;
+    std::shared_ptr<OrderList> orderList = nullptr;
 
     std::shared_ptr<httplib::Client> postingClient;
     std::shared_ptr<httplib::Client> pollingClient;
     std::shared_ptr<std::thread> pollingThread;
 
     enum PollingEvent {
-        ItemCountChanged,
-        OrderStatusChanged,
+        CartChanged,
+        OrderChanged,
         NewOrder,
-        AddMenuItem,
-        RemoveMenuItem,
-        ChangeMenuItem,
-        ReloadMenu,
+        MenuChanged,
+        NewSignIn
     };
 
     static inline std::unordered_map<std::string, PollingEvent> eventMap{
-            {"item_count_changed", ItemCountChanged},
-            {"order_status_changed", OrderStatusChanged},
+            {"cart_changed", CartChanged},
+            {"order_changed", OrderChanged},
             {"new_order", NewOrder},
-            {"add_menu_item", AddMenuItem},
-            {"remove_menu_item", RemoveMenuItem},
-            {"change_menu_item", ChangeMenuItem},
-            {"reload_menu", ReloadMenu},
-//            {"example_event", ExampleEvent}
+            {"menu_changed", MenuChanged},
+            {"new_sign_in", NewSignIn}
     };
 
     void setRegStatus(bool newStatus);

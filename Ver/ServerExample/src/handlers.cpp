@@ -142,6 +142,6 @@ void swapMenus(std::shared_ptr<Server> server) {
     std::stringstream sstream;
     sstream << fs.rdbuf();
     *getMenu().wlock() = sstream.str();
-    auto response = generateResponse(R"({"event":"reload_menu"})", "application/json", Connection::KEEP_ALIVE);
+    auto response = generateResponse(R"({"event":"menu_changed"})", "application/json", Connection::KEEP_ALIVE);
     server->pushToAllSessions(response);
 }

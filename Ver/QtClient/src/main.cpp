@@ -4,14 +4,14 @@
 #include <QQmlContext>
 
 #include <thread>
-#include <fstream>
 
 #include <gflags/gflags.h>
 
+#include "CartList.h"
 #include "MenuList.h"
 #include "MenuModel.h"
-#include "CartList.h"
-#include "jsonParser.h"
+#include "OrderList.h"
+#include "OrderModel.h"
 #include "Client.h"
 
 using namespace std::chrono_literals;
@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<restbes::CartList>("Ver", 1, 0, "CartList");
     qmlRegisterType<restbes::MenuModel>("Ver", 1, 0, "MenuModel");
     qmlRegisterType<restbes::MenuList>("Ver", 1, 0, "MenuList");
+    qmlRegisterType<restbes::OrderModel>("Ver", 1, 0, "OrderModel");
+    qmlRegisterType<restbes::OrderList>("Ver", 1, 0, "OrderList");
 
     auto client = std::make_shared<restbes::Client>(fLS::FLAGS_server,
                                                     fLI::FLAGS_port);

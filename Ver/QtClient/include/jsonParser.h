@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fwd.h"
+#include "MenuList.h"
 #include <memory>
 #include <string>
 #include <QString>

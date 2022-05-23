@@ -3,14 +3,14 @@ project(RestaurantBES)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(./server/include)
+include_directories(include)
 
 add_executable(Server
-        server/source/user.cpp
-        server/source/server.cpp
-        server/source/server_main.cpp
-        server/source/handlers.cpp
-        server/source/session.cpp)
+        src/user.cpp
+        src/server.cpp
+        src/server_main.cpp
+        src/handlers.cpp
+        src/session.cpp)
 target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
 
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
