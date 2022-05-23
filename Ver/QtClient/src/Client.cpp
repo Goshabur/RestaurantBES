@@ -172,10 +172,10 @@ void Client::startPolling() {
                     getMenuFromServer();
                     break;
                 }
-                case ExampleEvent: {
-                    emit exampleEvent();
-                    break;
-                }
+//                case ExampleEvent: {
+//                    emit exampleEvent();
+//                    break;
+//                }
                 default:
                     break;
             }

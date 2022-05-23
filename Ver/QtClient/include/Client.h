@@ -66,7 +66,7 @@ signals:
 
     void sessionIdChanged();
 
-    void exampleEvent();
+//    void exampleEvent();
 
 public slots:
 
@@ -96,7 +96,6 @@ private:
         RemoveMenuItem,
         ChangeMenuItem,
         ReloadMenu,
-        ExampleEvent
     };
 
     static inline std::unordered_map<std::string, PollingEvent> eventMap{
@@ -107,7 +106,7 @@ private:
             {"remove_menu_item", RemoveMenuItem},
             {"change_menu_item", ChangeMenuItem},
             {"reload_menu", ReloadMenu},
-            {"example_event", ExampleEvent}
+//            {"example_event", ExampleEvent}
     };
 
     void setRegStatus(bool newStatus);
