@@ -1,11 +1,16 @@
 # Формат ответов
 
+- [get_menu](#Запрос-меню)
+- [sign_in/sign_up/get_user](#Регистрация/авторизация/запрос-пользователя)
+- [get_cart](#Запрос-корзины)
+- [get_order](#Запрос-заказа)
+
 ## Запрос меню
 
 `timestamp` - дата последнего обновления меню
 ```json
 {
-  "query": "menu",
+  "query": "get_menu",
   "status_code": 0,
   "body": {
     "item": "menu",
@@ -26,14 +31,14 @@
 }
 ```
 
-## Регистрация/авторизация пользователя
+## Регистрация/авторизация/запрос пользователя
 
-Аналогичный ответ для `sign_in`
+Аналогичный ответ для `sign_in` и `sign_up`
 
 `timestamp` - дата заказа
 ```json
 {
-  "query": "sign_up",
+  "query": "get_user",
   "status_code": 0,
   "body": {
     "item": "user",
@@ -55,7 +60,7 @@
 ## Запрос корзины
 ```json
 {
-  "query": "show_cart",
+  "query": "get_cart",
   "status_code": 0,
   "body": {
     "item": "cart",
@@ -70,11 +75,11 @@
 }
 ```
 
-## Заказ
-Аналогично хочется обрабатывать запросы `get_order`
+## Запрос заказа
+
 ```json
 {
-  "query": "create_order",
+  "query": "get_order",
   "status_code": 0,
   "body": {
     "item": "order",
