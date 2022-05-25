@@ -62,10 +62,16 @@ int main(int argc, char **argv) {
 //                                    server);
 
     auto menu = createResource("/menu",
-                                  getMenuHandler,
-                                  std::nullopt,
-                                  errorHandler,
-                                  server);
+                               getMenuHandler,
+                               std::nullopt,
+                               errorHandler,
+                               server);
+
+    auto user = createResource("/user",
+                               std::nullopt,
+                               postUserHandler,
+                               errorHandler,
+                               server);
 
     auto get = createResource("/get",
                               pollingHandler,
@@ -76,6 +82,7 @@ int main(int argc, char **argv) {
     std::string pathToSSL[] = {fLS::FLAGS_SSLkeys + "/server.key",
                                fLS::FLAGS_SSLkeys + "/server.crt",
                                fLS::FLAGS_SSLkeys + "/dh2048.pem"};
+
     auto settings = restbes::createSettingsWithSSL(pathToSSL[0],
                                                    pathToSSL[1],
                                                    pathToSSL[2],
@@ -84,11 +91,12 @@ int main(int argc, char **argv) {
 
 //    server->addResource(echo);
 //    server->addResource(messenger);
+    server->addResource(user);
     server->addResource(get);
     server->addResource(menu);
     server->schedule(handleInactiveSessions, server, 1s);
     server->schedule(cleanUpUserSessions, server, 2s);
-    server->schedule(swapMenus, server, 3s);
+//    server->schedule(swapMenus, server, 3s);
     server->setSettings(settings);
     server->startServer();
 

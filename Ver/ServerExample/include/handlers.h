@@ -29,3 +29,7 @@ void getMenuHandler(std::shared_ptr<restbed::Session> session,
                     std::shared_ptr<Server> server);
 
 void swapMenus(std::shared_ptr<Server> server);
+
+void postUserHandler(std::shared_ptr<restbed::Session> session,
+                     const std::string &data,
+                     std::shared_ptr<Server> server);

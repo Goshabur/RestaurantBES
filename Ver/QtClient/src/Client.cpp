@@ -94,19 +94,22 @@ void Client::setSessionId(int newId) {
 bool Client::registerUser(const QString &regEmail,
                           const QString &regPassword,
                           const QString &regName) {
-    auto response = postingClient->Post("/restbes",
+    std::string jsonReq = JsonParser::generateRegistrationQuery(
+            regEmail,
+            regPassword,
+            regName);
+//    nlohmann::json js = nlohmann::json::parse(jsonReq);
+//    js["command"] = "lol";
+    auto response = postingClient->Post("/user",
                                         *headers.rlock(),
-                                        JsonParser::generateRegistrationQuery(
-                                                regEmail,
-                                                regPassword,
-                                                regName),
+                                        jsonReq,
                                         "application/json");
     if (!response) return false;
     return parseUserFromJson(response->body);
 }
 
 bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
-    auto response = postingClient->Post("/restbes",
+    auto response = postingClient->Post("/user",
                                         *headers.rlock(),
                                         JsonParser::generateSignInQuery(
                                                 regEmail,

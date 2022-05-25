@@ -47,24 +47,6 @@ Drawer {
 						Rectangle {
 							anchors.fill: parent
 							color: "white"
-							/*
-							Rectangle {
-								id: picture
-	                            height: frame.height - 20
-	                            width: frame.height - 20
-	                            anchors {
-	                                margins: 20
-	                                left: parent.left
-	                                verticalCenter: parent.verticalCenter
-	                            }
-	                            clip: true
-	                            Image {
-	                                sourceSize.height: parent.height
-	                                anchors.centerIn: parent
-	                                source: image
-	                            }
-	                        }
-	                        */
                             Label {
                                 id: title
                                 wrapMode: Text.WordWrap

@@ -4,6 +4,9 @@ import QtQuick.Window 2.12
 import QtQuick.Layouts 1.1
 
 Rectangle {
+	property alias navigDrawer: navigDrawer
+	signal clickLogo
+
     height: parent.height * 15/100
     anchors {
         top: parent.top
@@ -17,6 +20,13 @@ Rectangle {
         height: parent.height
         width: parent.width/3
         edge: Qt.RightEdge
+    }
+
+    NavigationDrawer {
+        id: navigDrawer
+        height: parent.height
+        width: parent.width/3
+        edge: Qt.LeftEdge
     }
 
 
@@ -41,6 +51,12 @@ Rectangle {
             width: height
             radius: width
             color: "#F5F5DC"
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    navigDrawer.open()
+                }
+            }
         }
         Label {
             anchors {
@@ -69,6 +85,10 @@ Rectangle {
             horizontalAlignment: Text.AlignHCenter
             font.pointSize: 1 + 2*parent.height/7
             font.bold: true
+            MouseArea {
+                anchors.fill: parent
+                onClicked: clickLogo()
+            }
         }
     }
 

@@ -2,6 +2,8 @@
 #include "user.h"
 #include "session.h"
 
+#include "json.hpp"
+
 #include <fstream>
 #include <sstream>
 
@@ -101,7 +103,10 @@ void postMessengerMethodHandler(std::shared_ptr<restbed::Session> session,
 void errorHandler(const int code,
                   const std::exception &exception,
                   std::shared_ptr<restbed::Session> session,
-                  std::shared_ptr<Server> server) {}
+                  std::shared_ptr<Server> server) {
+    auto response = generateResponse("ERROR", "text/plain", Connection::CLOSE);
+    session->close(*response);
+}
 
 void handleInactiveSessions(std::shared_ptr<Server> server) {
     auto lockedSessions = server->getSessionsW();
@@ -121,7 +126,10 @@ void cleanUpUserSessions(std::shared_ptr<Server> server) {
 }
 
 folly::Synchronized<std::string> &getMenu() {
-    static folly::Synchronized<std::string> menu;
+    static std::fstream fs("/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu.json");
+    std::stringstream sstream;
+    sstream << fs.rdbuf();
+    static folly::Synchronized<std::string> menu{sstream.str()};
     return menu;
 }
 
@@ -144,4 +152,27 @@ void swapMenus(std::shared_ptr<Server> server) {
     *getMenu().wlock() = sstream.str();
     auto response = generateResponse(R"({"event":"menu_changed"})", "application/json", Connection::KEEP_ALIVE);
     server->pushToAllSessions(response);
+}
+
+void postUserHandler(std::shared_ptr<restbed::Session> session,
+                     const std::string &data,
+                     std::shared_ptr<Server> server) {
+    static int counter = 0;
+    nlohmann::json base = R"({
+  "query": "",
+  "status_code": 0,
+  "body": {
+    "item": "user",
+    "user_id": 0,
+    "name": "",
+    "email": ""
+  }
+})"_json;
+    nlohmann::json js = nlohmann::json::parse(data);
+    base["query"] = js["command"];
+    base["body"]["user_id"] = ++counter;
+    base["body"]["name"] = js["name"];
+    base["body"]["email"] = js["email"];
+    auto response = generateResponse(base.dump(), "application/json", Connection::CLOSE);
+    session->close(*response);
 }

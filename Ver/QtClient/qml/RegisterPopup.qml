@@ -39,6 +39,7 @@ Popup {
 				clip: true
 				TextInput {
                     id: nameInput
+                    text: "Alice"
                     anchors.fill: parent
                     anchors.centerIn: parent
                     anchors.margins: 10
@@ -60,6 +61,7 @@ Popup {
 				clip: true
 				TextInput {
                     id: emailInput
+                    text: "email@gmail.com"
                     anchors.fill: parent
                     anchors.centerIn: parent
                     anchors.margins: 10
@@ -82,6 +84,7 @@ Popup {
 				clip: true
 				TextInput {
                     id: passwordInput
+                    text: "lol"
                     anchors.fill: parent
                     anchors.centerIn: parent
                     anchors.margins: 10

@@ -28,10 +28,12 @@ ApplicationWindow {
             register.open()
         }
         onClickSignIn: {
+	        theClient.signInUser(emailInput.text, passwordInput.text)
 	        emailInput.clear()
-	        passwordInput.clear()
+            passwordInput.clear()
         }
     }
+
 
     RegisterPopup {
         id: register
@@ -43,20 +45,38 @@ ApplicationWindow {
             signIn.open()
         }
         onClickRegister: {
+            theClient.registerUser(emailInput.text, passwordInput.text, nameInput.text)
+            mainLoader.source = "ProfilePage.qml"
             nameInput.clear()
             emailInput.clear()
             passwordInput.clear()
+            close()
         }
     }
 
     Timer {
         interval: 100
         running: true
-        onTriggered: signIn.open()
+        onTriggered: register.open()
     }
 
     Header {
         id: header
+        navigDrawer.onClickProfile: {
+            mainLoader.source = "ProfilePage.qml"
+        }
+        navigDrawer.onClickMenu: {
+            mainLoader.source = "MenuPage.qml"
+        }
+        navigDrawer.onClickSignIn: {
+            signIn.open()
+        }
+        navigDrawer.onClickRegister: {
+            register.open()
+        }
+        onClickLogo: {
+            mainLoader.source = "MenuPage.qml"
+        }
 	}
 
     Loader {
@@ -68,6 +88,7 @@ ApplicationWindow {
             bottom: parent.bottom
         }
         source: "MenuPage.qml"
+
     }
 }
 
