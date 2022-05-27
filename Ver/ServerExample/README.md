@@ -21,30 +21,3 @@
 * restbed
 * gflags
 * folly
-
-## Клиент
-
-```shell
-./Client --port 1234 --name Alice --resource /echo --count 100
-```
-
-### Флаги
-
-```shell
---port N # Номер порта (0 < N < 32768), обязательный
-
---name NAME # Имя пользователя, пользоватили с одинаковым именем считаются одним пользователем. По умолчанию Anon + номер
-
---server DOMAIN # Домен сервера, по умолчанию localhost
-
---silent # Не получать адресованные пользователю сообщения
-
---count MILLISECONDS # Отправлять на сервер автоматизированные сообщения с отсчетом миллисекунд
-
---resource PATH # Путь для запросов (/echo или /messenger) 
-```
-
-### Библиотеки для клиента
-
-* yhirose/cpp-httplib (header-only)
-* gflags
