@@ -5,8 +5,12 @@
 #include <vector>
 #include "admin.h"
 #include "pqxx/pqxx"
+#include <ctime>
+#include <iomanip>
 
 namespace restbes {
+
+static std::time_t time_now = std::time(nullptr);
 
 namespace {
 enum OrderStatus { CREATED = 0, ACCEPTED, CANCELLED, IN_PROGRESS, COMPLETED };

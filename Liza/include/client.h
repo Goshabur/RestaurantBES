@@ -24,7 +24,7 @@ public:
                     const std::string &email,
                     const std::string &password,
                     const std::string &cart)
-        : m_name(name), m_email(email), m_cart() {
+        : m_email(email), m_name(name), m_cart() {
         m_id = std::stoi(connectGet(
             R"(INSERT INTO "CLIENT" ("EMAIL", "NAME", "PASSWORD") VALUES (')" +
             email + "', '" + name + "', " + "crypt('" + password +

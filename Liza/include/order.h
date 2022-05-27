@@ -26,7 +26,7 @@ public:
         m_order_id = std::stoi(connectGet(
             R"(INSERT INTO "ORDER" ("ITEMS", "COST", "STATUS", "TIME") VALUES (')" +
             cart + "', " + cost + ", " + orderStatuses[m_order_status] +
-            ", NOW()) RETURNING \"ORDER_ID\""));
+            ", '" + std::to_string(time_now) + "') RETURNING \"ORDER_ID\""));
     }
 
     [[nodiscard]] id_t get_order_id() const noexcept {
