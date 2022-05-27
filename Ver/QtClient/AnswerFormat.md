@@ -4,17 +4,18 @@
 - [get_user/sign_in/sign_up](#Регистрация/авторизация/запрос-пользователя)
 - [get_cart](#Запрос-корзины)
 - [get_order](#Запрос-заказа)
+- [item_count_changed/clear_cart/create_order](#POST-запрос)
 
 ## Запрос меню
 
-`timestamp` - дата последнего обновления меню
+`timestamp` - дата последнего обновления меню в seconds since epoch
 ```json
 {
   "query": "get_menu",
   "status_code": 0,
   "body": {
     "item": "menu",
-    "timestamp": "2022/01/25 22:35:06",
+    "timestamp": "34680923",
     "contents": [
       {
         "item": "dish",
@@ -49,7 +50,7 @@
       {
         "order_id": 0,
         "status": 2,
-        "timestamp": "2022/01/25 22:35:06"
+        "timestamp": "34680923"
       },
       ...
     ]
@@ -85,7 +86,7 @@
   "body": {
     "item": "order",
     "order_id": 0,
-    "timestamp": "2022/01/25 22:35:06",
+    "timestamp": "34680923",
     "status": 0,
     "address": "Somewhere in Israel",
     "cart": {
@@ -111,3 +112,16 @@
   }
 }
 ```
+
+## POST-запрос
+
+Аналогичный ответ для `clear_cart` и `create_order`
+
+```json
+{
+  "query": "item_count_changed",
+  "status_code": 0,
+  "timestamp": "34680923"
+}
+```
+

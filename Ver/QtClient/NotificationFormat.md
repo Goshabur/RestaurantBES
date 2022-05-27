@@ -2,7 +2,6 @@
 
 - [cart_changed](#Изменилась-корзина)
 - [order_changed](#Изменился-заказ)
-- [new_order](#Новый-заказ)
 - [menu_changed](#Изменилось-меню)
 - ОПЦИОНАЛЬНО: [new_sign_in](#Новая-попытка-входа)
 
@@ -11,30 +10,18 @@
 ```json
 {
   "event": "cart_changed",
-  "timestamp": "2022/01/25 22:35:06"
+  "timestamp": "34680923"
 }
 ```
 
 ## Изменился заказ
 
-(в частности статус)
+Сюда входят в частности изменение статуса и создание нового заказа
 
 ```json
 {
   "event": "order_changed",
-  "timestamp": "2022/01/25 22:35:06",
-  "body": {
-    "order_id": 1
-  }
-}
-```
-
-## Новый заказ
-
-```json
-{
-  "event": "new_order",
-  "timestamp": "2022/01/25 22:35:06",
+  "timestamp": "34680923",
   "body": {
     "order_id": 1
   }
@@ -46,7 +33,7 @@
 ```json
 {
   "event": "menu_changed",
-  "timestamp": "2022/01/25 22:35:06"
+  "timestamp": "34680923"
 }
 ```
 
@@ -55,7 +42,7 @@
 ```json
 {
   "event": "new_sign_in",
-  "timestamp": "2022/01/25 22:35:06",
+  "timestamp": "34680923",
   "body": {
     "query": "sign_in",
     "status": 0
