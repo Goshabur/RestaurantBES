@@ -10,5 +10,6 @@
         <file alias="SignInPopup.qml">../qml/SignInPopup.qml</file>
         <file alias="RegisterPopup.qml">../qml/RegisterPopup.qml</file>
         <file alias="ProfilePage.qml">../qml/ProfilePage.qml</file>
+        <file alias="OrderPage.qml">../qml/OrderPage.qml</file>
     </qresource>
 </RCC>

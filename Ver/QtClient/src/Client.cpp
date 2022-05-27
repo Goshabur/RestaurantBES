@@ -29,6 +29,7 @@ Client::Client(std::string server, int _port, QObject *parent)
     }
 
     int newSessionId;
+    // TODO: answer from the server should be a JSON file
     sscanf(res->body.c_str(), "New Session-ID: %d", &newSessionId);
     setSessionId(newSessionId);
     headers.wlock()->find("Session-ID")->second = std::to_string(sessionId);
@@ -98,8 +99,6 @@ bool Client::registerUser(const QString &regEmail,
             regEmail,
             regPassword,
             regName);
-//    nlohmann::json js = nlohmann::json::parse(jsonReq);
-//    js["command"] = "lol";
     auto response = postingClient->Post("/user",
                                         *headers.rlock(),
                                         jsonReq,
@@ -134,7 +133,7 @@ bool Client::parseUserFromJson(const std::string &input) {
     return parseUserFromJson(json);
 }
 
-MenuList *Client::getMenu() {
+MenuList *Client::getMenu() const {
     return menuList.get();
 }
 
@@ -154,12 +153,15 @@ void Client::startPolling() {
             PollingEvent event = eventMap.at(stringEvent);
             switch (event) {
                 case CartChanged: {
+                    if (regStatus) getCartFromServer();
                     break;
                 }
                 case OrderChanged: {
+                    // TODO
                     break;
                 }
                 case NewOrder: {
+                    // TODO
                     break;
                 }
                 case MenuChanged: {
@@ -188,7 +190,49 @@ void Client::getMenuFromServer() {
     }
 
     auto menuData = JsonParser::parseMenu(response->body);
-    if (!menuList) menuList = std::make_shared<MenuList>();
     menuList->setMenu(std::move(menuData));
 }
+
+void Client::clearCart() {
+    cartList->clearCart();
+    if (regStatus) {
+        // TODO: generate query and send to the server
+    }
+}
+
+void Client::getCartFromServer() {
+    auto response = postingClient->Get("/cart",
+                                       *headers.rlock());
+    if (!response) {
+        throw std::runtime_error("Can't connect to the server");
+    }
+    else if (response->status != 200) {
+        throw std::runtime_error("Can't get cart from /cart");
+    }
+
+    nlohmann::json jsonBody = nlohmann::json::parse(response->body);
+    auto cartData = JsonParser::parseCart(jsonBody.at("body"));
+    cartList->setCart(std::move(cartData));
+}
+
+void Client::setItemCount(int id, int value) {
+    cartList->setItemCount(id, value);
+    if (regStatus) {
+        // TODO: generate query and send to the server
+    }
+}
+
+void Client::increaseItemCount(int id) {
+    setItemCount(id, cartList->getItemCount(id) + 1);
+}
+
+void Client::decreaseItemCount(int id) {
+    setItemCount(id, cartList->getItemCount(id) - 1);
+}
+
+void Client::createOrder(QString address, QString comment) {
+    // TODO: generate query and send to the server
+}
+
+
 }

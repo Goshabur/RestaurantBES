@@ -74,6 +74,12 @@ ApplicationWindow {
         navigDrawer.onClickRegister: {
             register.open()
         }
+        cartDrawer.onClickClearCart: {
+            theClient.clearCart()
+        }
+        cartDrawer.onClickOrder: {
+            mainLoader.setSource("OrderPage.qml", {"mainLoader": mainLoader})
+        }
         onClickLogo: {
             mainLoader.source = "MenuPage.qml"
         }

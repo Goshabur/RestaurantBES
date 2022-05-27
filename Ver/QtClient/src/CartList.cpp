@@ -75,5 +75,13 @@ int CartList::getId(int index) const {
     return items.rlock()->at(index).item_id;
 }
 
+void CartList::setCart(std::shared_ptr<CartData> newData) {
+    emit beginChangeLayout();
+    *items.wlock() = std::move(*newData);
+    updateIndexes();
+    emit indexesChanged();
+    emit endChangeLayout();
+}
+
 
 }

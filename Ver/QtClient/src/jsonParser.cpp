@@ -1,6 +1,7 @@
 #include "jsonParser.h"
 #include "MenuItem.h"
 #include "MenuList.h"
+#include "CartListFWD.h"
 
 #include <iostream>
 
@@ -13,15 +14,26 @@ MenuItem JsonParser::parseDish(const std::string &input) {
 }
 
 MenuItem JsonParser::parseDish(const nlohmann::json &json) {
-    return std::move(
-            MenuItem{
-                    json.at("id"),
-                    getQStringValue(json, "name"),
-                    getQStringValue(json, "image"),
-                    json.at("price"),
-                    getQStringValue(json, "info"),
-                    json.at("status")
-            });
+    return {
+            json.at("id"),
+            getQStringValue(json, "name"),
+            getQStringValue(json, "image"),
+            json.at("price"),
+            getQStringValue(json, "info"),
+            json.at("status")
+    };
+}
+
+CartItem JsonParser::parseCartItem(const std::string &input) {
+    nlohmann::json jsonCartItem = nlohmann::json::parse(input);
+    return std::move(parseCartItem(jsonCartItem));
+}
+
+CartItem JsonParser::parseCartItem(const nlohmann::json &json) {
+    return {
+            json.at("id"),
+            json.at("quantity")
+    };
 }
 
 std::shared_ptr<MenuData> JsonParser::parseMenu(const std::string &input) {
@@ -39,6 +51,20 @@ std::shared_ptr<MenuData> JsonParser::parseMenu(const nlohmann::json &json) {
     return menuData;
 }
 
+std::shared_ptr<CartData> JsonParser::parseCart(const std::string &input) {
+    nlohmann::json jsonCart = nlohmann::json::parse(input);
+    return parseCart(jsonCart);
+}
+
+std::shared_ptr<CartData> JsonParser::parseCart(const nlohmann::json &json) {
+    auto cartData = std::make_shared<CartData>();
+    const nlohmann::json::array_t &cartArray = json.at("contents");
+    for (const auto &item: cartArray) {
+        cartData->push_back(parseCartItem(item));
+    }
+    return cartData;
+}
+
 QString
 JsonParser::getQStringValue(const nlohmann::json &json, const char *key) {
     return {json.at(key).get<std::string>().c_str()};
@@ -52,7 +78,7 @@ std::string JsonParser::generateCreateOrderQuery(int user_id) {
     return json.dump();
 }
 
-std::string JsonParser::generateEmptyCartQuery(int user_id) {
+std::string JsonParser::generateClearCartQuery(int user_id) {
     nlohmann::json json({
                                 {"command", "empty_cart"},
                                 {"user_id", user_id}
@@ -60,7 +86,7 @@ std::string JsonParser::generateEmptyCartQuery(int user_id) {
     return json.dump();
 }
 
-std::string JsonParser::generateShowCartQuery(int user_id) {
+std::string JsonParser::generateGetCartQuery(int user_id) {
     nlohmann::json json({
                                 {"command", "show_cart"},
                                 {"user_id", user_id}

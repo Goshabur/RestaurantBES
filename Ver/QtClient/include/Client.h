@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
+
 #include "httplib.h"
 
 #include "MenuList.h"
@@ -44,16 +45,19 @@ public:
     Q_INVOKABLE bool signInUser(const QString &email,
                                 const QString &password);
 
-    Q_INVOKABLE restbes::MenuList *getMenu();
+    Q_INVOKABLE restbes::MenuList *getMenu() const;
 
-    Q_INVOKABLE restbes::CartList* getCart() const;
+    Q_INVOKABLE restbes::CartList *getCart() const;
 
-// TODO:
-//    Q_INVOKABLE void setItemCount(int id, int value);
-//    Q_INVOKABLE void increaseItemCount(int id);
-//    Q_INVOKABLE void decreaseItemCount(int id, int value);
-//    Q_INVOKABLE void clearCart();
-//    Q_INVOKABLE void createOrder(QString address, QString comment);
+    Q_INVOKABLE void clearCart();
+
+    Q_INVOKABLE void setItemCount(int id, int value);
+
+    Q_INVOKABLE void increaseItemCount(int id);
+
+    Q_INVOKABLE void decreaseItemCount(int id);
+
+    Q_INVOKABLE void createOrder(QString address, QString comment);
 
 signals:
 
@@ -79,7 +83,7 @@ private:
     int port;
     folly::Synchronized<httplib::Headers> headers;
     std::shared_ptr<CartList> cartList = std::make_shared<CartList>();
-    std::shared_ptr<MenuList> menuList = nullptr;
+    std::shared_ptr<MenuList> menuList = std::make_shared<MenuList>();
     std::shared_ptr<OrderList> orderList = nullptr;
 
     std::shared_ptr<httplib::Client> postingClient;
@@ -95,11 +99,11 @@ private:
     };
 
     static inline std::unordered_map<std::string, PollingEvent> eventMap{
-            {"cart_changed", CartChanged},
+            {"cart_changed",  CartChanged},
             {"order_changed", OrderChanged},
-            {"new_order", NewOrder},
-            {"menu_changed", MenuChanged},
-            {"new_sign_in", NewSignIn}
+            {"new_order",     NewOrder},
+            {"menu_changed",  MenuChanged},
+            {"new_sign_in",   NewSignIn}
     };
 
     void setRegStatus(bool newStatus);
@@ -117,6 +121,8 @@ private:
     bool parseUserFromJson(const std::string &input);
 
     void getMenuFromServer();
+
+    void getCartFromServer();
 
 };
 

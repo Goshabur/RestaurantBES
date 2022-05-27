@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.1
 
 Rectangle {
 	property alias navigDrawer: navigDrawer
+	property alias cartDrawer: cartDrawer
 	signal clickLogo
 
     height: parent.height * 15/100

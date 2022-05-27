@@ -8,12 +8,9 @@
 #include <memory>
 #include <unordered_map>
 
-namespace restbes {
+#include "CartListFWD.h"
 
-struct CartItem {
-    int item_id;
-    int count = 1;
-};
+namespace restbes {
 
 class CartList : public QObject {
 Q_OBJECT
@@ -36,6 +33,8 @@ public:
 
     [[nodiscard]] int getItemCount(int id) const;
 
+    void setCart(std::shared_ptr<CartData> newData);
+
 signals:
     void beginChangeLayout();
 
@@ -54,7 +53,7 @@ signals:
     void indexesChanged();
 
 private:
-    folly::Synchronized<std::vector<CartItem>> items;
+    folly::Synchronized<CartData> items;
     folly::Synchronized<std::unordered_map<int, int>> indexes;
 };
 
