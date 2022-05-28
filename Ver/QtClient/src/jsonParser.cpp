@@ -15,7 +15,7 @@ MenuItem JsonParser::parseDish(const std::string &input) {
 
 MenuItem JsonParser::parseDish(const nlohmann::json &json) {
     return {
-            json.at("id"),
+            json.at("dish_id"),
             getQStringValue(json, "name"),
             getQStringValue(json, "image"),
             json.at("price"),
@@ -31,7 +31,7 @@ CartItem JsonParser::parseCartItem(const std::string &input) {
 
 CartItem JsonParser::parseCartItem(const nlohmann::json &json) {
     return {
-            json.at("id"),
+            json.at("dish_id"),
             json.at("quantity")
     };
 }
@@ -72,7 +72,7 @@ JsonParser::getQStringValue(const nlohmann::json &json, const char *key) {
 
 std::string JsonParser::generateCreateOrderQuery(int user_id) {
     nlohmann::json json({
-                                {"command", "create_order"},
+                                {"query", "create_order"},
                                 {"user_id", user_id}
                         });
     return json.dump();
@@ -80,7 +80,7 @@ std::string JsonParser::generateCreateOrderQuery(int user_id) {
 
 std::string JsonParser::generateClearCartQuery(int user_id) {
     nlohmann::json json({
-                                {"command", "empty_cart"},
+                                {"query", "empty_cart"},
                                 {"user_id", user_id}
                         });
     return json.dump();
@@ -88,7 +88,7 @@ std::string JsonParser::generateClearCartQuery(int user_id) {
 
 std::string JsonParser::generateGetCartQuery(int user_id) {
     nlohmann::json json({
-                                {"command", "show_cart"},
+                                {"query", "show_cart"},
                                 {"user_id", user_id}
                         });
     return json.dump();
@@ -96,7 +96,7 @@ std::string JsonParser::generateGetCartQuery(int user_id) {
 
 std::string JsonParser::generateAddToCartQuery(int user_id, int product_id) {
     nlohmann::json json({
-                                {"command",    "add_to_cart"},
+                                {"query",    "add_to_cart"},
                                 {"user_id",    user_id},
                                 {"product_id", product_id}
                         });
@@ -106,7 +106,7 @@ std::string JsonParser::generateAddToCartQuery(int user_id, int product_id) {
 std::string
 JsonParser::generateDeleteFromCartQuery(int user_id, int product_id) {
     nlohmann::json json({
-                                {"command",    "delete_from_cart"},
+                                {"query",    "delete_from_cart"},
                                 {"user_id",    user_id},
                                 {"product_id", product_id}
                         });
@@ -117,7 +117,7 @@ std::string JsonParser::generateRegistrationQuery(const QString &email,
                                                   const QString &password,
                                                   const QString &name) {
     nlohmann::json json({
-                                {"command",  "sign_up"},
+                                {"query",  "sign_up"},
                                 {"email",    email.toStdString()},
                                 {"password", password.toStdString()},
                                 {"name",     name.toStdString()}
@@ -128,7 +128,7 @@ std::string JsonParser::generateRegistrationQuery(const QString &email,
 std::string
 JsonParser::generateSignInQuery(const QString &email, const QString &password) {
     nlohmann::json json({
-                                {"command",  "sign_in"},
+                                {"query",  "sign_in"},
                                 {"email",    email.toStdString()},
                                 {"password", password.toStdString()}
                         });

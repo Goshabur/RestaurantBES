@@ -1,14 +1,14 @@
 # Формат ответов
 
 - [get_menu](#Запрос-меню)
-- [get_user/sign_in/sign_up](#Регистрация/авторизация/запрос-пользователя)
+- [sign_in/sign_up](#Регистрация/авторизация)
 - [get_cart](#Запрос-корзины)
 - [get_order](#Запрос-заказа)
-- [item_count_changed/clear_cart/create_order](#POST-запрос)
+- [set_item_count/set_cart/create_order](#POST-запрос)
 
 ## Запрос меню
 
-`timestamp` - дата последнего обновления меню в seconds since epoch
+`timestamp` — дата последнего обновления меню в **seconds since epoch**
 ```json
 {
   "query": "get_menu",
@@ -19,7 +19,7 @@
     "contents": [
       {
         "item": "dish",
-        "id": 0,
+        "dish_id": 0,
         "name": "Lasagna",
         "image": "https://i.imgur.com/SPHmdBR.jpg",
         "price": 100,
@@ -32,14 +32,14 @@
 }
 ```
 
-## Регистрация/авторизация/запрос пользователя
+## Регистрация/авторизация
 
-Аналогичный ответ для `sign_in` и `sign_up`
+Аналогичный ответ для `sign_up`
 
-`timestamp` - дата заказа
+`timestamp` — дата заказа
 ```json
 {
-  "query": "get_user",
+  "query": "sign_in",
   "status_code": 0,
   "body": {
     "item": "user",
@@ -68,7 +68,7 @@
     "item": "cart",
     "contents": [
       {
-        "id": 0,
+        "dish_id": 0,
         "quantity": 1
       },
       ...
@@ -115,11 +115,11 @@
 
 ## POST-запрос
 
-Аналогичный ответ для `clear_cart` и `create_order`
+Формат ответа для `set_item_count`, `set_cart` и `create_order`
 
 ```json
 {
-  "query": "item_count_changed",
+  "query": "cart_changed",
   "status_code": 0,
   "timestamp": "34680923"
 }
