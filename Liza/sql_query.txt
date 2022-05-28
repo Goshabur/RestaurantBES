@@ -19,7 +19,9 @@ CREATE TABLE public."ORDER"
     "ORDER_ID" serial,
     "STATUS" text NOT NULL,
     "TIMESTAMP" text NOT NULL,
+    "LAST_MODIFIED" text NOT NULL,
     "ITEMS" jsonb,
+    "ADDRESS" text NOT NULL,
     "COMMENT" text,
     "COST" integer
 );

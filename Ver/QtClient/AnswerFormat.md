@@ -50,7 +50,8 @@
       {
         "order_id": 0,
         "status": 2,
-        "timestamp": "34680923"
+        "timestamp": "34680923",
+        "last_modified": "34680923"
       },
       ...
     ]
@@ -69,7 +70,7 @@
     "contents": [
       {
         "dish_id": 0,
-        "quantity": 1
+        "count": 1
       },
       ...
     ]
@@ -87,11 +88,20 @@
     "item": "order",
     "order_id": 0,
     "timestamp": "34680923",
+    "last_modified": "34680923",
+    "cost": 1430,
     "status": 0,
     "address": "Somewhere in Israel",
+    "comment": "Something you don't know what",
     "cart": {
       "item": "cart",
-      ...
+      "contents": [
+        {
+          "dish_id": 0,
+          "count": 1
+        },
+        ...
+      ]
     }
   }
 }
