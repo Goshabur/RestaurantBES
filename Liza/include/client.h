@@ -35,17 +35,15 @@ public:
 
     [[nodiscard]] std::string get_client_id() const;
 
-    std::string create_order();
-
     [[nodiscard]] std::string cart() const;
 
-    void add_to_cart(id_t dish_id) const noexcept;
+    [[nodiscard]] std::string create_order(const std::string &address, const std::string &comment) const;
 
-    void delete_from_cart(id_t dish_id) const noexcept;
+    static std::string get_client_name(const std::string &client_id);
 
-    void empty_cart() const noexcept;
+    static std::string get_client_email(const std::string &client_id);
 
-    static std::string show_order_status(id_t order_id);
+    static std::string get_client_cart(const std::string &client_id);
 };
 
 }  // namespace restbes

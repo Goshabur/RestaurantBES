@@ -22,95 +22,64 @@ public:
     explicit Cart(id_t user_id, const std::string &cart) : client_id(user_id) {
         connectExec(
             R"(INSERT INTO "CART" ("CLIENT_ID", "COST", "CART") VALUES ()" +
-            std::to_string(client_id) + ", " + total_price(cart) + ", '" +
-            cart + "')");
+            std::to_string(client_id) + ", " + std::to_string(cart_cost(cart)) +
+            ", '" + cart + "')");
     }
 
-    [[nodiscard]] static std::string get_cart(id_t user_id) {
-        std::string cart =
-            connectGet(R"(SELECT "CART" FROM "CART" WHERE "CLIENT_ID" = )" +
-                       std::to_string(user_id));
-
-        dynamic responseJson =
-            dynamic::object("cart", cart)("total_price", total_price(cart));
-
-        auto responseStr = folly::toJson(responseJson);
-
-        return responseStr;
+    static std::string get_cart(const std::string &user_id) {
+        return connectGet(
+            R"(SELECT "CART"::TEXT FROM "CART" WHERE "CLIENT_ID" = )" +
+            user_id);
     }
 
-    void add(id_t dish_id) const noexcept {
-        int quantity = 0;
-        json addToCart;
+    static void set_cart(const std::string &client_id,
+                         const std::string &cart,
+                         int cart_cost) {
+        connectExec(R"(UPDATE "CART" SET "CART" = ')" + cart +
+                    R"(' WHERE "CLIENT_ID" = )" + client_id);
+        connectExec(R"(UPDATE "CART" SET "COST" = ')" +
+                    std::to_string(cart_cost) + R"(' WHERE "CLIENT_ID" = )" +
+                    client_id);
+    }
 
-        try {
-            quantity = std::stoi(
-                connectGet(R"(SELECT "CART" -> ')" + std::to_string(dish_id) +
-                           R"(' FROM "CART" WHERE "CLIENT_ID" = )" +
-                           std::to_string(client_id)));
+    static void set_item_count(const std::string &client_id,
+                               int dish_id,
+                               int count) {
+        dynamic new_cart = dynamic::array;
 
-        } catch (...) {
-            // no such product in a cart
+        auto cart = json::parse(restbes::Cart::get_cart(client_id));
+        for (auto &el : cart) {
+            dynamic item =
+                dynamic::object("dish_id", el.at("dish_id").get<int>())(
+                    "count", el.at("count").get<int>());
+
+            if (el.at("dish_id").get<int>() == dish_id) {
+                item["count"] = count;
+
+                if (count == 0) {
+                    continue;
+                }
+            }
+
+            new_cart.push_back(item);
         }
 
-        addToCart[dish_id] = ++quantity;
-        std::string resultCart =
-            connectGet(R"(SELECT "CART" || ')" + addToCart.dump() +
-                       R"(' FROM "CART" WHERE "CLIENT_ID" = )" +
-                       std::to_string(client_id));
-
-        connectExec(R"(UPDATE "CART" SET "CART" = ')" + resultCart +
-                    R"(' WHERE "CLIENT_ID" = )" + std::to_string(client_id));
+        set_cart(client_id, folly::toJson(new_cart),
+                 cart_cost(folly::toJson(new_cart)));
     }
 
-    void del(id_t dish_id) const noexcept {
-        int quantity = std::stoi(
-            connectGet(R"(SELECT "CART" -> ')" + std::to_string(dish_id) +
-                       R"(' FROM "CART" WHERE "CLIENT_ID" = )" +
-                       std::to_string(client_id)));
-
-        json addToCart;
-        addToCart[dish_id] = --quantity;
-        std::string resultCart;
-
-        if (quantity <= 0) {
-            resultCart =
-                connectGet(R"(SELECT "CART" - ')" + std::to_string(dish_id) +
-                           R"(' FROM "CART" WHERE "CLIENT_ID" = )" +
-                           std::to_string(client_id));
-        } else {
-            resultCart = connectGet(R"(SELECT "CART" || ')" + addToCart.dump() +
-                                    R"(' FROM "CART" WHERE "CLIENT_ID" = )" +
-                                    std::to_string(client_id));
-        }
-
-        connectExec(R"(UPDATE "CART" SET "CART" = ')" + resultCart +
-                    R"(' WHERE "CLIENT_ID" = )" + std::to_string(client_id));
-
-        connectExec(R"(UPDATE "CART" SET "COST" = )" + total_price(resultCart) +
-                    R"( WHERE "CLIENT_ID" = )" + std::to_string(client_id));
-    }
-
-    void clear() const noexcept {
-        connectExec(R"(UPDATE "CART" SET "CART" = '{}' WHERE "CLIENT_ID" = )" +
-                    std::to_string(client_id));
-
-        connectExec(R"(UPDATE "CART" SET "COST" = 0 WHERE "CLIENT_ID" = )" +
-                    std::to_string(client_id));
-    }
-
-    [[nodiscard]] static std::string total_price(const std::string &user_cart) {
+    [[nodiscard]] static int cart_cost(const std::string &user_cart) {
         int cost = 0;
-        json cart(user_cart);
 
-        for (auto &el : cart.items()) {
+        auto cart = json::parse(user_cart);
+        for (auto &el : cart) {
             cost += std::stoi(connectGet(
-                        R"(SELECT "PRICE" FROM "DISH" WHERE "DISH_NAME" = ')" +
-                        el.key() + "'")) *
-                    std::stoi(el.value().dump());
+                        R"(SELECT "PRICE" FROM "DISH" WHERE "DISH_ID" = ')" +
+                        std::to_string(el.at("dish_id").get<int>()) + "'")) *
+                    el.at("count").get<int>();
         }
 
-        return std::to_string(cost);
+        return cost;
     }
 };
 
