@@ -68,6 +68,10 @@ target_link_libraries(JsonParser
         Qt5::Widgets
         QtMenu
         QtCart)
+target_link_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_include_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
+target_include_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
+target_link_libraries(JsonParser folly dl fmt)
 
 add_executable(QtClient
         QtClient/src/main.cpp

@@ -75,7 +75,7 @@ ApplicationWindow {
             register.open()
         }
         cartDrawer.onClickClearCart: {
-            theClient.clearCart()
+            theClient.clearCart(Client.NotifyServer)
         }
         cartDrawer.onClickOrder: {
             mainLoader.setSource("OrderPage.qml", {"mainLoader": mainLoader})

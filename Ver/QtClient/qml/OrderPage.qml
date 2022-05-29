@@ -147,11 +147,11 @@ Item {
                     color: "lightyellow"
                 }
                 onClicked: {
+                    theClient.createOrder(addressInput.text, commentInput.text)
                     addressInput.clear()
                     commentInput.clear()
-                    theClient.clearCart()
+                    theClient.clearCart(Client.DontNotifyServer)
                     mainLoader.source = "MenuPage.qml"
-                    console.log("New order created")
                 }
             }
         }

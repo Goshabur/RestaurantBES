@@ -1,3 +1,4 @@
+#include <QDebug>
 
 #include "Client.h"
 #include "jsonParser.h"
@@ -32,6 +33,8 @@ Client::Client(std::string server, int _port, QObject *parent)
     // TODO: answer from the server should be a JSON file
     sscanf(res->body.c_str(), "New Session-ID: %d", &newSessionId);
     setSessionId(newSessionId);
+    qDebug() << "Got Session-ID from the server";
+    qDebug() << res->body.c_str() << '\n';
     headers.wlock()->find("Session-ID")->second = std::to_string(sessionId);
     startPolling();
 
@@ -98,12 +101,15 @@ bool Client::registerUser(const QString &regEmail,
     std::string jsonReq = JsonParser::generateRegistrationQuery(
             regEmail,
             regPassword,
-            regName);
+            regName,
+            *cartList);
     auto response = postingClient->Post("/user",
                                         *headers.rlock(),
                                         jsonReq,
                                         "application/json");
     if (!response) return false;
+    qDebug() << "Authorized user";
+    qDebug() << response->body.c_str() << '\n';
     return parseUserFromJson(response->body);
 }
 
@@ -112,9 +118,12 @@ bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
                                         *headers.rlock(),
                                         JsonParser::generateSignInQuery(
                                                 regEmail,
-                                                regPassword),
+                                                regPassword,
+                                                *cartList),
                                         "application/json");
     if (!response) return false;
+    qDebug() << "Authorized user";
+    qDebug() << response->body.c_str() << '\n';
     return parseUserFromJson(response->body);
 }
 
@@ -160,10 +169,6 @@ void Client::startPolling() {
                     // TODO
                     break;
                 }
-                case NewOrder: {
-                    // TODO
-                    break;
-                }
                 case MenuChanged: {
                     getMenuFromServer();
                     break;
@@ -188,15 +193,24 @@ void Client::getMenuFromServer() {
     else if (response->status != 200) {
         throw std::runtime_error("Can't get menu from the server");
     }
+    qDebug() << "Got menu from the server";
+    qDebug() << response->body.c_str() << '\n';
 
-    auto menuData = JsonParser::parseMenu(response->body);
+    nlohmann::json jsonMenu = nlohmann::json::parse(response->body);
+    auto menuData = JsonParser::parseMenu(jsonMenu["body"]);
     menuList->setMenu(std::move(menuData));
 }
 
-void Client::clearCart() {
+void Client::clearCart(bool notifyServer) {
     cartList->clearCart();
-    if (regStatus) {
-        // TODO: generate query and send to the server
+    if (regStatus && notifyServer) {
+        std::string query = JsonParser::generateSetCartQuery(*cartList);
+        auto response = postingClient->Post("/cart",
+                                            *headers.rlock(),
+                                            query,
+                                            "application/json");
+        qDebug() << "set_cart command sent to the server";
+        qDebug() << query.c_str() << '\n';
     }
 }
 
@@ -209,6 +223,8 @@ void Client::getCartFromServer() {
     else if (response->status != 200) {
         throw std::runtime_error("Can't get cart from /cart");
     }
+    qDebug() << "Got cart from the server";
+    qDebug() << response->body.c_str() << '\n';
 
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto cartData = JsonParser::parseCart(jsonBody.at("body"));
@@ -216,9 +232,15 @@ void Client::getCartFromServer() {
 }
 
 void Client::setItemCount(int id, int value) {
-    cartList->setItemCount(id, value);
-    if (regStatus) {
-        // TODO: generate query and send to the server
+    bool countChanged = cartList->setItemCount(id, value);
+    if (regStatus && countChanged) {
+        std::string query = JsonParser::generateSetItemCountQuery(id, value);
+        auto response = postingClient->Post("/cart",
+                                            *headers.rlock(),
+                                            query,
+                                            "application/json");
+        qDebug() << "set_item_count command sent to the server";
+        qDebug() << query.c_str() << '\n';
     }
 }
 
@@ -230,8 +252,17 @@ void Client::decreaseItemCount(int id) {
     setItemCount(id, cartList->getItemCount(id) - 1);
 }
 
-void Client::createOrder(QString address, QString comment) {
-    // TODO: generate query and send to the server
+void Client::createOrder(const QString &address, const QString &comment) {
+    std::string query = JsonParser::generateCreateOrderQuery(address, comment);
+    auto response = postingClient->Post("/order",
+                                        *headers.rlock(),
+                                        query,
+                                        "application/json");
+    qDebug() << "New order sent to the server";
+    qDebug() << query.c_str() << '\n';
+}
+
+Client::Client(QObject *parent) : QObject(parent) {
 }
 
 

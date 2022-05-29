@@ -126,7 +126,8 @@ void cleanUpUserSessions(std::shared_ptr<Server> server) {
 }
 
 folly::Synchronized<std::string> &getMenu() {
-    static std::fstream fs("/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu.json");
+    static std::fstream fs(
+            "/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu.json");
     std::stringstream sstream;
     sstream << fs.rdbuf();
     static folly::Synchronized<std::string> menu{sstream.str()};
@@ -150,7 +151,9 @@ void swapMenus(std::shared_ptr<Server> server) {
     std::stringstream sstream;
     sstream << fs.rdbuf();
     *getMenu().wlock() = sstream.str();
-    auto response = generateResponse(R"({"event":"menu_changed"})", "application/json", Connection::KEEP_ALIVE);
+    auto response = generateResponse(R"({"event":"menu_changed"})",
+                                     "application/json",
+                                     Connection::KEEP_ALIVE);
     server->pushToAllSessions(response);
 }
 
@@ -169,10 +172,11 @@ void postUserHandler(std::shared_ptr<restbed::Session> session,
   }
 })"_json;
     nlohmann::json js = nlohmann::json::parse(data);
-    base["query"] = js["command"];
+    base["query"] = js["query"];
     base["body"]["user_id"] = ++counter;
-    base["body"]["name"] = js["name"];
-    base["body"]["email"] = js["email"];
-    auto response = generateResponse(base.dump(), "application/json", Connection::CLOSE);
+    base["body"]["name"] = js["body"]["name"];
+    base["body"]["email"] = js["body"]["email"];
+    auto response = generateResponse(base.dump(), "application/json",
+                                     Connection::CLOSE);
     session->close(*response);
 }

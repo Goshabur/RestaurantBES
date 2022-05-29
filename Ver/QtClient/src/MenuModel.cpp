@@ -195,18 +195,6 @@ void MenuModel::setDisplayMode(int mode) {
     displayMode = mode;
 }
 
-void MenuModel::setItemCount(int id, int value) {
-    cartList->setItemCount(id, value);
-}
-
-void MenuModel::increaseItemCount(int id) {
-    cartList->setItemCount(id, cartList->getItemCount(id) + 1);
-}
-
-void MenuModel::decreaseItemCount(int id) {
-    cartList->setItemCount(id, cartList->getItemCount(id) - 1);
-}
-
 void MenuModel::updatePersistentIndexList() {
     QModelIndexList newList{};
     if (displayMode == ShowMenu) {

@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<restbes::MenuList>("Ver", 1, 0, "MenuList");
     qmlRegisterType<restbes::OrderModel>("Ver", 1, 0, "OrderModel");
     qmlRegisterType<restbes::OrderList>("Ver", 1, 0, "OrderList");
+    qmlRegisterType<restbes::Client>("Ver", 1, 0, "Client");
 
     auto client = std::make_shared<restbes::Client>(fLS::FLAGS_server,
                                                     fLI::FLAGS_port);

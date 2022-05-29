@@ -62,6 +62,7 @@ public slots:
 private:
     std::set<int> items;
     std::shared_ptr<MenuData> menuData;
+    uint32_t timestamp = 0;
 };
 
 }

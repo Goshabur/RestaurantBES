@@ -55,6 +55,7 @@ signals:
 private:
     folly::Synchronized<CartData> items;
     folly::Synchronized<std::unordered_map<int, int>> indexes;
+    uint32_t timestamp = 0;
 };
 
 }

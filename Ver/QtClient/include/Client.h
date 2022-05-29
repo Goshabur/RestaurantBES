@@ -24,6 +24,14 @@ Q_OBJECT
     Q_PROPERTY(int userId READ getUserId NOTIFY userIdChanged)
     Q_PROPERTY(int sessionId READ getSessionId NOTIFY sessionIdChanged)
 public:
+    enum ServerNotification : bool {
+        NotifyServer = true,
+        DontNotifyServer = false
+    };
+    Q_ENUM(ServerNotification);
+
+    explicit Client(QObject *parent = nullptr);
+
     explicit Client(std::string server, int _port, QObject *parent = nullptr);
 
     [[nodiscard]] bool getRegStatus() const;
@@ -49,7 +57,7 @@ public:
 
     Q_INVOKABLE restbes::CartList *getCart() const;
 
-    Q_INVOKABLE void clearCart();
+    Q_INVOKABLE void clearCart(bool notifyServer);
 
     Q_INVOKABLE void setItemCount(int id, int value);
 
@@ -57,7 +65,7 @@ public:
 
     Q_INVOKABLE void decreaseItemCount(int id);
 
-    Q_INVOKABLE void createOrder(QString address, QString comment);
+    Q_INVOKABLE void createOrder(const QString &address, const QString &comment);
 
 signals:
 

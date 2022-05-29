@@ -110,7 +110,7 @@ Rectangle {
 	                    MouseArea {
 	                        anchors.fill: parent
 	                        onClicked: {
-	                            menuModel.decreaseItemCount(id)
+	                            theClient.decreaseItemCount(id)
 	                        }
 	                    }
 	                }
@@ -138,7 +138,7 @@ Rectangle {
 	                    MouseArea {
                             anchors.fill: parent
                             onClicked: {
-                                menuModel.increaseItemCount(id)
+                                theClient.increaseItemCount(id)
                             }
                         }
 	                }

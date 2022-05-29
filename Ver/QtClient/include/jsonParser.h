@@ -28,35 +28,31 @@ public:
 
     static std::shared_ptr<CartData> parseCart(const nlohmann::json &input);
 
-    // Type 1
-    static std::string generateCreateOrderQuery(int user_id);
-
-    static std::string generateClearCartQuery(int user_id);
-
-    static std::string generateGetCartQuery(int user_id);
-
-    // Type 2
-    static std::string generateAddToCartQuery(int user_id, int product_id);
-
-    static std::string generateDeleteFromCartQuery(int user_id, int product_id);
-
-    // Type 3
     static std::string generateRegistrationQuery(const QString &email,
                                                  const QString &password,
-                                                 const QString &name);
+                                                 const QString &name,
+                                                 const CartList &cartList);
+
+    static nlohmann::json::array_t generateJsonCartData(const CartList &cartList);
 
     static std::string generateSignInQuery(const QString &email,
-                                           const QString &password);
+                                           const QString &password,
+                                           const CartList &cartList);
+
+    static nlohmann::json generateJsonAuthorizationBase(const QString &email,
+                                                        const QString &password,
+                                                        const CartList &cartList);
+
+    static std::string generateSetItemCountQuery(int dish_id, int count);
+
+    static std::string generateSetCartQuery(const CartList &cartList);
+
+    static std::string generateCreateOrderQuery(const QString &address,
+                                                const QString &comment);
 
     static QString getQStringValue(const nlohmann::json &json,
                                    const char *key);
 
-
-// TODO:
-//    std::shared_ptr<Client> parseClient(json input);
-
-//private:
-//    std::shared_ptr<CartList> parseCart(const std::string &input);
 };
 
 }

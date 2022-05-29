@@ -50,12 +50,6 @@ public:
 
     void setDisplayMode(int mode);
 
-    Q_INVOKABLE void setItemCount(int id, int value);
-
-    Q_INVOKABLE void increaseItemCount(int id);
-
-    Q_INVOKABLE void decreaseItemCount(int id);
-
 signals:
     void menuListChanged();
 

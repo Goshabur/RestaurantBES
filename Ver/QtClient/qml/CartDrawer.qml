@@ -147,7 +147,7 @@ Drawer {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            cartModel.increaseItemCount(id)
+                            theClient.increaseItemCount(id)
                         }
                     }
                 }
@@ -186,7 +186,7 @@ Drawer {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            cartModel.decreaseItemCount(id)
+                            theClient.decreaseItemCount(id)
                         }
                     }
                 }
