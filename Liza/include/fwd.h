@@ -1,30 +1,50 @@
 #pragma once
 
+#include <ctime>
 #include <fstream>
+#include <iomanip>
+#include <restbed>
 #include <string>
 #include <vector>
-#include "admin.h"
+//#include "../include/admin.h"
+//#include "../include/cart.h"
+//#include "../include/client.h"
+//#include "../include/order.h"
+#include "../../../folly_installed/installed/folly/include/folly/dynamic.h"
+#include "../../../folly_installed/installed/folly/include/folly/json.h"
+#include "folly/dynamic.h"
+#include "handlers.h"
+#include "nlohmann/json.hpp"
 #include "pqxx/pqxx"
-#include <ctime>
-#include <iomanip>
+#include "session.h"
+#include "user.h"
 
 namespace restbes {
 
 static std::time_t time_now = std::time(nullptr);
 
-namespace {
 enum OrderStatus { CREATED = 0, ACCEPTED, CANCELLED, IN_PROGRESS, COMPLETED };
 enum DishStatus { UNAVAILABLE = 0, AVAILABLE };
 
 [[maybe_unused]] std::vector<std::string> orderStatuses = {
     "CREATED", "ACCEPTED", "CANCELLED", "IN_PROGRESS", "COMPLETED"};
 
+[[maybe_unused]] std::map<std::string, int> orderStatusesMap = {
+    {"CREATED", 0},
+    {"ACCEPTED", 1},
+    {"CANCELLED", 2},
+    {"IN_PROGRESS", 3},
+    {"COMPLETED", 4}};
+
 [[maybe_unused]] std::vector<std::string> dishStatuses = {"UNAVAILABLE",
                                                           "AVAILABLE"};
 
+[[maybe_unused]] std::map<std::string, int> dishStatusesMap = {
+    {"UNAVAILABLE", 0},
+    {"AVAILABLE", 1}};
+
 std::ofstream server_request_log("server_request_log.txt", std::ofstream::app);
 std::ofstream server_error_log("server_error_log.txt", std::ofstream::app);
-}  // namespace
 
 static void connectExec(const std::string &sql) {
     pqxx::connection C(
@@ -34,8 +54,6 @@ static void connectExec(const std::string &sql) {
     pqxx::work W(C);
     W.exec(sql);
     W.commit();
-
-    // TODO: signal that something has changed and/or executed successfully
 
     C.disconnect();
 }
@@ -95,6 +113,17 @@ static bool check_order_exists(const std::string &order_id) {
         return false;
     }
     return true;
+}
+
+void notifySessionsMenuChanged() {
+    folly::dynamic notificationJson = folly::dynamic::object;
+    notificationJson["event"] = "menu_changed";
+    notificationJson["timestamp"] =
+        connectGet(R"(SELECT "TIMESTAMP" FROM "MENU_HISTORY")");
+
+    server->pushToAllSessions(restbes::generateResponse(
+        folly::toJson(notificationJson), "application/json",
+        restbes::Connection::KEEP_ALIVE));
 }
 
 }  // namespace restbes

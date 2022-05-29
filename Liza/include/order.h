@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fwd.h"
-#include "nlohmann/json.hpp"
+#include "../include/cart.h"
+#include "../include/fwd.h"
 
 using restbes::connectGet;
 
@@ -57,6 +57,12 @@ public:
             R"(SELECT "ADDRESS" FROM "ORDER" WHERE "ORDER_ID" = )" + order_id);
     }
 
+    static std::string get_order_client_id(const std::string &order_id) {
+        return connectGet(
+            R"(SELECT "CLIENT_ID" FROM "HISTORY" WHERE "ORDER_ID" = )" +
+            order_id);
+    }
+
     static std::string get_order_comment(const std::string &order_id) {
         return connectGet(
             R"(SELECT "COMMENT" FROM "ORDER" WHERE "ORDER_ID" = )" + order_id);
@@ -72,6 +78,23 @@ public:
         return connectGet(
             R"(SELECT "ITEMS"::TEXT FROM "ORDER" WHERE "ORDER_ID" = )" +
             order_id);
+    }
+
+    static void notifySessionsOrderChanged(const std::string &order_id) {
+        folly::dynamic notificationJson = folly::dynamic::object;
+        notificationJson["event"] = "order_changed";
+        notificationJson["timestamp"] = connectGet(
+            R"(SELECT "LAST_MODIFIED" FROM "ORDER" WHERE "ORDER_ID = )" +
+            order_id);
+        notificationJson["body"] = folly::dynamic::object;
+        notificationJson["body"]["order_id"] = std::stoi(order_id);
+
+        std::string user_id = restbes::Order::get_order_client_id(order_id);
+        auto user = server->getUser(user_id);
+
+        user->push(restbes::generateResponse(folly::toJson(notificationJson),
+                                             "application/json",
+                                             restbes::Connection::KEEP_ALIVE));
     }
 };
 

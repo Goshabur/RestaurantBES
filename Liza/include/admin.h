@@ -10,7 +10,7 @@ public:
     Admin() = default;
 
     static void change_order_status(const std::string &order_id,
-                                    const std::string &set_status) noexcept;
+                                    const std::string &set_status);
 
     static void change_dish_status(const std::string &dish_name,
                                    const std::string &set_status);
@@ -23,9 +23,9 @@ public:
 
     static std::string getPrice(const std::string &dish_id);
 
-    static std::string getDishStatus(const std::string &dish_id);
+    static int getDishStatus(const std::string &dish_id);
 
-    static std::string getOrderStatus(const std::string &order_id);
+    static int getOrderStatus(const std::string &order_id);
 
     static std::string getDishName(const std::string &dish_id);
 };

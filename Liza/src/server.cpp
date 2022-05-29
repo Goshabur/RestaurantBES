@@ -1,15 +1,8 @@
-#include "server.h"
-#include <fstream>
-#include <iostream>
-#include <restbed>
 #include "../include/admin.h"
+#include "../include/cart.h"
 #include "../include/client.h"
 #include "../include/fwd.h"
 #include "../include/order.h"
-#include "folly/dynamic.h"
-#include "handlers.h"
-#include "session.h"
-#include "user.h"
 
 using folly::dynamic;
 using folly::parseJson;
