@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "../include/admin.h"
 #include "../include/fwd.h"
 
 using TgBot::BotCommand;
@@ -138,7 +139,9 @@ int main() {
                         bot.getApi().sendMessage(
                             message->chat->id,
                             "Choose new status (current status: \"" +
-                                restbes::Admin::getOrderStatus(number) + "\").",
+                                restbes::orderStatuses
+                                    [restbes::Admin::getOrderStatus(number)] +
+                                "\").",
                             false, 0, keyboardOrderStatus);
                         state[message->chat->id].orderId = std::stoi(number);
                         state[message->chat->id].waitOrderId = false;
@@ -155,77 +158,77 @@ int main() {
         [&bot](const TgBot::CallbackQuery::Ptr &query) {
             if (state[query->message->chat->id].waitOrderStatus) {
                 std::string orderStatus = query->data;
-                std::string oldStatus = restbes::Admin::getOrderStatus(
+                int oldStatus = restbes::Admin::getOrderStatus(
                     std::to_string(state[query->message->chat->id].orderId));
-                if (oldStatus == query->data) {
+                if (restbes::orderStatuses[oldStatus] == query->data) {
                     bot.getApi().sendMessage(query->message->chat->id,
                                              "Nothing to change.");
                 } else {
                     restbes::Admin::change_order_status(
                         std::to_string(state[query->message->chat->id].orderId),
-                        query->data);
-                    bot.getApi().sendMessage(query->message->chat->id,
-                                             "Changed from \"" + oldStatus +
-                                                 "\" to \"" + orderStatus +
-                                                 "\".");
+                        std::to_string(restbes::orderStatusesMap[query->data]));
+                    bot.getApi().sendMessage(
+                        query->message->chat->id,
+                        "Changed from \"" + restbes::orderStatuses[oldStatus] +
+                            "\" to \"" + orderStatus + "\".");
                 }
                 state[query->message->chat->id].waitOrderStatus = false;
             } else if (state[query->message->chat->id].waitDishStatus) {
                 std::string dishStatus = query->data;
-                std::string oldStatus = restbes::Admin::getDishStatus(
+                int oldStatus = restbes::Admin::getDishStatus(
                     std::to_string(state[query->message->chat->id].dishId));
-                if (oldStatus == query->data) {
+                if (restbes::dishStatuses[oldStatus] == query->data) {
                     bot.getApi().sendMessage(query->message->chat->id,
                                              "Nothing to change.");
                 } else {
                     restbes::Admin::change_dish_status(
                         std::to_string(state[query->message->chat->id].dishId),
-                        query->data);
-                    bot.getApi().sendMessage(query->message->chat->id,
-                                             "Changed from \"" + oldStatus +
-                                                 "\" to \"" + dishStatus +
-                                                 "\".");
+                        std::to_string(restbes::dishStatusesMap[query->data]));
+                    bot.getApi().sendMessage(
+                        query->message->chat->id,
+                        "Changed from \"" + restbes::dishStatuses[oldStatus] +
+                            "\" to \"" + dishStatus + "\".");
                 }
                 state[query->message->chat->id].waitDishStatus = false;
             }
         });
 
-    bot.getEvents().onCommand(
-        "set_dish_status", [&](const Message::Ptr &message) {
-            if (state[message->chat->id].logged) {
-                std::stringstream ss(message->text);
-                std::string command, number;
-                ss >> command;
-                ss >> number;
-                if (number.empty()) {
-                    bot.getApi().sendMessage(message->chat->id,
-                                             "Enter dish id.");
-                    state[message->chat->id].waitDishId = true;
-                    state[message->chat->id].toChangeDishStatus = true;
-                } else {
-                    if (!restbes::check_dish_exists(number)) {
-                        bot.getApi().sendMessage(message->chat->id,
-                                                 "No dish with such id.");
-                        state[message->chat->id].waitDishId = true;
-                    } else {
-                        state[message->chat->id].dishId = std::stoi(number);
-                        bot.getApi().sendMessage(
-                            message->chat->id,
-                            "Choose new status for " +
-                                restbes::Admin::getDishName(number) +
-                                " (id: " + number + ", current status: \"" +
-                                restbes::Admin::getDishStatus(number) +
-                                "\").\n",
-                            false, 0, keyboardDishStatus);
-                        state[message->chat->id].waitDishStatus = true;
-                        state[message->chat->id].waitDishId = false;
-                    }
-                }
+    bot.getEvents().onCommand("set_dish_status", [&](const Message::Ptr
+                                                         &message) {
+        if (state[message->chat->id].logged) {
+            std::stringstream ss(message->text);
+            std::string command, number;
+            ss >> command;
+            ss >> number;
+            if (number.empty()) {
+                bot.getApi().sendMessage(message->chat->id, "Enter dish id.");
+                state[message->chat->id].waitDishId = true;
+                state[message->chat->id].toChangeDishStatus = true;
             } else {
-                bot.getApi().sendMessage(message->chat->id,
-                                         "Access denied. Enter password.");
+                if (!restbes::check_dish_exists(number)) {
+                    bot.getApi().sendMessage(message->chat->id,
+                                             "No dish with such id.");
+                    state[message->chat->id].waitDishId = true;
+                } else {
+                    state[message->chat->id].dishId = std::stoi(number);
+                    bot.getApi().sendMessage(
+                        message->chat->id,
+                        "Choose new status for " +
+                            restbes::Admin::getDishName(number) +
+                            " (id: " + number + ", current status: \"" +
+                            restbes::dishStatuses[restbes::Admin::getDishStatus(
+                                number)] +
+                            "\").\n",
+                        false, 0, keyboardDishStatus);
+                    state[message->chat->id].waitDishStatus = true;
+                    state[message->chat->id].waitDishId = false;
+                }
             }
-        });
+        } else {
+            bot.getApi().sendMessage(message->chat->id,
+                                     "Access denied. Enter password.");
+        }
+    });
 
     bot.getEvents().onCommand(
         "set_dish_price", [&](const Message::Ptr &message) {
@@ -286,7 +289,9 @@ int main() {
                     bot.getApi().sendMessage(
                         message->chat->id,
                         "Choose new status (current status: \"" +
-                            restbes::Admin::getOrderStatus(message->text) +
+                            restbes::orderStatuses
+                                [restbes::Admin::getOrderStatus(
+                                    message->text)] +
                             "\").",
                         false, 0, keyboardOrderStatus);
                     state[message->chat->id].orderId = std::stoi(message->text);
@@ -296,19 +301,20 @@ int main() {
 
             } else if (state[message->chat->id].waitOrderStatus) {
                 std::string orderStatus = message->text;
-                std::string oldStatus = restbes::Admin::getOrderStatus(
+                int oldStatus = restbes::Admin::getOrderStatus(
                     std::to_string(state[message->chat->id].orderId));
-                if (oldStatus == message->text) {
+                if (restbes::orderStatuses[oldStatus] == message->text) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "Nothing to change.");
                 } else {
                     restbes::Admin::change_order_status(
                         std::to_string(state[message->chat->id].orderId),
-                        message->text);
-                    bot.getApi().sendMessage(message->chat->id,
-                                             "Changed from \"" + oldStatus +
-                                                 "\" to \"" + orderStatus +
-                                                 "\".");
+                        std::to_string(
+                            restbes::orderStatusesMap[message->text]));
+                    bot.getApi().sendMessage(
+                        message->chat->id,
+                        "Changed from \"" + restbes::orderStatuses[oldStatus] +
+                            "\" to \"" + orderStatus + "\".");
                 }
                 state[message->chat->id].waitOrderStatus = false;
 
@@ -336,7 +342,9 @@ int main() {
                                 restbes::Admin::getDishName(message->text) +
                                 " (id: " + message->text +
                                 ", current status: \"" +
-                                restbes::Admin::getDishStatus(message->text) +
+                                restbes::dishStatuses
+                                    [restbes::Admin::getDishStatus(
+                                        message->text)] +
                                 "\").\n",
                             false, 0, keyboardDishStatus);
                         state[message->chat->id].waitDishStatus = true;
@@ -368,9 +376,9 @@ int main() {
 
             } else if (state[message->chat->id].waitDishStatus) {
                 std::string dishStatus = message->text;
-                std::string oldStatus = restbes::Admin::getDishStatus(
+                int oldStatus = restbes::Admin::getDishStatus(
                     std::to_string(state[message->chat->id].dishId));
-                if (oldStatus == dishStatus) {
+                if (restbes::dishStatuses[oldStatus] == dishStatus) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "Nothing to change.");
                 } else {
@@ -378,8 +386,9 @@ int main() {
                         std::to_string(state[message->chat->id].dishId),
                         dishStatus);
                     bot.getApi().sendMessage(
-                        message->chat->id, "Changed from \"" + oldStatus +
-                                               "\" to \"" + dishStatus + "\".");
+                        message->chat->id,
+                        "Changed from \"" + restbes::dishStatuses[oldStatus] +
+                            "\" to \"" + dishStatus + "\".");
                 }
                 state[message->chat->id].waitDishStatus = false;
 
