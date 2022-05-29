@@ -64,7 +64,6 @@ MenuItem MenuList::getItem(int id) const {
     return (menuData->count(id)) ? menuData->at(id) : MenuItem{};
 }
 
-// TODO: Integrate with displayMode==ShowCart
 void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
     emit beginChangeLayout();
     items.clear();
@@ -119,6 +118,14 @@ void MenuList::removeUnavailableItems() {
             ++i;
         }
     }
+}
+
+void MenuList::setTimestamp(uint32_t newTimestamp) {
+    timestamp = newTimestamp;
+}
+
+uint32_t MenuList::getTimestamp() const {
+    return timestamp;
 }
 
 }

@@ -159,9 +159,11 @@ void Client::startPolling() {
             nlohmann::json json = nlohmann::json::parse(res->body);
             const std::string &stringEvent = json.at(
                     "event").get<std::string>();
+            uint32_t timestamp = json["timestamp"].get<uint32_t>();
             PollingEvent event = eventMap.at(stringEvent);
             switch (event) {
                 case CartChanged: {
+                    if (timestamp <= cartList->getTimestamp()) break;
                     if (regStatus) getCartFromServer();
                     break;
                 }
@@ -170,6 +172,7 @@ void Client::startPolling() {
                     break;
                 }
                 case MenuChanged: {
+                    if (timestamp <= menuList->getTimestamp()) break;
                     getMenuFromServer();
                     break;
                 }
@@ -198,7 +201,9 @@ void Client::getMenuFromServer() {
 
     nlohmann::json jsonMenu = nlohmann::json::parse(response->body);
     auto menuData = JsonParser::parseMenu(jsonMenu["body"]);
+    uint32_t timestamp = jsonMenu["body"]["timestamp"].get<uint32_t>();
     menuList->setMenu(std::move(menuData));
+    menuList->setTimestamp(timestamp);
 }
 
 void Client::clearCart(bool notifyServer) {
@@ -211,6 +216,19 @@ void Client::clearCart(bool notifyServer) {
                                             "application/json");
         qDebug() << "set_cart command sent to the server";
         qDebug() << query.c_str() << '\n';
+
+        if (!response) {
+            qDebug() << "Can't connect to the server\n";
+            return;
+        }
+        if (response->status != 200) {
+            qDebug() << "Bad response\n" << response->body.c_str() << '\n';
+            return;
+        }
+        nlohmann::json json = nlohmann::json::parse(response->body);
+        uint32_t timestamp = json["timestamp"].get<uint32_t>();;
+        cartList->setTimestamp(timestamp);
+        qDebug() << "Answer:\n" << response->body.c_str() << '\n';
     }
 }
 
@@ -228,7 +246,9 @@ void Client::getCartFromServer() {
 
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto cartData = JsonParser::parseCart(jsonBody.at("body"));
+    uint32_t timestamp = jsonBody["body"]["timestamp"].get<uint32_t>();
     cartList->setCart(std::move(cartData));
+    cartList->setTimestamp(timestamp);
 }
 
 void Client::setItemCount(int id, int value) {
@@ -241,6 +261,19 @@ void Client::setItemCount(int id, int value) {
                                             "application/json");
         qDebug() << "set_item_count command sent to the server";
         qDebug() << query.c_str() << '\n';
+
+        if (!response) {
+            qDebug() << "Can't connect to the server\n";
+            return;
+        }
+        if (response->status != 200) {
+            qDebug() << "Bad response\n" << response->body.c_str() << '\n';
+            return;
+        }
+        nlohmann::json json = nlohmann::json::parse(response->body);
+        uint32_t timestamp = json["timestamp"].get<uint32_t>();;
+        cartList->setTimestamp(timestamp);
+        qDebug() << "Answer:\n" << response->body.c_str() << '\n';
     }
 }
 

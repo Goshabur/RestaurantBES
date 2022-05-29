@@ -35,6 +35,10 @@ public:
 
     void setCart(std::shared_ptr<CartData> newData);
 
+    void setTimestamp(uint32_t newTimestamp);
+
+    uint32_t getTimestamp() const;
+
 signals:
     void beginChangeLayout();
 

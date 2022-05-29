@@ -2,7 +2,7 @@
   "query": "get_menu",
   "body": {
     "item": "menu",
-    "timestamp": "2022/01/25 22:35:06",
+    "timestamp": 4567897,
     "contents": [
       {
         "item": "dish",

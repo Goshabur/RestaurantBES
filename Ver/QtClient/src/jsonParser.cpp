@@ -83,7 +83,6 @@ std::string JsonParser::generateCreateOrderQuery(const QString &address,
     return json.dump();
 }
 
-// TODO: waiting for the exact format
 std::string JsonParser::generateSetCartQuery(const CartList &cartList) {
     nlohmann::json json({
                                 {"query", "set_cart"}

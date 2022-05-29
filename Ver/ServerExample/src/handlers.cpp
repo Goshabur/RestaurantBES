@@ -126,8 +126,7 @@ void cleanUpUserSessions(std::shared_ptr<Server> server) {
 }
 
 folly::Synchronized<std::string> &getMenu() {
-    static std::fstream fs(
-            "/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu.json");
+    static std::fstream fs("/home/veronika/hse_study/RestaurantBES/Ver/ServerExample/exampleMenu.json");
     std::stringstream sstream;
     sstream << fs.rdbuf();
     static folly::Synchronized<std::string> menu{sstream.str()};
