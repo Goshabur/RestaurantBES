@@ -11,6 +11,7 @@
 #include "MenuList.h"
 #include "CartList.h"
 #include "OrderList.h"
+#include "Order.h"
 
 #include <memory>
 
@@ -65,7 +66,9 @@ public:
 
     Q_INVOKABLE void decreaseItemCount(int id);
 
-    Q_INVOKABLE void createOrder(const QString &address, const QString &comment);
+    Q_INVOKABLE void createOrder(const QString &addr, const QString &commnt);
+
+    Q_INVOKABLE restbes::Order* getOrderFromServer(int orderId);
 
 signals:
 
@@ -78,6 +81,8 @@ signals:
     void userIdChanged();
 
     void sessionIdChanged();
+
+    void getOrder(int orderId);
 
 public slots:
 
@@ -92,7 +97,7 @@ private:
     folly::Synchronized<httplib::Headers> headers;
     std::shared_ptr<CartList> cartList = std::make_shared<CartList>();
     std::shared_ptr<MenuList> menuList = std::make_shared<MenuList>();
-    std::shared_ptr<OrderList> orderList = nullptr;
+    std::shared_ptr<OrderList> orderList = std::make_shared<OrderList>();
 
     std::shared_ptr<httplib::Client> postingClient;
     std::shared_ptr<httplib::Client> pollingClient;
@@ -101,7 +106,6 @@ private:
     enum PollingEvent {
         CartChanged,
         OrderChanged,
-        NewOrder,
         MenuChanged,
         NewSignIn
     };
@@ -109,7 +113,6 @@ private:
     static inline std::unordered_map<std::string, PollingEvent> eventMap{
             {"cart_changed",  CartChanged},
             {"order_changed", OrderChanged},
-            {"new_order",     NewOrder},
             {"menu_changed",  MenuChanged},
             {"new_sign_in",   NewSignIn}
     };

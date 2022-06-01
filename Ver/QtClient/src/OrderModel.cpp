@@ -75,7 +75,7 @@ void OrderModel::setOrderList(OrderList *list) {
     if (orderList) {
         CONNECT_SIGNALS(orderList, OrderList);
         connect(orderList,
-                &OrderList::itemStatusChanged,
+                &OrderList::itemChanged,
                 this,
                 [=](int id) {
                     auto ind = index(orderList->getIndex(id), 0);

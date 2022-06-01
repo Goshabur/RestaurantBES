@@ -130,10 +130,11 @@ bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
 bool Client::parseUserFromJson(const nlohmann::json &json) {
     if (json.at("status_code") != 0) return false;
     setRegStatus(true);
-    const nlohmann::json::object_t &user = json.at("body");
+    const nlohmann::json &user = json.at("body");
     setUserId(user.at("user_id"));
     setName(JsonParser::getQStringValue(user, "name"));
     setEmail(JsonParser::getQStringValue(user, "email"));
+    orderList->setOrderData(JsonParser::parseOrderData(user["orders"]));
     return true;
 }
 
@@ -168,7 +169,8 @@ void Client::startPolling() {
                     break;
                 }
                 case OrderChanged: {
-                    // TODO
+                    if (timestamp <= orderList->getTimestamp()) break;
+                    emit getOrder(json["body"]["order_id"].get<int>());
                     break;
                 }
                 case MenuChanged: {
@@ -226,7 +228,7 @@ void Client::clearCart(bool notifyServer) {
             return;
         }
         nlohmann::json json = nlohmann::json::parse(response->body);
-        uint32_t timestamp = json["timestamp"].get<uint32_t>();;
+        uint32_t timestamp = json["date"].get<uint32_t>();
         cartList->setTimestamp(timestamp);
         qDebug() << "Answer:\n" << response->body.c_str() << '\n';
     }
@@ -246,7 +248,7 @@ void Client::getCartFromServer() {
 
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto cartData = JsonParser::parseCart(jsonBody.at("body"));
-    uint32_t timestamp = jsonBody["body"]["timestamp"].get<uint32_t>();
+    uint32_t timestamp = jsonBody["body"]["date"].get<uint32_t>();
     cartList->setCart(std::move(cartData));
     cartList->setTimestamp(timestamp);
 }
@@ -271,7 +273,7 @@ void Client::setItemCount(int id, int value) {
             return;
         }
         nlohmann::json json = nlohmann::json::parse(response->body);
-        uint32_t timestamp = json["timestamp"].get<uint32_t>();;
+        uint32_t timestamp = json["timestamp"].get<uint32_t>();
         cartList->setTimestamp(timestamp);
         qDebug() << "Answer:\n" << response->body.c_str() << '\n';
     }
@@ -285,8 +287,8 @@ void Client::decreaseItemCount(int id) {
     setItemCount(id, cartList->getItemCount(id) - 1);
 }
 
-void Client::createOrder(const QString &address, const QString &comment) {
-    std::string query = JsonParser::generateCreateOrderQuery(address, comment);
+void Client::createOrder(const QString &addr, const QString &commnt) {
+    std::string query = JsonParser::generateCreateOrderQuery(addr, commnt);
     auto response = postingClient->Post("/order",
                                         *headers.rlock(),
                                         query,
@@ -298,5 +300,26 @@ void Client::createOrder(const QString &address, const QString &comment) {
 Client::Client(QObject *parent) : QObject(parent) {
 }
 
+Order* Client::getOrderFromServer(int orderId) {
+    auto orderHeaders = headers.copy();
+    orderHeaders.insert({"Order-ID", std::to_string(orderId)});
+    auto response = postingClient->Get("/order",
+                                       orderHeaders);
+    if (!response) {
+        throw std::runtime_error("Can't connect to the server");
+    }
+    else if (response->status != 200) {
+        throw std::runtime_error("Can't get the order from /order");
+    }
+    qDebug() << "Got the order " << orderId << " from the server";
+    qDebug() << response->body.c_str() << '\n';
+
+    nlohmann::json jsonBody = nlohmann::json::parse(response->body);
+    auto* order = new Order();
+    JsonParser::parseOrder(jsonBody["body"], *order);
+    orderList->setItemStatus(order->getOrderId(), order->getStatus());
+    orderList->setTimestamp(order->getTimestamp());
+    return order;
+}
 
 }

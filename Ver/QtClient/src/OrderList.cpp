@@ -38,7 +38,7 @@ bool OrderList::setItemStatus(int id, int value) {
     }
 
     SUCCESS:
-    emit itemStatusChanged(id);
+    emit itemChanged(id);
     return true;
 }
 
@@ -67,6 +67,14 @@ OrderData::const_iterator OrderList::end() const {
 
 OrderItem OrderList::getItem(int id) const {
     return getItemAt(getIndex(id));
+}
+
+uint32_t OrderList::getTimestamp() const {
+    return timestamp;
+}
+
+void OrderList::setTimestamp(uint32_t newTimestamp) {
+    timestamp = newTimestamp;
 }
 
 }

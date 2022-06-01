@@ -86,7 +86,7 @@ add_executable(QtClient
 
         QtClient/include/OrderModel.h
         QtClient/src/OrderModel.cpp
-        )
+        QtClient/include/Order.h QtClient/src/Order.cpp)
 
 target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
 

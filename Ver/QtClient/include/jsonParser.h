@@ -2,6 +2,9 @@
 
 #include "MenuList.h"
 #include "CartListFWD.h"
+#include "OrderList.h"
+#include "Order.h"
+
 #include <memory>
 #include <string>
 #include <QString>
@@ -27,6 +30,14 @@ public:
     static std::shared_ptr<CartData> parseCart(const std::string &input);
 
     static std::shared_ptr<CartData> parseCart(const nlohmann::json &input);
+
+    static void parseOrder(const std::string &input, Order &order);
+
+    static void parseOrder(const nlohmann::json &input, Order &order);
+
+    static std::shared_ptr<OrderData> parseOrderData(const std::string &input);
+
+    static std::shared_ptr<OrderData> parseOrderData(const nlohmann::json &input);
 
     static std::string generateRegistrationQuery(const QString &email,
                                                  const QString &password,

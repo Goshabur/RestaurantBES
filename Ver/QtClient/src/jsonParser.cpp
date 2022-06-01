@@ -143,10 +143,10 @@ nlohmann::json JsonParser::generateJsonAuthorizationBase(const QString &email,
                                                          const CartList &cartList) {
     nlohmann::json
             json({
-                         {"body",  {
-                                           {"email", email.toStdString()},
-                                           {"password", password.toStdString()}
-                                   }
+                         {"body", {
+                                 {"email", email.toStdString()},
+                                 {"password", password.toStdString()}
+                         }
                          }
                  });
     auto &body = json["body"];
@@ -156,6 +156,42 @@ nlohmann::json JsonParser::generateJsonAuthorizationBase(const QString &email,
         body["cart"] = generateJsonCartData(cartList);
     }
     return json;
+}
+
+void JsonParser::parseOrder(const std::string &input, Order &order) {
+    nlohmann::json json = nlohmann::json::parse(input);
+    parseOrder(json, order);
+}
+
+void JsonParser::parseOrder(const nlohmann::json &input, Order &order) {
+    order.setOrderId(input["order_id"].get<int>());
+    order.setTimestamp(input["timestamp"].get<uint32_t>());
+    order.setLastModified(input["last_modified"].get<uint32_t>());
+    order.setTotalCost(input["cost"].get<int>());
+    order.setStatus(input["status"].get<int>());
+    order.setAddress(getQStringValue(input, "address"));
+    order.setComment(getQStringValue(input, "comment"));
+    auto *orderCart = new CartList();
+    orderCart->setCart(parseCart(input["cart"]));
+    order.setCart(orderCart);
+}
+
+std::shared_ptr<OrderData>
+JsonParser::parseOrderData(const std::string &input) {
+    nlohmann::json::array_t json = nlohmann::json::parse(input);
+    return parseOrderData(json);
+}
+
+std::shared_ptr<OrderData>
+JsonParser::parseOrderData(const nlohmann::json &input) {
+    auto orderData = std::make_shared<OrderData>();
+    for (const auto &order: input) {
+        orderData->push_back({order["order_id"].get<int>(),
+                              order["status"].get<int>(),
+                              order["timestamp"].get<uint32_t>()
+                             });
+    }
+    return orderData;
 }
 
 }

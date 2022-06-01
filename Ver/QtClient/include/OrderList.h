@@ -7,8 +7,18 @@
 namespace restbes {
 
 struct OrderItem {
-    int order_id = -1;
+    const int order_id = -1;
     int status = -1;
+    const uint32_t date = 0;
+
+    friend bool operator==(OrderItem a, OrderItem b) {
+        return a.order_id == b.order_id && a.status == b.status &&
+               a.date == b.date;
+    }
+
+    friend bool operator!=(OrderItem a, OrderItem b) {
+        return !(a == b);
+    }
 };
 
 using OrderData = std::vector<OrderItem>;
@@ -16,7 +26,7 @@ using OrderData = std::vector<OrderItem>;
 class OrderList : public QObject {
 Q_OBJECT
 public:
-    explicit OrderList(QObject* parent = nullptr);
+    explicit OrderList(QObject *parent = nullptr);
 
     [[nodiscard]] int size() const;
 
@@ -38,6 +48,10 @@ public:
 
     [[nodiscard]] OrderData::const_iterator end() const;
 
+    uint32_t getTimestamp() const;
+
+    void setTimestamp(uint32_t newTimestamp);
+
 signals:
 
     void beginChangeLayout();
@@ -52,11 +66,12 @@ signals:
 
     void endRemoveItem();
 
-    void itemStatusChanged(int id);
+    void itemChanged(int id);
 
 private:
     std::shared_ptr<OrderData> orderData;
     std::unordered_map<int, int> indexes;
+    uint32_t timestamp;
 };
 
 }

@@ -167,7 +167,8 @@ void postUserHandler(std::shared_ptr<restbed::Session> session,
     "item": "user",
     "user_id": 0,
     "name": "",
-    "email": ""
+    "email": "",
+    "orders": []
   }
 })"_json;
     nlohmann::json js = nlohmann::json::parse(data);
