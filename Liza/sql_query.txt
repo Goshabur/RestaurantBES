@@ -17,7 +17,7 @@ CREATE TABLE public."CLIENT"
 CREATE TABLE public."ORDER"
 (
     "ORDER_ID" serial,
-    "STATUS" text NOT NULL,
+    "STATUS" integer NOT NULL,
     "TIMESTAMP" text NOT NULL,
     "LAST_MODIFIED" text NOT NULL,
     "ITEMS" jsonb,
@@ -33,7 +33,7 @@ CREATE TABLE public."DISH"
     "IMAGE" text NOT NULL,
     "PRICE" integer NOT NULL,
     "INFO" text,
-    "STATUS" text NOT NULL,
+    "STATUS" integer NOT NULL,
     PRIMARY KEY ("IMAGE")
 );
 
