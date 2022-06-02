@@ -5,9 +5,6 @@ project(RestaurantBES)
 
 include_directories(./server/include)
 include_directories(/usr/local/include ${OPENSSL_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-include_directories(tgbot-cpp/include)
-
-add_subdirectory(tgbot-cpp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -33,35 +30,47 @@ set(PQXX_LIBRARIES pqxx_static)
 
 FetchContent_MakeAvailable(libpqxx)
 
-add_executable(RestaurantBES src/server.cpp src/admin.cpp src/client.cpp #Telegram_Bot/tgBot.cpp
+add_executable(RestaurantBES src/server.cpp
+        src/admin.cpp src/client.cpp
         server/source/user.cpp
         server/source/server.cpp
-        server/source/server_main.cpp
         server/source/handlers.cpp
         server/source/session.cpp
         )
 
 target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
 target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
-target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/lib)
+target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/lib)
 target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/lib)
 
-target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
-
+target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/source)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(RestaurantBES restbed crypto ssl pthread gflags folly double-conversion dl fmt glog)
 target_link_libraries(RestaurantBES "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)
 
-add_executable(TelegramBot Telegram_Bot/tgBot.cpp src/admin.cpp)
-
 if (CURL_FOUND)
     include_directories(${CURL_INCLUDE_DIRS})
     add_definitions(-DHAVE_CURL)
 endif ()
+
+add_subdirectory(tgbot-cpp)
+add_executable(TelegramBot Telegram_Bot/tgBot.cpp src/admin.cpp)
+
+target_link_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_link_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/fmt/lib)
+target_link_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion/lib)
+target_link_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/restbed/build)
+
+target_include_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/restbed/source)
+target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
+target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/glog/include)
+target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/fmt/include)
+target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion/include)
 
 target_link_libraries(TelegramBot "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)
 target_link_libraries(TelegramBot TgBot ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${CURL_LIBRARIES})

@@ -9,6 +9,11 @@ class Admin {
 public:
     Admin() = default;
 
+    static std::string add_new_dish(const std::string &dish_name,
+                             const std::string &dish_price,
+                             const std::string &dish_info,
+                             const std::string &image_url);
+
     static void change_order_status(const std::string &order_id,
                                     const std::string &set_status);
 
