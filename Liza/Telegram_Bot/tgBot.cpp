@@ -26,6 +26,10 @@ public:
     bool logged;
     bool waitOrderId;
     bool waitOrderStatus;
+    bool waitNewDishName;
+    bool waitNewDishPrice;
+    bool waitNewDishInfo;
+    bool waitNewDishImage;
     int orderId;
     bool waitDishId;
     bool waitDishStatus;
@@ -33,8 +37,18 @@ public:
     int dishId;
     bool toChangeDishStatus;
     bool toChangeDishPrice;
+    std::string newDishName;
+    std::string newDishPrice;
+    std::string newDishInfo;
+    std::string newDishImage;
 };
 std::unordered_map<int64_t, StateClass> state;
+
+void clear_state(int chat_id) {
+    bool logged = state[chat_id].logged;
+    state[chat_id] = StateClass();
+    state[chat_id].logged = logged;
+}
 
 bool check_number(const std::string &num) {
     if (num[0] == '0') {
@@ -64,6 +78,8 @@ int main() {
     cmd = std::make_shared<BotCommand>("set_dish_status", "Change dish status");
     commands.push_back(cmd);
     cmd = std::make_shared<BotCommand>("set_dish_price", "Change dish price");
+    commands.push_back(cmd);
+    cmd = std::make_shared<BotCommand>("add_dish", "Add new dish to menu");
     commands.push_back(cmd);
 
     bot.getApi().setMyCommands(commands);
@@ -106,6 +122,7 @@ int main() {
     keyboardOrderStatus->inlineKeyboard.push_back(row01);
 
     bot.getEvents().onCommand("start", [&](const Message::Ptr &message) {
+        clear_state(message->chat->id);
         if (state[message->chat->id].logged) {
             bot.getApi().sendMessage(message->chat->id, "Already logged in.");
         } else
@@ -121,6 +138,7 @@ int main() {
 
     bot.getEvents().onCommand(
         "set_order_status", [&](const Message::Ptr &message) {
+            clear_state(message->chat->id);
             if (state[message->chat->id].logged) {
                 std::stringstream ss(message->text);
                 std::string command, number;
@@ -195,6 +213,7 @@ int main() {
 
     bot.getEvents().onCommand("set_dish_status", [&](const Message::Ptr
                                                          &message) {
+        clear_state(message->chat->id);
         if (state[message->chat->id].logged) {
             std::stringstream ss(message->text);
             std::string command, number;
@@ -232,6 +251,7 @@ int main() {
 
     bot.getEvents().onCommand(
         "set_dish_price", [&](const Message::Ptr &message) {
+            clear_state(message->chat->id);
             if (state[message->chat->id].logged) {
                 std::stringstream ss(message->text);
                 std::string command, number;
@@ -264,6 +284,18 @@ int main() {
                                          "Access denied. Enter password.");
             }
         });
+
+    bot.getEvents().onCommand("add_dish", [&](const Message::Ptr &message) {
+        clear_state(message->chat->id);
+        if (state[message->chat->id].logged) {
+            bot.getApi().sendMessage(message->chat->id, "Enter dish name.");
+            state[message->chat->id].waitNewDishName = true;
+
+        } else {
+            bot.getApi().sendMessage(message->chat->id,
+                                     "Access denied. Enter password.");
+        }
+    });
 
     bot.getEvents().onUnknownCommand([&](const Message::Ptr &message) {
         bot.getApi().sendMessage(message->chat->id, "Unknown command.");
@@ -391,6 +423,52 @@ int main() {
                             "\" to \"" + dishStatus + "\".");
                 }
                 state[message->chat->id].waitDishStatus = false;
+
+            } else if (state[message->chat->id].waitNewDishName) {
+                state[message->chat->id].newDishName = message->text;
+                state[message->chat->id].waitNewDishName = false;
+                bot.getApi().sendMessage(message->chat->id,
+                                         "Enter dish price.");
+                state[message->chat->id].waitNewDishPrice = true;
+
+            } else if (state[message->chat->id].waitNewDishPrice) {
+                if (!check_number(message->text)) {
+                    bot.getApi().sendMessage(message->chat->id,
+                                             "Invalid price!");
+                } else {
+                    state[message->chat->id].newDishPrice = message->text;
+                    state[message->chat->id].waitNewDishPrice = false;
+                    bot.getApi().sendMessage(message->chat->id,
+                                             "Enter dish info (description).");
+                    state[message->chat->id].waitNewDishInfo = true;
+                }
+
+            } else if (state[message->chat->id].waitNewDishInfo) {
+                state[message->chat->id].newDishInfo = message->text;
+                state[message->chat->id].waitNewDishInfo = false;
+                bot.getApi().sendMessage(message->chat->id,
+                                         "Enter dish image URL.");
+                state[message->chat->id].waitNewDishImage = true;
+
+            } else if (state[message->chat->id].waitNewDishImage) {
+                // TODO (optional): check for valid url;
+                state[message->chat->id].newDishImage = message->text;
+                state[message->chat->id].waitNewDishImage = false;
+
+                std::string id = restbes::Admin::add_new_dish(
+                    state[message->chat->id].newDishName,
+                    state[message->chat->id].newDishPrice,
+                    state[message->chat->id].newDishInfo,
+                    state[message->chat->id].newDishImage);
+
+                state[message->chat->id].newDishName.clear();
+                state[message->chat->id].newDishPrice.clear();
+                state[message->chat->id].newDishInfo.clear();
+                state[message->chat->id].newDishImage.clear();
+
+                bot.getApi().sendMessage(
+                    message->chat->id,
+                    "Successfully added. Dish' id — " + id + ".");
 
             } else {
                 bot.getApi().sendMessage(message->chat->id, "Unknown command.");
