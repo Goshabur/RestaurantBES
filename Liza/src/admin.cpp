@@ -1,6 +1,6 @@
 #include "../include/admin.h"
 #include "../include/fwd.h"
-//#include "../include/order.h"
+#include "../include/order.h"
 
 namespace restbes {
 void Admin::change_order_status(const std::string &order_id,
@@ -10,7 +10,8 @@ void Admin::change_order_status(const std::string &order_id,
     connectExec(R"(UPDATE "ORDER" SET "LAST_MODIFIED" = ')" +
                 std::to_string(time_now) + "' WHERE \"ORDER_ID\"=" + order_id);
 
-    //    restbes::Order::notifySessionsOrderChanged(order_id);
+    restbes::Order order(std::stoi(order_id));
+    order.notifySessionsOrderChanged();
 }
 
 void Admin::change_dish_status(const std::string &dish_id,
@@ -20,7 +21,7 @@ void Admin::change_dish_status(const std::string &dish_id,
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 }
 
 std::string Admin::add_new_dish(const std::string &dish_name,
@@ -32,7 +33,7 @@ std::string Admin::add_new_dish(const std::string &dish_name,
         dish_name + "', " + dish_price + ", '" + dish_info + "', '" +
         image_url + "', 1) RETURNING \"DISH_ID\"");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 
     return dish_id;
 }
@@ -44,17 +45,17 @@ void Admin::change_dish_price(const std::string &dish_id,
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 }
 
-void Admin::change_dish_info(const std::string &dish_id,
-                             const std::string &set_info) {
+[[maybe_unused]] void Admin::change_dish_info(const std::string &dish_id,
+                                              const std::string &set_info) {
     connectExec(R"(UPDATE "DISH" SET "INFO" = ')" + set_info +
                 "' WHERE \"DISH_ID\"= '" + dish_id + "'");
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 }
 
 std::string Admin::getPrice(const std::string &dish_id) {

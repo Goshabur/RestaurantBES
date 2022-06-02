@@ -10,9 +10,9 @@ public:
     Admin() = default;
 
     static std::string add_new_dish(const std::string &dish_name,
-                             const std::string &dish_price,
-                             const std::string &dish_info,
-                             const std::string &image_url);
+                                    const std::string &dish_price,
+                                    const std::string &dish_info,
+                                    const std::string &image_url);
 
     static void change_order_status(const std::string &order_id,
                                     const std::string &set_status);
@@ -23,8 +23,8 @@ public:
     static void change_dish_price(const std::string &dish_id,
                                   const std::string &set_price);
 
-    static void change_dish_info(const std::string &dish_id,
-                                 const std::string &set_info);
+    [[maybe_unused]] static void change_dish_info(const std::string &dish_id,
+                                                  const std::string &set_info);
 
     static std::string getPrice(const std::string &dish_id);
 

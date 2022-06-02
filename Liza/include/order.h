@@ -16,6 +16,11 @@ private:
     OrderStatus m_order_status = CREATED;
 
 public:
+    explicit Order(id_t order_id) : m_order_id(order_id) {
+        m_client_id =
+            std::stoi(get_order_client_id(std::to_string(m_order_id)));
+    };
+
     explicit Order(id_t client_id, std::string address, std::string comment)
         : m_client_id(client_id),
           m_address(std::move(address)),
@@ -27,7 +32,7 @@ public:
         m_order_id = std::stoi(connectGet(
             R"(INSERT INTO "ORDER" ("ITEMS", "COST", "STATUS", "TIMESTAMP", "LAST_MODIFIED", "ADDRESS", "COMMENT") VALUES (')" +
             cart + "', " + std::to_string(cost) + ", " +
-            orderStatuses[m_order_status] + ", '" + std::to_string(time_now) +
+            std::to_string(m_order_status) + ", '" + std::to_string(time_now) +
             "', '" + std::to_string(time_now) + "', '" + m_address + "', " +
             m_comment + "') RETURNING \"ORDER_ID\""));
     }
@@ -80,17 +85,18 @@ public:
             order_id);
     }
 
-    static void notifySessionsOrderChanged(const std::string &order_id) {
+    void notifySessionsOrderChanged() const {
         folly::dynamic notificationJson = folly::dynamic::object;
         notificationJson["event"] = "order_changed";
         notificationJson["timestamp"] = connectGet(
             R"(SELECT "LAST_MODIFIED" FROM "ORDER" WHERE "ORDER_ID = )" +
-            order_id);
+            std::to_string(m_order_id));
         notificationJson["body"] = folly::dynamic::object;
-        notificationJson["body"]["order_id"] = std::stoi(order_id);
+        notificationJson["body"]["order_id"] = m_order_id;
 
-        std::string user_id = restbes::Order::get_order_client_id(order_id);
-        auto user = server->getUser(user_id);
+        std::string user_id =
+            restbes::Order::get_order_client_id(std::to_string(m_order_id));
+        auto user = server->getUser(std::to_string(m_client_id));
 
         user->push(restbes::generateResponse(folly::toJson(notificationJson),
                                              "application/json",
