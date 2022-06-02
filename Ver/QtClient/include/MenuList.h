@@ -37,9 +37,9 @@ public:
 
     void setMenu(std::shared_ptr<MenuData> newData);
 
-    void setTimestamp(uint32_t newTimestamp);
+    void setTimestamp(unsigned int newTimestamp);
 
-    uint32_t getTimestamp() const;
+    unsigned int getTimestamp() const;
 
 signals:
     void beginChangeLayout();
@@ -66,7 +66,7 @@ public slots:
 private:
     std::set<int> items;
     std::shared_ptr<MenuData> menuData;
-    uint32_t timestamp = 0;
+    unsigned int timestamp = 0;
 };
 
 }

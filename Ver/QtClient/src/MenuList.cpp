@@ -120,11 +120,11 @@ void MenuList::removeUnavailableItems() {
     }
 }
 
-void MenuList::setTimestamp(uint32_t newTimestamp) {
+void MenuList::setTimestamp(unsigned int newTimestamp) {
     timestamp = newTimestamp;
 }
 
-uint32_t MenuList::getTimestamp() const {
+unsigned int MenuList::getTimestamp() const {
     return timestamp;
 }
 

@@ -165,8 +165,8 @@ void JsonParser::parseOrder(const std::string &input, Order &order) {
 
 void JsonParser::parseOrder(const nlohmann::json &input, Order &order) {
     order.setOrderId(input["order_id"].get<int>());
-    order.setTimestamp(input["timestamp"].get<uint32_t>());
-    order.setLastModified(input["last_modified"].get<uint32_t>());
+    order.setTimestamp(input["timestamp"].get<unsigned int>());
+    order.setLastModified(input["last_modified"].get<unsigned int>());
     order.setTotalCost(input["cost"].get<int>());
     order.setStatus(input["status"].get<int>());
     order.setAddress(getQStringValue(input, "address"));
@@ -188,7 +188,7 @@ JsonParser::parseOrderData(const nlohmann::json &input) {
     for (const auto &order: input) {
         orderData->push_back({order["order_id"].get<int>(),
                               order["status"].get<int>(),
-                              order["timestamp"].get<uint32_t>()
+                              order["timestamp"].get<unsigned int>()
                              });
     }
     return orderData;

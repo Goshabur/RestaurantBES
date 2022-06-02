@@ -47,6 +47,8 @@ QVariant OrderModel::data(const QModelIndex &index, int role) const {
             return {item.order_id};
         case StatusRole:
             return {item.status};
+        case DateRole:
+            return {item.date};
         default:
             return {};
     }
@@ -55,7 +57,8 @@ QVariant OrderModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> OrderModel::roleNames() const {
     static QHash<int, QByteArray> names{
             {IdRole,     "id"},
-            {StatusRole, "status"}
+            {StatusRole, "status"},
+            {DateRole, "date"}
     };
     return names;
 }

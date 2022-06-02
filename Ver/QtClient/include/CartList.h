@@ -35,9 +35,9 @@ public:
 
     void setCart(std::shared_ptr<CartData> newData);
 
-    void setTimestamp(uint32_t newTimestamp);
+    void setTimestamp(unsigned int newTimestamp);
 
-    uint32_t getTimestamp() const;
+    unsigned int getTimestamp() const;
 
 signals:
     void beginChangeLayout();
@@ -59,7 +59,7 @@ signals:
 private:
     folly::Synchronized<CartData> items;
     folly::Synchronized<std::unordered_map<int, int>> indexes;
-    uint32_t timestamp = 0;
+    unsigned int timestamp = 0;
 };
 
 }

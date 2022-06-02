@@ -6,9 +6,9 @@ namespace restbes {
 
 int Order::getOrderId() const { return orderId; }
 
-uint32_t Order::getTimestamp() const { return timestamp; }
+unsigned int Order::getTimestamp() const { return timestamp; }
 
-uint32_t Order::getLastModified() const { return lastModified; }
+unsigned int Order::getLastModified() const { return lastModified; }
 
 int Order::getTotalCost() const { return totalCost; }
 
@@ -27,13 +27,13 @@ void Order::setOrderId(int newOrderId) {
     emit orderIdChanged();
 }
 
-void Order::setTimestamp(uint32_t newTimestamp) {
+void Order::setTimestamp(unsigned int newTimestamp) {
     if (timestamp == newTimestamp) return;
     timestamp = newTimestamp;
     emit timestampChanged();
 }
 
-void Order::setLastModified(uint32_t newLastModified) {
+void Order::setLastModified(unsigned int newLastModified) {
     if (lastModified == newLastModified) return;
     lastModified = newLastModified;
     emit lastModifiedChanged();

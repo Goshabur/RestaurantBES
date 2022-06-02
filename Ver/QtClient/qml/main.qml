@@ -46,13 +46,20 @@ ApplicationWindow {
         }
         onClickRegister: {
             theClient.registerUser(emailInput.text, passwordInput.text, nameInput.text)
-            mainLoader.source = "ProfilePage.qml"
+            mainLoader.setSource("ProfilePage.qml", {"popupLoader": popupLoader})
             nameInput.clear()
             emailInput.clear()
             passwordInput.clear()
             close()
         }
     }
+
+	OrderPopup {
+		id: orderPopup
+		implicitWidth: parent.width * 2/5
+        implicitHeight: parent.height *5/7
+        anchors.centerIn: parent
+	}
 
     Timer {
         interval: 100
@@ -63,7 +70,7 @@ ApplicationWindow {
     Header {
         id: header
         navigDrawer.onClickProfile: {
-            mainLoader.source = "ProfilePage.qml"
+            mainLoader.setSource("ProfilePage.qml", {"popupLoader": popupLoader})
         }
         navigDrawer.onClickMenu: {
             mainLoader.source = "MenuPage.qml"
@@ -95,6 +102,12 @@ ApplicationWindow {
         }
         source: "MenuPage.qml"
 
+    }
+
+    Loader {
+        id: popupLoader
+        anchors.fill: parent
+        source: "OrderPopup.qml"
     }
 }
 

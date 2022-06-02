@@ -83,11 +83,11 @@ void CartList::setCart(std::shared_ptr<CartData> newData) {
     emit endChangeLayout();
 }
 
-void CartList::setTimestamp(uint32_t newTimestamp) {
+void CartList::setTimestamp(unsigned int newTimestamp) {
     timestamp = newTimestamp;
 }
 
-uint32_t CartList::getTimestamp() const {
+unsigned int CartList::getTimestamp() const {
     return timestamp;
 }
 

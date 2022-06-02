@@ -11,5 +11,6 @@
         <file alias="RegisterPopup.qml">../qml/RegisterPopup.qml</file>
         <file alias="ProfilePage.qml">../qml/ProfilePage.qml</file>
         <file alias="OrderPage.qml">../qml/OrderPage.qml</file>
+        <file alias="OrderPopup.qml">../qml/OrderPopup.qml</file>
     </qresource>
 </RCC>

@@ -69,11 +69,11 @@ OrderItem OrderList::getItem(int id) const {
     return getItemAt(getIndex(id));
 }
 
-uint32_t OrderList::getTimestamp() const {
+unsigned int OrderList::getTimestamp() const {
     return timestamp;
 }
 
-void OrderList::setTimestamp(uint32_t newTimestamp) {
+void OrderList::setTimestamp(unsigned int newTimestamp) {
     timestamp = newTimestamp;
 }
 

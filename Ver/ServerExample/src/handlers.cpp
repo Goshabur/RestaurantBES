@@ -176,6 +176,25 @@ void postUserHandler(std::shared_ptr<restbed::Session> session,
     base["body"]["user_id"] = ++counter;
     base["body"]["name"] = js["body"]["name"];
     base["body"]["email"] = js["body"]["email"];
+    base["body"]["orders"] = R"(
+[
+    {
+        "order_id": 123,
+        "status": 1,
+        "timestamp": 356845
+    },
+    {
+        "order_id": 45,
+        "status": 2,
+        "timestamp": 980
+    },
+    {
+        "order_id":7,
+        "status": 1,
+        "timestamp": 98770676
+    }
+]
+)"_json;
     auto response = generateResponse(base.dump(), "application/json",
                                      Connection::CLOSE);
     session->close(*response);

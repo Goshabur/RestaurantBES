@@ -14,7 +14,8 @@ public:
 
     enum {
         IdRole = Qt::UserRole,
-        StatusRole
+        StatusRole,
+        DateRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;

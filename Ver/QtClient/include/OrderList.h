@@ -9,7 +9,7 @@ namespace restbes {
 struct OrderItem {
     const int order_id = -1;
     int status = -1;
-    const uint32_t date = 0;
+    const unsigned int date = 0;
 
     friend bool operator==(OrderItem a, OrderItem b) {
         return a.order_id == b.order_id && a.status == b.status &&
@@ -48,9 +48,9 @@ public:
 
     [[nodiscard]] OrderData::const_iterator end() const;
 
-    uint32_t getTimestamp() const;
+    unsigned int getTimestamp() const;
 
-    void setTimestamp(uint32_t newTimestamp);
+    void setTimestamp(unsigned int newTimestamp);
 
 signals:
 
@@ -69,9 +69,9 @@ signals:
     void itemChanged(int id);
 
 private:
-    std::shared_ptr<OrderData> orderData;
+    std::shared_ptr<OrderData> orderData = std::make_shared<OrderData>();
     std::unordered_map<int, int> indexes;
-    uint32_t timestamp;
+    unsigned int timestamp;
 };
 
 }

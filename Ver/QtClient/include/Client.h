@@ -58,6 +58,8 @@ public:
 
     Q_INVOKABLE restbes::CartList *getCart() const;
 
+    Q_INVOKABLE restbes::OrderList *getOrderList() const;
+
     Q_INVOKABLE void clearCart(bool notifyServer);
 
     Q_INVOKABLE void setItemCount(int id, int value);
@@ -82,7 +84,7 @@ signals:
 
     void sessionIdChanged();
 
-    void getOrder(int orderId);
+    void getOrder(restbes::Order* order);
 
 public slots:
 

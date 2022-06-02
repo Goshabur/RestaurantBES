@@ -1,124 +1,150 @@
 import QtQuick 2.5
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.1
+import Ver 1.0
 
 Popup {
-	id: root
+	id: frame
 	modal: true
-	property alias nameInput: nameInput
-	property alias emailInput: emailInput
-	property alias passwordInput: passwordInput
-	signal clickRegister
-	signal clickSignIn
+	implicitWidth: parent.width * 2/5
+    implicitHeight: parent.height *5/7
+    anchors.centerIn: parent
+	property int fontSize: 1 + (frame.width + frame.height) / 40
+	property int bigFontSize: 1 + (frame.width + frame.height) / 30
+	property Order order: Order {
+		orderId: 123
+		timestamp: 13245
+		totalCost: 30
+		status: 1
+		address: "Somewhere in Bremen"
+		comment: "Everything is good"
+		cart: theClient.getCart()
+	}
 	contentItem: Rectangle {
 		anchors.fill: parent
 		color: "pink"
 		ColumnLayout {
-			anchors.centerIn: parent
-			spacing: 10
+			width: parent.width
+			height: parent.height
+			spacing: 5
 			Label {
 				Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-				Layout.margins: 20
-				text: "Register"
+				Layout.topMargin: 20
+				text: "Order " + order.orderId
 				wrapMode: Text.WordWrap
-				font.pixelSize: 30
+				font.pixelSize: bigFontSize
 				font.bold: true
 			}
-
 			Label {
                 Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-                text: "Name:"
-                font.pixelSize: 20
+                text: "Date: " + order.timestamp
+                wrapMode: Text.WordWrap
+                font.pixelSize: fontSize
+                font.bold: false
             }
-
 			Rectangle {
-				Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-				Layout.preferredWidth: root.width *2/3
-				Layout.preferredHeight: root.width *2/3 /8
-				color: "white"
-				clip: true
-				TextInput {
-                    id: nameInput
-                    text: "Alice"
+                Layout.preferredWidth: frame.width - 20
+                Layout.preferredHeight: frame.height/3
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+                color: "lightpink"
+
+                ListView {
                     anchors.fill: parent
-                    anchors.centerIn: parent
                     anchors.margins: 10
-                    font.pixelSize: parent.height *2/3
-                    maximumLength: 40
+                    anchors.centerIn: parent
+                    spacing: 20
+                    boundsBehavior: Flickable.StopAtBounds
+                    clip: true
+                    model: MenuModel {
+                        id: cartModel
+                        menuList: theClient.getMenu()
+                        cartList: order.cart
+                        displayMode: MenuModel.ShowCart
+                    }
+                    delegate: Item {
+                        id: positionFrame
+                        width: frame.width - 20
+                        height: (frame.width - 20) / 12
+                        anchors.margins: 10
+                        anchors {
+                            horizontalCenter: parent.horizontalCenter
+                        }
+
+                        RowLayout {
+                            id: rowLayout
+                            anchors.fill: positionFrame
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            Label {
+                                id: title
+                                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                wrapMode: Text.WordWrap
+                                text: name
+                                font.pixelSize: fontSize
+                                font.bold: true
+                            }
+                            Label {
+                                id: priceTag
+                                Layout.alignment: Qt.AlignRight | Qt.AlignTop
+                                wrapMode: Text.WordWrap
+                                text: price + "x" + count
+                                font.pixelSize: fontSize
+                                font.bold: true
+                            }
+                        }
+                        Rectangle {
+                            width: parent.width
+                            height: 3
+                            anchors.bottom: parent.bottom
+                            color: "#E0FFFF"
+                        }
+                    }
                 }
             }
-
-			Label {
-				Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-				text: "Email:"
-				font.pixelSize: 20
-			}
-			Rectangle {
-				Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-				Layout.preferredWidth: root.width *2/3
-				Layout.preferredHeight: root.width *2/3 /8
-				color: "white"
-				clip: true
-				TextInput {
-                    id: emailInput
-                    text: "email@gmail.com"
-                    anchors.fill: parent
-                    anchors.centerIn: parent
-                    anchors.margins: 10
-                    font.pixelSize: parent.height *2/3
-                    maximumLength: 40
-                }
-            }
-
-			Label {
+            Label {
                 Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-                text: "Password:"
-                font.pixelSize: 20
+                text: "Total cost: " + order.totalCost
+                wrapMode: Text.WordWrap
+                font.pixelSize: fontSize
+                font.bold: false
             }
-
-			Rectangle {
-				Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-				Layout.preferredWidth: root.width *2/3
-				Layout.preferredHeight: root.width *2/3 /8
-				color: "white"
-				clip: true
-				TextInput {
-                    id: passwordInput
-                    text: "lol"
-                    anchors.fill: parent
-                    anchors.centerIn: parent
-                    anchors.margins: 10
-                    passwordMaskDelay: 400
-                    echoMode: TextInput.Password
-                    font.pixelSize: parent.height *2/3
-                    maximumLength: 40
-                }
+            Label {
+                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+                text: "Status: " + order.status
+                wrapMode: Text.WordWrap
+                font.pixelSize: fontSize
+                font.bold: false
             }
-
+            Label {
+                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+                width: frame.width
+                text: "Address: " + order.address
+                wrapMode: Text.WordWrap
+                font.pixelSize: fontSize
+                font.bold: false
+            }
+            Label {
+                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+                width: frame.width
+                text: "Comment: " + order.comment
+                wrapMode: Text.WordWrap
+                font.pixelSize: fontSize
+                font.bold: false
+            }
             Button {
-                id: registerButton
-                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
+                id: closeButton
+                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                Layout.margins: 20
                 Layout.preferredWidth: root.width *1/3
                 Layout.preferredHeight: root.width *1/3 /5
-                Layout.topMargin: 20
-                text: "Register"
+                text: "Close"
+                font.pixelSize: fontSize
+                font.bold: true
                 background: Rectangle {
                     anchors.fill: parent
                     color: "lightyellow"
                 }
-                onClicked: clickRegister()
-            }
-            Button {
-                id: signInButton
-                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-                Layout.preferredWidth: root.width *1/3
-                Layout.preferredHeight: root.width *1/3 /5
-                text: "Sign In"
-                background: Rectangle {
-                    anchors.fill: parent
-                    color: "transparent"
-                }
-                onClicked: clickSignIn()
+                onClicked: frame.close()
             }
 		}
 	}
