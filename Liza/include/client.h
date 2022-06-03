@@ -5,8 +5,9 @@
 
 using restbes::connectExec;
 using restbes::connectGet;
+using restbesCart::Cart;
 
-namespace restbes {
+namespace restbesClient {
 
 class Client {
 private:
@@ -37,13 +38,20 @@ public:
 
     [[nodiscard]] std::string cart() const;
 
-    [[nodiscard]] std::string create_order(const std::string &address, const std::string &comment) const;
-
-    static std::string get_client_name(const std::string &client_id);
-
-    static std::string get_client_email(const std::string &client_id);
-
-    static std::string get_client_cart(const std::string &client_id);
+    [[nodiscard]] std::string create_order(const std::string &address,
+                                           const std::string &comment) const;
 };
 
-}  // namespace restbes
+std::string get_client_name(const std::string &client_id);
+
+std::string get_client_email(const std::string &client_id);
+
+std::string get_client_cart(const std::string &client_id);
+
+std::string get_client_id_by_email(const std::string &email);
+
+bool check_user_exists(const std::string &email);
+
+bool check_sign_in(const std::string &email, const std::string &password);
+
+}  // namespace restbesClient

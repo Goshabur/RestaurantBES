@@ -3,8 +3,11 @@ include(FetchContent)
 cmake_minimum_required(VERSION 3.20)
 project(RestaurantBES)
 
-include_directories(./server/include)
+include_directories(../Ver/QtClient/include)
 include_directories(/usr/local/include ${OPENSSL_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+
+include_directories(../Ver/ServerExample/include)
+include_directories(./include)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,13 +33,32 @@ set(PQXX_LIBRARIES pqxx_static)
 
 FetchContent_MakeAvailable(libpqxx)
 
-add_executable(RestaurantBES src/server.cpp
-        src/admin.cpp src/client.cpp
-        server/src/user.cpp
-        server/src/server_main.cpp
-        server/src/server.cpp
-        server/src/handlers.cpp
-        server/src/session.cpp
+add_library(Server
+        ../Ver/ServerExample/src/user.cpp
+        ../Ver/ServerExample/src/server.cpp
+        ../Ver/ServerExample/src/session.cpp
+        )
+
+target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
+
+target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/restbed/restbed/source)
+
+target_link_libraries(Server restbed crypto ssl pthread gflags folly dl fmt)
+
+add_executable(RestaurantBES
+        src/admin.cpp
+        src/client.cpp
+        src/main.cpp
+        src/handlers.cpp
+        src/cart.cpp
+        src/order.cpp
+        src/server.cpp
         )
 
 target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
@@ -51,7 +73,7 @@ target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/inst
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/source)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/restbed/source)
 
-target_link_libraries(RestaurantBES restbed crypto ssl pthread gflags folly double-conversion dl fmt glog)
+target_link_libraries(RestaurantBES Server restbed crypto ssl pthread gflags folly double-conversion dl fmt glog)
 target_link_libraries(RestaurantBES "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)
 
 if (CURL_FOUND)
@@ -90,15 +112,15 @@ FetchContent_MakeAvailable(json)
 include_directories(QtClient/include)
 
 add_library(QtMenu STATIC
-        QtClient/include/MenuItem.h
-        QtClient/include/MenuList.h
-        QtClient/src/MenuList.cpp)
+        ../Ver/QtClient/include/MenuItem.h
+        ../Ver/QtClient/include/MenuList.h
+        ../Ver/QtClient/src/MenuList.cpp)
 target_link_libraries(QtMenu
         Qt5::Widgets)
 
 add_library(QtCart STATIC
-        QtClient/include/CartList.h
-        QtClient/src/CartList.cpp)
+        ../Ver/QtClient/include/CartList.h
+        ../Ver/QtClient/src/CartList.cpp)
 target_link_libraries(QtCart
         Qt5::Widgets)
 target_link_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
@@ -110,16 +132,16 @@ target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/f
 target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
 target_include_directories(QtCart PRIVATE $ENV{HOME}/restbed/restbed/source)
 
-target_link_libraries(QtCart folly dl fmt gflags)
+target_link_libraries(QtCart folly dl fmt gflags double-conversion glog)
 
 add_library(QtOrder
-        QtClient/include/OrderList.h
-        QtClient/src/OrderList.cpp)
+        ../Ver/QtClient/include/OrderList.h
+        ../Ver/QtClient/src/OrderList.cpp)
 target_link_libraries(QtOrder
         Qt5::Widgets)
 
 add_library(JsonParser STATIC
-        QtClient/src/jsonParser.cpp
+        ../Ver/QtClient/src/jsonParser.cpp
         )
 target_link_libraries(JsonParser
         nlohmann_json::nlohmann_json
@@ -132,19 +154,20 @@ target_include_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/install
 target_link_libraries(JsonParser folly dl fmt)
 
 add_executable(QtClient
-        QtClient/src/main.cpp
-        QtClient/src/qml.qrc
-        QtClient/src/images.qrc
+        ../Ver/QtClient/src/main.cpp
+        ../Ver/QtClient/src/qml.qrc
+        ../Ver/QtClient/src/images.qrc
 
-        QtClient/include/Client.h
-        QtClient/src/Client.cpp
+        ../Ver/QtClient/include/Client.h
+        ../Ver/QtClient/src/Client.cpp
 
-        QtClient/include/MenuModel.h
-        QtClient/src/MenuModel.cpp
+        ../Ver/QtClient/include/MenuModel.h
+        ../Ver/QtClient/src/MenuModel.cpp
 
-        QtClient/include/OrderModel.h
-        QtClient/src/OrderModel.cpp
-        QtClient/include/Order.h QtClient/src/Order.cpp)
+        ../Ver/QtClient/include/OrderModel.h
+        ../Ver/QtClient/src/OrderModel.cpp
+        ../Ver/QtClient/include/Order.h
+        ../Ver/QtClient/src/Order.cpp)
 
 target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
 target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)

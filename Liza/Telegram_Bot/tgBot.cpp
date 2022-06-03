@@ -149,7 +149,7 @@ int main() {
                                              "Enter order id.");
                     state[message->chat->id].waitOrderId = true;
                 } else {
-                    if (!restbes::check_order_exists(number)) {
+                    if (!restbesAdmin::check_order_exists(number)) {
                         bot.getApi().sendMessage(message->chat->id,
                                                  "No order with such id.");
                         state[message->chat->id].waitOrderId = true;
@@ -158,7 +158,7 @@ int main() {
                             message->chat->id,
                             "Choose new status (current status: \"" +
                                 restbes::orderStatuses
-                                    [restbes::Admin::getOrderStatus(number)] +
+                                    [restbesAdmin::getOrderStatus(number)] +
                                 "\").",
                             false, 0, keyboardOrderStatus);
                         state[message->chat->id].orderId = std::stoi(number);
@@ -176,13 +176,13 @@ int main() {
         [&bot](const TgBot::CallbackQuery::Ptr &query) {
             if (state[query->message->chat->id].waitOrderStatus) {
                 std::string orderStatus = query->data;
-                int oldStatus = restbes::Admin::getOrderStatus(
+                int oldStatus = restbesAdmin::getOrderStatus(
                     std::to_string(state[query->message->chat->id].orderId));
                 if (restbes::orderStatuses[oldStatus] == query->data) {
                     bot.getApi().sendMessage(query->message->chat->id,
                                              "Nothing to change.");
                 } else {
-                    restbes::Admin::change_order_status(
+                    restbesAdmin::change_order_status(
                         std::to_string(state[query->message->chat->id].orderId),
                         std::to_string(restbes::orderStatusesMap[query->data]));
                     bot.getApi().sendMessage(
@@ -193,13 +193,13 @@ int main() {
                 state[query->message->chat->id].waitOrderStatus = false;
             } else if (state[query->message->chat->id].waitDishStatus) {
                 std::string dishStatus = query->data;
-                int oldStatus = restbes::Admin::getDishStatus(
+                int oldStatus = restbesAdmin::getDishStatus(
                     std::to_string(state[query->message->chat->id].dishId));
                 if (restbes::dishStatuses[oldStatus] == query->data) {
                     bot.getApi().sendMessage(query->message->chat->id,
                                              "Nothing to change.");
                 } else {
-                    restbes::Admin::change_dish_status(
+                    restbesAdmin::change_dish_status(
                         std::to_string(state[query->message->chat->id].dishId),
                         std::to_string(restbes::dishStatusesMap[query->data]));
                     bot.getApi().sendMessage(
@@ -224,7 +224,7 @@ int main() {
                 state[message->chat->id].waitDishId = true;
                 state[message->chat->id].toChangeDishStatus = true;
             } else {
-                if (!restbes::check_dish_exists(number)) {
+                if (!restbesAdmin::check_dish_exists(number)) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "No dish with such id.");
                     state[message->chat->id].waitDishId = true;
@@ -233,9 +233,9 @@ int main() {
                     bot.getApi().sendMessage(
                         message->chat->id,
                         "Choose new status for " +
-                            restbes::Admin::getDishName(number) +
+                            restbesAdmin::getDishName(number) +
                             " (id: " + number + ", current status: \"" +
-                            restbes::dishStatuses[restbes::Admin::getDishStatus(
+                            restbes::dishStatuses[restbesAdmin::getDishStatus(
                                 number)] +
                             "\").\n",
                         false, 0, keyboardDishStatus);
@@ -263,7 +263,7 @@ int main() {
                     state[message->chat->id].waitDishId = true;
                     state[message->chat->id].toChangeDishPrice = true;
                 } else {
-                    if (!restbes::check_dish_exists(number)) {
+                    if (!restbesAdmin::check_dish_exists(number)) {
                         bot.getApi().sendMessage(message->chat->id,
                                                  "No dish with such id.");
                         state[message->chat->id].waitDishId = true;
@@ -272,9 +272,9 @@ int main() {
                         bot.getApi().sendMessage(
                             message->chat->id,
                             "Enter new price for " +
-                                restbes::Admin::getDishName(number) +
+                                restbesAdmin::getDishName(number) +
                                 " (id: " + number + ", current price: " +
-                                restbes::Admin::getPrice(number) + ").");
+                                restbesAdmin::getPrice(number) + ").");
                         state[message->chat->id].waitDishPrice = true;
                         state[message->chat->id].waitDishId = false;
                     }
@@ -303,17 +303,17 @@ int main() {
 
     bot.getEvents().onNonCommandMessage([&](const Message::Ptr &message) {
         if (!state[message->chat->id].logged &&
-            !restbes::check_admin(message->text)) {
+            !restbesAdmin::check_admin(message->text)) {
             bot.getApi().sendMessage(message->chat->id, "Wrong password.");
 
         } else if (!state[message->chat->id].logged &&
-                   restbes::check_admin(message->text)) {
+                   restbesAdmin::check_admin(message->text)) {
             state[message->chat->id].logged = true;
             bot.getApi().sendMessage(message->chat->id, "Success.");
 
         } else {
             if (state[message->chat->id].waitOrderId) {
-                if (!restbes::check_order_exists(message->text)) {
+                if (!restbesAdmin::check_order_exists(message->text)) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "No order with such id.");
 
@@ -322,7 +322,7 @@ int main() {
                         message->chat->id,
                         "Choose new status (current status: \"" +
                             restbes::orderStatuses
-                                [restbes::Admin::getOrderStatus(
+                                [restbesAdmin::getOrderStatus(
                                     message->text)] +
                             "\").",
                         false, 0, keyboardOrderStatus);
@@ -333,13 +333,13 @@ int main() {
 
             } else if (state[message->chat->id].waitOrderStatus) {
                 std::string orderStatus = message->text;
-                int oldStatus = restbes::Admin::getOrderStatus(
+                int oldStatus = restbesAdmin::getOrderStatus(
                     std::to_string(state[message->chat->id].orderId));
                 if (restbes::orderStatuses[oldStatus] == message->text) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "Nothing to change.");
                 } else {
-                    restbes::Admin::change_order_status(
+                    restbesAdmin::change_order_status(
                         std::to_string(state[message->chat->id].orderId),
                         std::to_string(
                             restbes::orderStatusesMap[message->text]));
@@ -351,7 +351,7 @@ int main() {
                 state[message->chat->id].waitOrderStatus = false;
 
             } else if (state[message->chat->id].waitDishId) {
-                if (!restbes::check_dish_exists(message->text)) {
+                if (!restbesAdmin::check_dish_exists(message->text)) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "No dish with such id.");
 
@@ -361,9 +361,9 @@ int main() {
                         bot.getApi().sendMessage(
                             message->chat->id,
                             "Enter new price for " +
-                                restbes::Admin::getDishName(message->text) +
+                                restbesAdmin::getDishName(message->text) +
                                 " (id: " + message->text + ", current price: " +
-                                restbes::Admin::getPrice(message->text) + ").");
+                                restbesAdmin::getPrice(message->text) + ").");
                         state[message->chat->id].waitDishPrice = true;
                         state[message->chat->id].waitDishId = false;
 
@@ -371,11 +371,11 @@ int main() {
                         bot.getApi().sendMessage(
                             message->chat->id,
                             "Choose new status for " +
-                                restbes::Admin::getDishName(message->text) +
+                                restbesAdmin::getDishName(message->text) +
                                 " (id: " + message->text +
                                 ", current status: \"" +
                                 restbes::dishStatuses
-                                    [restbes::Admin::getDishStatus(
+                                    [restbesAdmin::getDishStatus(
                                         message->text)] +
                                 "\").\n",
                             false, 0, keyboardDishStatus);
@@ -389,13 +389,13 @@ int main() {
                     bot.getApi().sendMessage(message->chat->id,
                                              "Invalid price!");
                 } else {
-                    std::string oldPrice = restbes::Admin::getPrice(
+                    std::string oldPrice = restbesAdmin::getPrice(
                         std::to_string(state[message->chat->id].dishId));
                     if (oldPrice == message->text) {
                         bot.getApi().sendMessage(message->chat->id,
                                                  "Nothing to change.");
                     } else {
-                        restbes::Admin::change_dish_price(
+                        restbesAdmin::change_dish_price(
                             std::to_string(state[message->chat->id].dishId),
                             message->text);
                         bot.getApi().sendMessage(message->chat->id,
@@ -408,13 +408,13 @@ int main() {
 
             } else if (state[message->chat->id].waitDishStatus) {
                 std::string dishStatus = message->text;
-                int oldStatus = restbes::Admin::getDishStatus(
+                int oldStatus = restbesAdmin::getDishStatus(
                     std::to_string(state[message->chat->id].dishId));
                 if (restbes::dishStatuses[oldStatus] == dishStatus) {
                     bot.getApi().sendMessage(message->chat->id,
                                              "Nothing to change.");
                 } else {
-                    restbes::Admin::change_dish_status(
+                    restbesAdmin::change_dish_status(
                         std::to_string(state[message->chat->id].dishId),
                         dishStatus);
                     bot.getApi().sendMessage(
@@ -455,7 +455,7 @@ int main() {
                 state[message->chat->id].newDishImage = message->text;
                 state[message->chat->id].waitNewDishImage = false;
 
-                std::string id = restbes::Admin::add_new_dish(
+                std::string id = restbesAdmin::add_new_dish(
                     state[message->chat->id].newDishName,
                     state[message->chat->id].newDishPrice,
                     state[message->chat->id].newDishInfo,

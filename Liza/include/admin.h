@@ -3,35 +3,35 @@
 #include <cstdlib>
 #include "string"
 
-namespace restbes {
+namespace restbesAdmin {
 
-class Admin {
-public:
-    Admin() = default;
+bool check_admin(const std::string &password);
 
-    static std::string add_new_dish(const std::string &dish_name,
-                                    const std::string &dish_price,
-                                    const std::string &dish_info,
-                                    const std::string &image_url);
+bool check_dish_exists(const std::string &dish_id);
 
-    static void change_order_status(const std::string &order_id,
-                                    const std::string &set_status);
+bool check_order_exists(const std::string &order_id);
 
-    static void change_dish_status(const std::string &dish_name,
-                                   const std::string &set_status);
+std::string add_new_dish(const std::string &dish_name,
+                         const std::string &dish_price,
+                         const std::string &dish_info,
+                         const std::string &image_url);
 
-    static void change_dish_price(const std::string &dish_id,
-                                  const std::string &set_price);
+void change_order_status(const std::string &order_id,
+                         const std::string &set_status);
 
-    [[maybe_unused]] static void change_dish_info(const std::string &dish_id,
-                                                  const std::string &set_info);
+void change_dish_status(const std::string &dish_name,
+                        const std::string &set_status);
 
-    static std::string getPrice(const std::string &dish_id);
+void change_dish_price(const std::string &dish_id,
+                       const std::string &set_price);
 
-    static int getDishStatus(const std::string &dish_id);
+void change_dish_info(const std::string &dish_id, const std::string &set_info);
 
-    static int getOrderStatus(const std::string &order_id);
+std::string getPrice(const std::string &dish_id);
 
-    static std::string getDishName(const std::string &dish_id);
-};
+int getDishStatus(const std::string &dish_id);
+
+int getOrderStatus(const std::string &order_id);
+
+std::string getDishName(const std::string &dish_id);
 }  // namespace restbes
