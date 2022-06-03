@@ -23,23 +23,17 @@ int OrderList::getId(int index) const {
     return getItemAt(index).order_id;
 }
 
-bool OrderList::setItemStatus(int id, int value) {
+void OrderList::setItemStatus(int id, int value, unsigned int date) {
     if (indexes.count(id)) {
-        auto status = getItemStatus(id);
-        if (status == value) return false;
+        if (getItemStatus(id) == value) return;
         orderData->at(getIndex(id)).status = value;
-        goto SUCCESS;
+        emit itemChanged(id);
     } else {
         emit beginInsertItem(size());
         indexes.insert({id, size()});
-        orderData->push_back({id, value});
+        orderData->push_back({id, value, date});
         emit endInsertItem();
-        goto SUCCESS;
     }
-
-    SUCCESS:
-    emit itemChanged(id);
-    return true;
 }
 
 void OrderList::setOrderData(std::shared_ptr<OrderData> newData) {

@@ -84,7 +84,9 @@ signals:
 
     void sessionIdChanged();
 
-    void getOrder(restbes::Order* order);
+    void newOrder(restbes::Order* order);
+
+    void orderStatusChanged(restbes::Order* order);
 
 public slots:
 

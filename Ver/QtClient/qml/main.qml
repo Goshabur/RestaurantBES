@@ -28,9 +28,16 @@ ApplicationWindow {
             register.open()
         }
         onClickSignIn: {
-	        theClient.signInUser(emailInput.text, passwordInput.text)
-	        emailInput.clear()
-            passwordInput.clear()
+	        var success = theClient.signInUser(emailInput.text, passwordInput.text)
+            if (success) {
+                mainLoader.setSource("ProfilePage.qml", {"popupLoader": popupLoader})
+                passwordInput.clear()
+                emailInput.clear()
+                close()
+            } else {
+                windowColor = "red"
+                timer.start()
+            }
         }
     }
 
@@ -45,21 +52,19 @@ ApplicationWindow {
             signIn.open()
         }
         onClickRegister: {
-            theClient.registerUser(emailInput.text, passwordInput.text, nameInput.text)
-            mainLoader.setSource("ProfilePage.qml", {"popupLoader": popupLoader})
-            nameInput.clear()
-            emailInput.clear()
-            passwordInput.clear()
-            close()
+            var success = theClient.registerUser(emailInput.text, passwordInput.text, nameInput.text)
+            if (success) {
+                mainLoader.setSource("ProfilePage.qml", {"popupLoader": popupLoader})
+	            nameInput.clear()
+	            emailInput.clear()
+	            passwordInput.clear()
+	            close()
+            } else {
+				windowColor = "darkred"
+				timer.start()
+			}
         }
     }
-
-	OrderPopup {
-		id: orderPopup
-		implicitWidth: parent.width * 2/5
-        implicitHeight: parent.height *5/7
-        anchors.centerIn: parent
-	}
 
     Timer {
         interval: 100
@@ -85,7 +90,11 @@ ApplicationWindow {
             theClient.clearCart(Client.NotifyServer)
         }
         cartDrawer.onClickOrder: {
-            mainLoader.setSource("OrderPage.qml", {"mainLoader": mainLoader})
+            if (theClient.regStatus) {
+                mainLoader.setSource("OrderPage.qml", {"mainLoader": mainLoader})
+            } else {
+                signIn.open()
+            }
         }
         onClickLogo: {
             mainLoader.source = "MenuPage.qml"
@@ -101,7 +110,6 @@ ApplicationWindow {
             bottom: parent.bottom
         }
         source: "MenuPage.qml"
-
     }
 
     Loader {
@@ -109,5 +117,27 @@ ApplicationWindow {
         anchors.fill: parent
         source: "OrderPopup.qml"
     }
+
+    Loader {
+	    id: notificationLoader
+	    width: parent.width * 2/6
+        height: parent.height *2/12
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 20
+	    source: "OrderStatusPopup.qml"
+	}
+
+	Connections {
+		target: theClient
+		onNewOrder: {
+			popupLoader.setSource("OrderPopup.qml", {"order": order})
+			popupLoader.item.open()
+		}
+		onOrderStatusChanged: {
+			notificationLoader.setSource("OrderStatusPopup.qml", {"order": order})
+			notificationLoader.item.open()
+		}
+	}
 }
 

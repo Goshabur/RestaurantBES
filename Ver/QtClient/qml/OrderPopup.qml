@@ -20,6 +20,20 @@ Popup {
 		comment: "Everything is good"
 		cart: theClient.getCart()
 	}
+
+	function timeConverter(UNIX_timestamp){
+        var a = new Date(UNIX_timestamp * 1000);
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var year = a.getFullYear();
+        var month = a.getMonth() + 1;
+        var date = a.getDate();
+        var hour = a.getHours();
+        var min = a.getMinutes();
+        var sec = a.getSeconds();
+        var time = date + '.' + month + '.' + year + ' ' + hour + ':' + min;
+        return time;
+    }
+
 	contentItem: Rectangle {
 		anchors.fill: parent
 		color: "pink"
@@ -37,7 +51,7 @@ Popup {
 			}
 			Label {
                 Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-                text: "Date: " + order.timestamp
+                text: timeConverter(order.timestamp)
                 wrapMode: Text.WordWrap
                 font.pixelSize: fontSize
                 font.bold: false

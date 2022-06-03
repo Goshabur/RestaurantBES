@@ -43,8 +43,6 @@ Client::Client(std::string server, int _port, QObject *parent)
     getMenuFromServer();
     setItemCount(1, 2);
     setItemCount(2, 1);
-    orderList->setItemStatus(24356, 1);
-    orderList->setItemStatus(8, 1);
 }
 
 bool Client::getRegStatus() const {
@@ -102,6 +100,9 @@ void Client::setSessionId(int newId) {
 bool Client::registerUser(const QString &regEmail,
                           const QString &regPassword,
                           const QString &regName) {
+    // TODO: remove the next line
+//    return false;
+
     std::string jsonReq = JsonParser::generateRegistrationQuery(
             regEmail,
             regPassword,
@@ -114,10 +115,19 @@ bool Client::registerUser(const QString &regEmail,
     if (!response) return false;
     qDebug() << "Authorized user";
     qDebug() << response->body.c_str() << '\n';
+
+    // TODO: remove the next 3 lines
+//    auto* order = new Order();
+//    order->setCart(cartList.get());
+//    emit orderStatusChanged(order);
+
     return parseUserFromJson(response->body);
 }
 
 bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
+    // TODO: remove the next line
+//    return false;
+
     auto response = postingClient->Post("/user",
                                         *headers.rlock(),
                                         JsonParser::generateSignInQuery(
@@ -175,8 +185,11 @@ void Client::startPolling() {
                 }
                 case OrderChanged: {
                     if (timestamp <= orderList->getTimestamp()) break;
-                    emit getOrder(getOrderFromServer(
-                            json["body"]["order_id"].get<int>()));
+                    int orderId = json["body"]["order_id"].get<int>();
+                    auto* order = getOrderFromServer(orderId);
+                    if (!order) break;
+                    if (order->getStatus() == 1) emit newOrder(order);
+                    else emit orderStatusChanged(order);
                     break;
                 }
                 case MenuChanged: {
@@ -311,8 +324,9 @@ Order *Client::getOrderFromServer(int orderId) {
                                        orderHeaders);
     if (!response) {
         throw std::runtime_error("Can't connect to the server");
-    } else if (response->status != 200) {
-        throw std::runtime_error("Can't get the order from /order");
+    } else if (response->status != 200 || response->body.empty()) {
+        qDebug() << "Can't get the order" << orderId << "from /order\n";
+        return nullptr;
     }
     qDebug() << "Got the order " << orderId << " from the server";
     qDebug() << response->body.c_str() << '\n';
@@ -320,8 +334,8 @@ Order *Client::getOrderFromServer(int orderId) {
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto *order = new Order();
     JsonParser::parseOrder(jsonBody["body"], *order);
-    orderList->setItemStatus(order->getOrderId(), order->getStatus());
-    orderList->setTimestamp(order->getTimestamp());
+    orderList->setItemStatus(order->getOrderId(), order->getStatus(), order->getTimestamp());
+    orderList->setTimestamp(order->getLastModified());
     return order;
 }
 

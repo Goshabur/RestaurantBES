@@ -38,7 +38,7 @@ public:
 
     [[nodiscard]] int getId(int index) const;
 
-    bool setItemStatus(int id, int value);
+    void setItemStatus(int id, int value, unsigned int date = 0);
 
     void setOrderData(std::shared_ptr<OrderData> newData);
 
@@ -71,7 +71,7 @@ signals:
 private:
     std::shared_ptr<OrderData> orderData = std::make_shared<OrderData>();
     std::unordered_map<int, int> indexes;
-    unsigned int timestamp;
+    unsigned int timestamp = 0;
 };
 
 }

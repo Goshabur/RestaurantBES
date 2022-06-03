@@ -76,13 +76,13 @@ signals:
 private slots:
 
 private:
-    int orderId;
-    unsigned int timestamp;
-    unsigned int lastModified;
-    int totalCost;
-    int status;
-    QString address;
-    QString comment;
+    int orderId = -1;
+    unsigned int timestamp = 0;
+    unsigned int lastModified = 0;
+    int totalCost = 0;
+    int status = 0;
+    QString address = "addrs";
+    QString comment = "cmnt";
     CartList* cart;
 };
 

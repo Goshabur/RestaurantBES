@@ -7,11 +7,22 @@ Popup {
 	modal: true
     property alias emailInput: emailInput
     property alias passwordInput: passwordInput
+    property alias timer: timer
+    property color windowColor: "pink"
+
     signal clickRegister
     signal clickSignIn
+
+    Timer {
+        id: timer
+        interval: 200
+        running: false
+        onTriggered: windowColor = "pink"
+    }
+
 	contentItem: Rectangle {
 		anchors.fill: parent
-		color: "pink"
+		color: windowColor
 		ColumnLayout {
 			anchors.centerIn: parent
 			spacing: 10
