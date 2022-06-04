@@ -40,12 +40,12 @@ int main(int argc, char *argv[]) {
     qmlRegisterType<restbes::Client>("Ver", 1, 0, "Client");
     qmlRegisterType<restbes::Order>("Ver", 1, 0, "Order");
 
-    auto client = std::make_shared<restbes::Client>(fLS::FLAGS_server,
+    auto client = new restbes::Client(fLS::FLAGS_server,
                                                     fLI::FLAGS_port);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("theClient"),
-                                             client.get());
+                                             client);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     engine.load(url);

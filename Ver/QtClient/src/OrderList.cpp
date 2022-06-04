@@ -36,9 +36,9 @@ void OrderList::setItemStatus(int id, int value, unsigned int date) {
     }
 }
 
-void OrderList::setOrderData(std::shared_ptr<OrderData> newData) {
+void OrderList::setOrderData(OrderData* newData) {
     emit beginChangeLayout();
-    orderData = std::move(newData);
+    orderData = newData;
     indexes.clear();
     int i = 0;
     for (auto item: *orderData) {

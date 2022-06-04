@@ -40,7 +40,7 @@ public:
 
     void setItemStatus(int id, int value, unsigned int date = 0);
 
-    void setOrderData(std::shared_ptr<OrderData> newData);
+    void setOrderData(OrderData* newData);
 
     [[nodiscard]] int getItemStatus(int id) const;
 
@@ -69,7 +69,7 @@ signals:
     void itemChanged(int id);
 
 private:
-    std::shared_ptr<OrderData> orderData = std::make_shared<OrderData>();
+    OrderData* orderData = new OrderData();
     std::unordered_map<int, int> indexes;
     unsigned int timestamp = 0;
 };

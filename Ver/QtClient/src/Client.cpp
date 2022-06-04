@@ -163,7 +163,7 @@ bool Client::parseUserFromJson(const std::string &input) {
 }
 
 MenuList *Client::getMenu() const {
-    return menuList.get();
+    return menuList;
 }
 
 void Client::startPolling() {
@@ -212,7 +212,7 @@ void Client::startPolling() {
 }
 
 restbes::CartList *Client::getCart() const {
-    return cartList.get();
+    return cartList;
 }
 
 void Client::getMenuFromServer() {
@@ -348,7 +348,7 @@ void Client::getOrderFromServer(int orderId) {
 }
 
 OrderList *Client::getOrderList() const {
-    return orderList.get();
+    return orderList;
 }
 
 }

@@ -51,13 +51,13 @@ MenuData* JsonParser::parseMenu(const nlohmann::json &json) {
     return menuData;
 }
 
-std::shared_ptr<CartData> JsonParser::parseCart(const std::string &input) {
+CartData* JsonParser::parseCart(const std::string &input) {
     nlohmann::json jsonCart = nlohmann::json::parse(input);
     return parseCart(jsonCart);
 }
 
-std::shared_ptr<CartData> JsonParser::parseCart(const nlohmann::json &json) {
-    auto cartData = std::make_shared<CartData>();
+CartData* JsonParser::parseCart(const nlohmann::json &json) {
+    auto* cartData = new CartData();
     const nlohmann::json::array_t &cartArray = json.at("contents");
     for (const auto &item: cartArray) {
         cartData->push_back(parseCartItem(item));
@@ -176,15 +176,15 @@ void JsonParser::parseOrder(const nlohmann::json &input, Order &order) {
     order.setCart(orderCart);
 }
 
-std::shared_ptr<OrderData>
+OrderData*
 JsonParser::parseOrderData(const std::string &input) {
     nlohmann::json::array_t json = nlohmann::json::parse(input);
     return parseOrderData(json);
 }
 
-std::shared_ptr<OrderData>
+OrderData*
 JsonParser::parseOrderData(const nlohmann::json &input) {
-    auto orderData = std::make_shared<OrderData>();
+    auto* orderData = new OrderData();
     for (const auto &order: input) {
         orderData->push_back({order["order_id"].get<int>(),
                               order["status"].get<int>(),

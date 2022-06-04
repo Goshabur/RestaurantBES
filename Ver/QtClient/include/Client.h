@@ -102,9 +102,9 @@ private:
     std::string address;
     int port;
     folly::Synchronized<httplib::Headers> headers;
-    std::shared_ptr<CartList> cartList = std::make_shared<CartList>();
-    std::shared_ptr<MenuList> menuList = std::make_shared<MenuList>();
-    std::shared_ptr<OrderList> orderList = std::make_shared<OrderList>();
+    CartList* cartList =   new CartList();
+    MenuList* menuList =   new MenuList();
+    OrderList* orderList = new OrderList();
 
     std::shared_ptr<httplib::Client> postingClient;
     std::shared_ptr<httplib::Client> pollingClient;

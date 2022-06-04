@@ -33,7 +33,7 @@ public:
 
     [[nodiscard]] int getItemCount(int id) const;
 
-    void setCart(std::shared_ptr<CartData> newData);
+    void setCart(CartData* newData);
 
     void setTimestamp(unsigned int newTimestamp);
 
