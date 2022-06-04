@@ -76,18 +76,23 @@ ApplicationWindow {
         id: header
         navigDrawer.onClickProfile: {
             mainLoader.setSource("ProfilePage.qml", {"popupLoader": popupLoader})
+            navigDrawer.close()
         }
         navigDrawer.onClickMenu: {
             mainLoader.source = "MenuPage.qml"
+            navigDrawer.close()
         }
         navigDrawer.onClickSignIn: {
             signIn.open()
+            navigDrawer.close()
         }
         navigDrawer.onClickRegister: {
             register.open()
+            navigDrawer.close()
         }
         cartDrawer.onClickClearCart: {
             theClient.clearCart(Client.NotifyServer)
+            cartDrawer.close()
         }
         cartDrawer.onClickOrder: {
             if (theClient.regStatus) {
@@ -95,6 +100,7 @@ ApplicationWindow {
             } else {
                 signIn.open()
             }
+            cartDrawer.close()
         }
         onClickLogo: {
             mainLoader.source = "MenuPage.qml"

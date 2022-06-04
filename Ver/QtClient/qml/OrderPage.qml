@@ -7,9 +7,6 @@ Item {
 	id: base
     anchors.fill: parent
     property Loader mainLoader
-    //property alias addressInput: addressInput
-    //property alias commentInput: commentInput
-    //signal clickOrder
 
     Label {
         id: header
@@ -51,6 +48,7 @@ Item {
                     id: addressInput
                     anchors.fill: parent
                     anchors.centerIn: parent
+                    text: "Somewhere in your mind"
                     font.pixelSize: parent.height * 9/10
                     maximumLength: 40
                 }
@@ -83,6 +81,7 @@ Item {
                 color: "lightpink"
 
                 ListView {
+                    flickDeceleration: 14000000 / parent.height
                     anchors.fill: parent
                     anchors.margins: 20
                     spacing: 20

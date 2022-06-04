@@ -28,6 +28,7 @@ Drawer {
                 color: "lightpink"
 
 				ListView {
+					flickDeceleration: 14000000 / parent.height
 					anchors.fill: parent
 					anchors.margins: 20
 					spacing: 20

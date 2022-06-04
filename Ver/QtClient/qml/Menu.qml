@@ -21,6 +21,8 @@ Rectangle {
             rightMargin: menuView.anchors.leftMargin
             bottomMargin: 20
         }
+        flickDeceleration: 14000000 / parent.height
+        //maximumVelocity: 10
         boundsBehavior: Flickable.StopAtBounds
         clip: true
 
