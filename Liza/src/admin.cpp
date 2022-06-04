@@ -50,7 +50,7 @@ void change_order_status(const std::string &order_id,
                 std::to_string(time_now) + "' WHERE \"ORDER_ID\"=" + order_id);
 
     restbesOrder::Order order(std::stoi(order_id));
-    //    restbes::notifySessionsOrderChanged(order_id);
+//        restbes::notifySessionsOrderChanged(order_id);
 }
 
 void change_dish_status(const std::string &dish_id,

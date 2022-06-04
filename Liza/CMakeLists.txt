@@ -87,7 +87,16 @@ if (CURL_FOUND)
 endif ()
 
 add_subdirectory(tgbot-cpp)
-add_executable(TelegramBot Telegram_Bot/tgBot.cpp src/admin.cpp src/order.cpp src/cart.cpp src/client.cpp src/server.cpp)
+add_executable(TelegramBot
+        Telegram_Bot/tgBot.cpp
+        Telegram_Bot/tgBot_main.cpp
+        Telegram_Bot/tgBot.h
+        src/admin.cpp
+        src/order.cpp
+        src/cart.cpp
+        src/client.cpp
+        src/server.cpp
+        )
 
 target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
 target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/lib)
@@ -163,7 +172,6 @@ target_link_libraries(JsonParser folly dl fmt)
 add_executable(QtClient
         ../Ver/QtClient/src/main.cpp
         ../Ver/QtClient/src/qml.qrc
-        ../Ver/QtClient/src/images.qrc
 
         ../Ver/QtClient/include/Client.h
         ../Ver/QtClient/src/Client.cpp
