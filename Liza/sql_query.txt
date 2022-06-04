@@ -32,7 +32,6 @@ CREATE TABLE public."DISH"
     "DISH_NAME" text NOT NULL,
     "IMAGE" text NOT NULL,
     "PRICE" integer NOT NULL,
-    "INFO" text,
     "STATUS" integer NOT NULL,
     PRIMARY KEY ("IMAGE")
 );
@@ -64,7 +63,8 @@ CREATE TABLE public."CART"
 (
     "CLIENT_ID" integer NOT NULL,
     "CART" jsonb,
-    "COST" integer NOT NULL
+    "COST" integer NOT NULL,
+    "TIMESTAMP" integer NOT NULL
 );
 
 ALTER TABLE IF EXISTS public."HISTORY"
@@ -90,3 +90,15 @@ ALTER TABLE IF EXISTS public."ORDER"
 
 ALTER TABLE IF EXISTS public."CLIENT"
     OWNER to postgres;
+    
+    
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Салат \"Цезарь\"", "https://ogorodland.ru/wp-content/uploads/2021/11/salat-cezar-klassicheskii-s-kuricei_1611309080_15_max.jpg", 220, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Гренки с чесноком", "https://kartinkin.net/uploads/posts/2021-03/1616105233_38-p-grenki-krasivaya-yeda-41.jpg", 180, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Цыпленок табака", "https://avatars.mds.yandex.net/get-zen_doc/1706621/pub_5e95bca41fba7924e80011f8_5e95bebe6dfdce0b138062fd/scale_1200", 880, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Жареный картофель", "https://kartinkin.net/uploads/posts/2021-03/1616105233_38-p-grenki-krasivaya-yeda-41.jpg", 245, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Овощи на гриле", "https://grill-shop-russia.ru/images/2020/08/ovoh.jpg", 550, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Фрикадельки с брусничным соусом", "https://www.gekas.se/wp-content/uploads/2016/10/koettbullar-webb.jpg", 490, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Чизкейк с малиной", "https://mykaleidoscope.ru/uploads/posts/2021-09/1632238679_2-mykaleidoscope-ru-p-chizkeik-s-malinoi-krasivo-foto-2.jpg", 290, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Пирожное \"Картошка\"", "https://mykaleidoscope.ru/uploads/posts/2021-10/1633107605_9-mykaleidoscope-ru-p-krasivoe-pirozhnoe-kartoshka-krasivo-foto-11.jpg", 150, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Брауни", "https://i.imgur.com/SPHmdBR.jpg", 390, 1);
+INSERT INTO "DISH" ("DISH_NAME", "IMAGE", "PRICE", "STATUS") VALUES ("Лимонад", "https://www.kamis-pripravy.ru/upload/medialibrary/bba/bba792ac9e39c6ae5999886c177cd5fe.jpg", 235, 1);
