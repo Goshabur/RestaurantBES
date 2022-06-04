@@ -108,11 +108,12 @@ bool Client::registerUser(const QString &regEmail,
             regPassword,
             regName,
             *cartList);
+    qDebug() << jsonReq.c_str();
     auto response = postingClient->Post("/user",
                                         *headers.rlock(),
                                         jsonReq,
                                         "application/json");
-    if (!response) return false;
+    if (!response || response->status != 200) return false;
     qDebug() << "Authorized user";
     qDebug() << response->body.c_str() << '\n';
 
@@ -135,7 +136,7 @@ bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
                                                 regPassword,
                                                 *cartList),
                                         "application/json");
-    if (!response) return false;
+    if (!response || response->status != 200) return false;
     qDebug() << "Authorized user";
     qDebug() << response->body.c_str() << '\n';
     return parseUserFromJson(response->body);
@@ -146,6 +147,7 @@ bool Client::parseUserFromJson(const nlohmann::json &json) {
     setRegStatus(true);
     const nlohmann::json &user = json.at("body");
     setUserId(user.at("user_id"));
+    headers.wlock()->find("User-ID")->second = std::to_string(userId);
     setName(JsonParser::getQStringValue(user, "name"));
     setEmail(JsonParser::getQStringValue(user, "email"));
     orderList->setOrderData(JsonParser::parseOrderData(user["orders"]));
