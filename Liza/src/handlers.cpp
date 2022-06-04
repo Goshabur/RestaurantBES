@@ -436,8 +436,8 @@ std::string show_menu() {
         item["name"] = row[1].as<std::string>();
         item["image"] = row[2].as<std::string>();
         item["price"] = row[3].as<int>();
-        item["info"] = row[4].as<std::string>();
-        item["status"] = row[5].as<int>();
+//        item["info"] = row[4].as<std::string>();
+        item["status"] = row[4].as<int>();
         response["body"]["contents"].push_back(item);
     }
 

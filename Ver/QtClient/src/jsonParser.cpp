@@ -18,8 +18,8 @@ MenuItem JsonParser::parseDish(const nlohmann::json &json) {
             json.at("dish_id"),
             getQStringValue(json, "name"),
             getQStringValue(json, "image"),
-            json.at("price"),
-            getQStringValue(json, "info"),
+            json.at("price"), "",
+//            getQStringValue(json, "info"),
             json.at("status")
     };
 }

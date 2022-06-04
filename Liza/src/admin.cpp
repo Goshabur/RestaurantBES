@@ -3,6 +3,9 @@
 #include "../include/order.h"
 #include "handlers.h"
 
+using restbes::connectExec;
+using restbes::connectGet;
+using restbes::connectGet_pqxx_result;
 using restbes::time_now;
 
 namespace restbesAdmin {
@@ -12,8 +15,8 @@ bool check_admin(const std::string &password) {
             R"(SELECT "ADMIN_ID" FROM "ADMINISTRATOR" WHERE "PASSWORD" = crypt(')" +
             password + "', \"PASSWORD\")");
     } catch (...) {
-        restbes::server_request_log << "Failed attempt to log in as an administrator."
-                           << std::endl;
+        restbes::server_request_log
+            << "Failed attempt to log in as an administrator." << std::endl;
         return false;
     }
     return true;
@@ -47,7 +50,7 @@ void change_order_status(const std::string &order_id,
                 std::to_string(time_now) + "' WHERE \"ORDER_ID\"=" + order_id);
 
     restbesOrder::Order order(std::stoi(order_id));
-    restbes::notifySessionsOrderChanged(order_id);
+    //    restbes::notifySessionsOrderChanged(order_id);
 }
 
 void change_dish_status(const std::string &dish_id,
@@ -57,7 +60,7 @@ void change_dish_status(const std::string &dish_id,
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    restbes::notifySessionsMenuChanged();
+    //    restbes::notifySessionsMenuChanged();
 }
 
 std::string add_new_dish(const std::string &dish_name,
@@ -69,7 +72,7 @@ std::string add_new_dish(const std::string &dish_name,
         dish_name + "', " + dish_price + ", '" + dish_info + "', '" +
         image_url + "', 1) RETURNING \"DISH_ID\"");
 
-    restbes::notifySessionsMenuChanged();
+    //    restbes::notifySessionsMenuChanged();
 
     return dish_id;
 }
@@ -81,7 +84,7 @@ void change_dish_price(const std::string &dish_id,
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    restbes::notifySessionsMenuChanged();
+    //    restbes::notifySessionsMenuChanged();
 }
 
 void change_dish_info(const std::string &dish_id, const std::string &set_info) {
@@ -90,7 +93,7 @@ void change_dish_info(const std::string &dish_id, const std::string &set_info) {
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    restbes::notifySessionsMenuChanged();
+    //    restbes::notifySessionsMenuChanged();
 }
 
 std::string getPrice(const std::string &dish_id) {
@@ -113,4 +116,4 @@ std::string getDishName(const std::string &dish_id) {
     return connectGet(R"(SELECT "DISH_NAME" FROM "DISH" WHERE "DISH_ID" = ')" +
                       dish_id + "'");
 }
-}  // namespace restbes
+}  // namespace restbesAdmin

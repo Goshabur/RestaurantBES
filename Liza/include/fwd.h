@@ -3,7 +3,6 @@
 #include <ctime>
 #include <fstream>
 #include <iomanip>
-#include <restbed>
 #include <string>
 #include <vector>
 #include "folly/dynamic.h"
