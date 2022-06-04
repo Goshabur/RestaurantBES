@@ -13,7 +13,6 @@ bool check_order_exists(const std::string &order_id);
 
 std::string add_new_dish(const std::string &dish_name,
                          const std::string &dish_price,
-                         const std::string &dish_info,
                          const std::string &image_url);
 
 void change_order_status(const std::string &order_id,
@@ -34,4 +33,5 @@ int getDishStatus(const std::string &dish_id);
 int getOrderStatus(const std::string &order_id);
 
 std::string getDishName(const std::string &dish_id);
-}  // namespace restbes
+
+}  // namespace restbesAdmin

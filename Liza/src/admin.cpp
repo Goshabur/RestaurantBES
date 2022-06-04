@@ -49,7 +49,7 @@ void change_order_status(const std::string &order_id,
     connectExec(R"(UPDATE "ORDER" SET "LAST_MODIFIED" = ')" +
                 std::to_string(time_now) + "' WHERE \"ORDER_ID\"=" + order_id);
 
-//    restbesOrder::Order order(std::stoi(order_id));
+    //    restbesOrder::Order order(std::stoi(order_id));
 
     restbes::notifySessionsOrderChanged(order_id);
 }
@@ -69,8 +69,8 @@ std::string add_new_dish(const std::string &dish_name,
                          const std::string &image_url) {
     std::string dish_id = connectGet(
         R"(INSERT INTO "DISH" ("DISH_NAME", "PRICE", "IMAGE", "STATUS") VALUES (')" +
-        dish_name + "', " + dish_price + ", '" +
-        image_url + "', 1) RETURNING \"DISH_ID\"");
+        dish_name + "', " + dish_price + ", '" + image_url +
+        "', 1) RETURNING \"DISH_ID\"");
 
     restbes::notifySessionsMenuChanged();
 
@@ -116,4 +116,5 @@ std::string getDishName(const std::string &dish_id) {
     return connectGet(R"(SELECT "DISH_NAME" FROM "DISH" WHERE "DISH_ID" = ')" +
                       dish_id + "'");
 }
+
 }  // namespace restbesAdmin

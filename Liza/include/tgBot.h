@@ -53,4 +53,5 @@ void tgBotPolling();
 void clear_state(int chat_id);
 
 bool check_number(const std::string &num);
+
 }  // namespace TelegramBot

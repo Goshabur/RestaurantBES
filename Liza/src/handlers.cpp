@@ -52,7 +52,8 @@ void postAuthorizationMethodHandler(
         if (restbesClient::check_sign_in(user_email, password)) {
             user_id = restbesClient::get_client_id_by_email(user_email);
             Server::addUser(user_id, server);
-            if (receivingSession->getUserId().empty()) server->assignSession(session_id, user_id);
+            if (receivingSession->getUserId().empty())
+                server->assignSession(session_id, user_id);
             auto user = server->getUser(user_id);
             std::string user_name = restbesClient::get_client_name(user_id);
 
@@ -68,16 +69,15 @@ void postAuthorizationMethodHandler(
                 pqxx::result result_order = connectGet_pqxx_result(
                     R"(SELECT * FROM "ORDER" WHERE "ORDER_ID" = )" +
                     std::to_string(row[1].as<int>()));
-                    dynamic item = dynamic::object;
-                    item["order_id"] = row[1].as<int>();
-                    item["status"] =
-                        restbesOrder::get_order_status(std::to_string(item["order_id"].asInt()));
-                    item["timestamp"] = restbesOrder::get_order_timestamp(
-                        std::to_string(item["order_id"].asInt()));
-                    item["last_modified"] =
-                        restbesOrder::get_order_last_modified(
-                            std::to_string(item["order_id"].asInt()));
-                    responseJson["body"]["orders"].push_back(item);
+                dynamic item = dynamic::object;
+                item["order_id"] = row[1].as<int>();
+                item["status"] = restbesOrder::get_order_status(
+                    std::to_string(item["order_id"].asInt()));
+                item["timestamp"] = restbesOrder::get_order_timestamp(
+                    std::to_string(item["order_id"].asInt()));
+                item["last_modified"] = restbesOrder::get_order_last_modified(
+                    std::to_string(item["order_id"].asInt()));
+                responseJson["body"]["orders"].push_back(item);
             }
 
             session->close(*generateResponse(folly::toJson(responseJson) + '\n',
@@ -138,7 +138,8 @@ void postAuthorizationMethodHandler(
                                          user_cart);
             user_id = client.get_client_id();
             Server::addUser(user_id, server);
-            if (receivingSession->getUserId().empty()) server->assignSession(session_id, user_id);
+            if (receivingSession->getUserId().empty())
+                server->assignSession(session_id, user_id);
             auto user = server->getUser(user_id);
 
             responseJson["body"]["user_id"] = std::stoi(user_id);
@@ -437,11 +438,9 @@ std::string show_menu() {
         item["name"] = row[1].as<std::string>();
         item["image"] = row[2].as<std::string>();
         item["price"] = row[3].as<int>();
-//        item["info"] = row[4].as<std::string>();
         item["status"] = row[4].as<int>();
         response["body"]["contents"].push_back(item);
     }
-
     return folly::toJson(response);
 }
 

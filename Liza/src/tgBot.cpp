@@ -16,11 +16,11 @@ bool check_number(const std::string &num) {
     return std::all_of(num.begin(), num.end(),
                        [](char x) { return isdigit(x); });
 }
+
 }  // namespace TelegramBot
 
 void TelegramBot::tgBotPolling() {
-    std::ifstream infile(
-        "/home/lizaerem/RestaurantBES/Liza/Secure/TOKEN.txt");
+    std::ifstream infile("/home/lizaerem/RestaurantBES/Liza/Secure/TOKEN.txt");
     std::string TOKEN;
     infile >> TOKEN;
     TgBot::Bot bot(TOKEN);
@@ -415,7 +415,6 @@ void TelegramBot::tgBotPolling() {
                 std::string id = restbesAdmin::add_new_dish(
                     state[message->chat->id].newDishName,
                     state[message->chat->id].newDishPrice,
-                    state[message->chat->id].newDishInfo,
                     state[message->chat->id].newDishImage);
 
                 state[message->chat->id].newDishName.clear();
