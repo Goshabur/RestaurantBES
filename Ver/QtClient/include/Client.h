@@ -29,12 +29,14 @@ public:
         NotifyServer = true,
         DontNotifyServer = false
     };
+
     Q_ENUM(ServerNotification);
 
     enum OrderType {
         Notification,
         WindowPopup
     };
+
     Q_ENUM(OrderType);
 
     explicit Client(QObject *parent = nullptr);
@@ -77,6 +79,7 @@ public:
     Q_INVOKABLE void createOrder(const QString &addr, const QString &commnt);
 
 private slots:
+
     void getOrderFromServer(int orderId, int type);
 
 signals:
@@ -91,9 +94,9 @@ signals:
 
     void sessionIdChanged();
 
-    void showOrder(restbes::Order* order);
+    void showOrder(restbes::Order *order);
 
-    void orderStatusChanged(restbes::Order* order);
+    void orderStatusChanged(restbes::Order *order);
 
     void getOrder(int orderId, int type);
 
@@ -108,9 +111,9 @@ private:
     std::string address;
     int port;
     folly::Synchronized<httplib::Headers> headers;
-    CartList* cartList =   new CartList();
-    MenuList* menuList =   new MenuList();
-    OrderList* orderList = new OrderList();
+    CartList *cartList = new CartList();
+    MenuList *menuList = new MenuList();
+    OrderList *orderList = new OrderList();
 
     std::shared_ptr<httplib::Client> postingClient;
     std::shared_ptr<httplib::Client> pollingClient;

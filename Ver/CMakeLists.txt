@@ -13,6 +13,16 @@ set(FMT fmt-rsFOHg1lnSE4YEAOp4DXj1C2TkL43wt032fPM5H9wFE)
 set(GLOG glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o)
 set(DOUBLE_CONVERSIONS double-conversion-yz-tOOI9shRwd_c7D6KsoefZQgMsavQLPYRzthcDoSM)
 
+set(FOLLY_INCLUDE ${FOLLY_DIRECTORY}/folly/include
+${FOLLY_DIRECTORY}/${GLOG}/include
+${FOLLY_DIRECTORY}/${FMT}/include
+${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
+
+set(FOLLY_LIB ${FOLLY_DIRECTORY}/folly/lib
+${FOLLY_DIRECTORY}/${GLOG}/lib
+${FOLLY_DIRECTORY}/${FMT}/lib
+${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/lib)
+
 find_package(Qt5 COMPONENTS Widgets Quick Qml REQUIRED)
 
 FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
@@ -28,20 +38,16 @@ add_library(QtMenu STATIC
         QtClient/src/MenuList.cpp)
 target_link_libraries(QtMenu
         Qt5::Widgets)
+target_link_directories(QtMenu PRIVATE ${FOLLY_LIB})
+target_include_directories(QtMenu PRIVATE ${FOLLY_INCLUDE})
 
 add_library(QtCart STATIC
         QtClient/include/CartList.h
         QtClient/src/CartList.cpp)
 target_link_libraries(QtCart
         Qt5::Widgets)
-target_link_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
-target_link_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
-
-target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/folly/include)
-target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
-target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
-target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
-target_include_directories(QtCart PRIVATE $ENV{HOME}/restbed/restbed/source)
+target_link_directories(QtCart PRIVATE ${FOLLY_LIB})
+target_include_directories(QtCart PRIVATE ${FOLLY_INCLUDE})
 
 target_link_libraries(QtCart folly dl fmt gflags double-conversion glog)
 
@@ -50,6 +56,8 @@ add_library(QtOrder
         QtClient/src/OrderList.cpp)
 target_link_libraries(QtOrder
         Qt5::Widgets)
+target_link_directories(QtOrder PRIVATE ${FOLLY_LIB})
+target_include_directories(QtOrder PRIVATE ${FOLLY_INCLUDE})
 
 add_library(JsonParser STATIC
         QtClient/src/jsonParser.cpp
@@ -79,14 +87,8 @@ add_executable(QtClient
         QtClient/include/Order.h
         QtClient/src/Order.cpp)
 
-target_link_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
-target_link_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
-
-target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/folly/include)
-target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
-target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
-target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
-target_include_directories(QtClient PRIVATE $ENV{HOME}/restbed/restbed/source)
+target_link_directories(QtClient PRIVATE ${FOLLY_LIB})
+target_include_directories(QtClient PRIVATE ${FOLLY_INCLUDE})
 
 target_link_libraries(QtClient crypto ssl pthread folly dl fmt gflags)
 target_link_libraries(QtClient Qt5::Widgets Qt5::Quick)

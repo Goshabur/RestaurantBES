@@ -2,7 +2,9 @@
 
 #include <QObject>
 
-#include <memory>
+#include <folly/Synchronized.h>
+
+#include <atomic>
 
 namespace restbes {
 
@@ -40,7 +42,7 @@ public:
 
     void setItemStatus(int id, int value, unsigned int date = 0);
 
-    void setOrderData(OrderData* newData);
+    void setOrderData(OrderData newData);
 
     [[nodiscard]] int getItemStatus(int id) const;
 
@@ -69,9 +71,9 @@ signals:
     void itemChanged(int id);
 
 private:
-    OrderData* orderData = new OrderData();
-    std::unordered_map<int, int> indexes;
-    unsigned int timestamp = 0;
+    folly::Synchronized<OrderData> orderData;
+    folly::Synchronized<std::unordered_map<int, int>> indexes;
+    std::atomic<unsigned int> timestamp = 0;
 };
 
 }

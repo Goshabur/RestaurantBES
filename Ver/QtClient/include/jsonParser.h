@@ -23,21 +23,21 @@ public:
 
     static CartItem parseCartItem(const nlohmann::json &json);
 
-    static MenuData* parseMenu(const std::string &input);
+    static MenuData parseMenu(const std::string &input);
 
-    static MenuData* parseMenu(const nlohmann::json &json);
+    static MenuData parseMenu(const nlohmann::json &json);
 
-    static CartData* parseCart(const std::string &input);
+    static CartData parseCart(const std::string &input);
 
-    static CartData* parseCart(const nlohmann::json &input);
+    static CartData parseCart(const nlohmann::json &input);
 
     static void parseOrder(const std::string &input, Order &order);
 
     static void parseOrder(const nlohmann::json &input, Order &order);
 
-    static OrderData* parseOrderData(const std::string &input);
+    static OrderData parseOrderData(const std::string &input);
 
-    static OrderData* parseOrderData(const nlohmann::json &input);
+    static OrderData parseOrderData(const nlohmann::json &input);
 
     static std::string generateRegistrationQuery(const QString &email,
                                                  const QString &password,

@@ -5,8 +5,9 @@
 
 #include "MenuItem.h"
 
+#include <folly/Synchronized.h>
+
 #include <set>
-#include <memory>
 
 namespace restbes {
 
@@ -16,8 +17,6 @@ class MenuList : public QObject {
 Q_OBJECT
 public:
     explicit MenuList(QObject *parent = nullptr);
-
-    [[nodiscard]] MenuData* getMenuData() const;
 
     [[nodiscard]] int size() const;
 
@@ -35,13 +34,14 @@ public:
 
     [[nodiscard]] MenuItem getItem(int id) const;
 
-    void setMenu(MenuData* newData);
+    void setMenu(MenuData newData);
 
     void setTimestamp(unsigned int newTimestamp);
 
     unsigned int getTimestamp() const;
 
 signals:
+
     void beginChangeLayout();
 
     void endChangeLayout();
@@ -57,16 +57,17 @@ signals:
     void itemChanged(int id);
 
 public slots:
-    void insertItem(restbes::MenuItem item);
+
+    void insertItem(const restbes::MenuItem& item);
 
     void removeItem(int id);
 
     void removeUnavailableItems();
 
 private:
-    std::set<int> items;
-    MenuData* menuData;
-    unsigned int timestamp = 0;
+    folly::Synchronized<std::set<int>> items;
+    folly::Synchronized<MenuData> menuData;
+    std::atomic<unsigned int> timestamp = 0;
 };
 
 }

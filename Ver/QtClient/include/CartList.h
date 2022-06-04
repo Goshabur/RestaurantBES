@@ -5,7 +5,7 @@
 
 #include <folly/Synchronized.h>
 
-#include <memory>
+#include <atomic>
 #include <unordered_map>
 
 #include "CartListFWD.h"
@@ -33,11 +33,15 @@ public:
 
     [[nodiscard]] int getItemCount(int id) const;
 
-    void setCart(CartData* newData);
+    void setCart(CartData newData);
 
     void setTimestamp(unsigned int newTimestamp);
 
     unsigned int getTimestamp() const;
+
+    friend bool operator==(const CartList &a, const CartList &b) {
+        return a.timestamp == b.timestamp && a.items.copy() == b.items.copy();
+    }
 
 signals:
     void beginChangeLayout();
@@ -59,7 +63,7 @@ signals:
 private:
     folly::Synchronized<CartData> items;
     folly::Synchronized<std::unordered_map<int, int>> indexes;
-    unsigned int timestamp = 0;
+    std::atomic<unsigned int> timestamp = 0;
 };
 
 }

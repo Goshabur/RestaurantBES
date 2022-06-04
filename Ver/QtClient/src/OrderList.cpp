@@ -6,17 +6,18 @@ OrderList::OrderList(QObject *parent) : QObject(parent) {
 }
 
 int OrderList::size() const {
-    return orderData->size();
+    return orderData.rlock()->size();
 }
 
 OrderItem OrderList::getItemAt(int index) const {
     if (index < 0 || index >= size()) return {};
-    return orderData->at(index);
+    return orderData.rlock()->at(index);
 }
 
 int OrderList::getIndex(int id) const {
-    if (indexes.count(id) == 0) return -1;
-    return indexes.at(id);
+    auto lockedIndexes = indexes.rlock();
+    if (lockedIndexes->count(id) == 0) return -1;
+    return lockedIndexes->at(id);
 }
 
 int OrderList::getId(int index) const {
@@ -24,25 +25,27 @@ int OrderList::getId(int index) const {
 }
 
 void OrderList::setItemStatus(int id, int value, unsigned int date) {
-    if (indexes.count(id)) {
+    if (indexes.rlock()->count(id)) {
         if (getItemStatus(id) == value) return;
-        orderData->at(getIndex(id)).status = value;
+        orderData.wlock()->at(getIndex(id)).status = value;
         emit itemChanged(id);
     } else {
         emit beginInsertItem(size());
-        indexes.insert({id, size()});
-        orderData->push_back({id, value, date});
+        indexes.wlock()->insert({id, size()});
+        orderData.wlock()->push_back({id, value, date});
         emit endInsertItem();
     }
 }
 
-void OrderList::setOrderData(OrderData* newData) {
+void OrderList::setOrderData(OrderData newData) {
     emit beginChangeLayout();
-    orderData = newData;
-    indexes.clear();
+    auto lockedOrderData = orderData.wlock();
+    auto lockedIndexes = indexes.wlock();
+    *lockedOrderData = std::move(newData);
+    lockedIndexes->clear();
     int i = 0;
-    for (auto item: *orderData) {
-        indexes[item.order_id] = i++;
+    for (const auto &item: *lockedOrderData) {
+        lockedIndexes->operator[](item.order_id) = i++;
     }
     emit endChangeLayout();
 }
@@ -52,11 +55,11 @@ int OrderList::getItemStatus(int id) const {
 }
 
 OrderData::const_iterator OrderList::begin() const {
-    return orderData->begin();
+    return orderData.rlock()->begin();
 }
 
 OrderData::const_iterator OrderList::end() const {
-    return orderData->end();
+    return orderData.rlock()->end();
 }
 
 OrderItem OrderList::getItem(int id) const {

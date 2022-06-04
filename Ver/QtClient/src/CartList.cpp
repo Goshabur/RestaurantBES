@@ -75,9 +75,9 @@ int CartList::getId(int index) const {
     return items.rlock()->at(index).item_id;
 }
 
-void CartList::setCart(CartData* newData) {
+void CartList::setCart(CartData newData) {
     emit beginChangeLayout();
-    *items.wlock() = *newData;
+    *items.wlock() = std::move(newData);
     updateIndexes();
     emit indexesChanged();
     emit endChangeLayout();

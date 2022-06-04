@@ -36,31 +36,31 @@ CartItem JsonParser::parseCartItem(const nlohmann::json &json) {
     };
 }
 
-MenuData* JsonParser::parseMenu(const std::string &input) {
+MenuData JsonParser::parseMenu(const std::string &input) {
     nlohmann::json jsonMenu = nlohmann::json::parse(input);
     return parseMenu(jsonMenu);
 }
 
-MenuData* JsonParser::parseMenu(const nlohmann::json &json) {
-    auto* menuData = new MenuData();
+MenuData JsonParser::parseMenu(const nlohmann::json &json) {
+    MenuData menuData;
     const nlohmann::json::array_t &dishArray = json.at("contents");
     for (const auto &dish: dishArray) {
         auto dishItem = parseDish(dish);
-        menuData->insert({dishItem.id, std::move(dishItem)});
+        menuData.insert({dishItem.id, std::move(dishItem)});
     }
     return menuData;
 }
 
-CartData* JsonParser::parseCart(const std::string &input) {
+CartData JsonParser::parseCart(const std::string &input) {
     nlohmann::json jsonCart = nlohmann::json::parse(input);
     return parseCart(jsonCart);
 }
 
-CartData* JsonParser::parseCart(const nlohmann::json &json) {
-    auto* cartData = new CartData();
+CartData JsonParser::parseCart(const nlohmann::json &json) {
+    CartData cartData;
     const nlohmann::json::array_t &cartArray = json.at("contents");
     for (const auto &item: cartArray) {
-        cartData->push_back(parseCartItem(item));
+        cartData.push_back(parseCartItem(item));
     }
     return cartData;
 }
@@ -171,22 +171,22 @@ void JsonParser::parseOrder(const nlohmann::json &input, Order &order) {
     order.setStatus(input["status"].get<int>());
     order.setAddress(getQStringValue(input, "address"));
     order.setComment(getQStringValue(input, "comment"));
-    auto *orderCart = new CartList();
+    auto* orderCart = new CartList();
     orderCart->setCart(parseCart(input["cart"]));
     order.setCart(orderCart);
 }
 
-OrderData*
+OrderData
 JsonParser::parseOrderData(const std::string &input) {
     nlohmann::json::array_t json = nlohmann::json::parse(input);
     return parseOrderData(json);
 }
 
-OrderData*
+OrderData
 JsonParser::parseOrderData(const nlohmann::json &input) {
-    auto* orderData = new OrderData();
+    OrderData orderData;
     for (const auto &order: input) {
-        orderData->push_back({order["order_id"].get<int>(),
+        orderData.push_back({order["order_id"].get<int>(),
                               order["status"].get<int>(),
                               order["timestamp"].get<unsigned int>()
                              });
