@@ -49,8 +49,9 @@ void change_order_status(const std::string &order_id,
     connectExec(R"(UPDATE "ORDER" SET "LAST_MODIFIED" = ')" +
                 std::to_string(time_now) + "' WHERE \"ORDER_ID\"=" + order_id);
 
-    restbesOrder::Order order(std::stoi(order_id));
-//        restbes::notifySessionsOrderChanged(order_id);
+//    restbesOrder::Order order(std::stoi(order_id));
+
+    restbes::notifySessionsOrderChanged(order_id);
 }
 
 void change_dish_status(const std::string &dish_id,
@@ -60,19 +61,18 @@ void change_dish_status(const std::string &dish_id,
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 }
 
 std::string add_new_dish(const std::string &dish_name,
                          const std::string &dish_price,
-                         const std::string &dish_info,
                          const std::string &image_url) {
     std::string dish_id = connectGet(
-        R"(INSERT INTO "DISH" ("DISH_NAME", "PRICE", "INFO", "IMAGE", "STATUS") VALUES (')" +
-        dish_name + "', " + dish_price + ", '" + dish_info + "', '" +
+        R"(INSERT INTO "DISH" ("DISH_NAME", "PRICE", "IMAGE", "STATUS") VALUES (')" +
+        dish_name + "', " + dish_price + ", '" +
         image_url + "', 1) RETURNING \"DISH_ID\"");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 
     return dish_id;
 }
@@ -84,7 +84,7 @@ void change_dish_price(const std::string &dish_id,
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 }
 
 void change_dish_info(const std::string &dish_id, const std::string &set_info) {
@@ -93,7 +93,7 @@ void change_dish_info(const std::string &dish_id, const std::string &set_info) {
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(time_now) + "'");
 
-    //    restbes::notifySessionsMenuChanged();
+    restbes::notifySessionsMenuChanged();
 }
 
 std::string getPrice(const std::string &dish_id) {

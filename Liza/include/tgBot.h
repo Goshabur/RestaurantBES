@@ -8,8 +8,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "../include/admin.h"
-#include "../include/fwd.h"
+#include "admin.h"
+#include "fwd.h"
 #include "tgbot/tgbot.h"
 
 using TgBot::BotCommand;
