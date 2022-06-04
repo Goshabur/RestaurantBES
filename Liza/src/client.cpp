@@ -14,7 +14,7 @@ std::string Client::cart() const {
 std::string Client::create_order(const std::string &address,
                                  const std::string &comment) const {
     restbesOrder::Order order(m_id, address, comment);
-    restbesCart::set_cart(std::to_string(m_id), "{}", 0);
+    restbesCart::set_cart(std::to_string(m_id), "[]", 0);
     restbesOrder::update_order_history(order.get_order_id(), m_id);
 
     return std::to_string(order.get_order_id());

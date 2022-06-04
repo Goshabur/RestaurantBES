@@ -17,7 +17,7 @@ Q_OBJECT
 public:
     explicit MenuList(QObject *parent = nullptr);
 
-    [[nodiscard]] std::shared_ptr<MenuData> getMenuData() const;
+    [[nodiscard]] MenuData* getMenuData() const;
 
     [[nodiscard]] int size() const;
 
@@ -35,7 +35,7 @@ public:
 
     [[nodiscard]] MenuItem getItem(int id) const;
 
-    void setMenu(std::shared_ptr<MenuData> newData);
+    void setMenu(MenuData* newData);
 
     void setTimestamp(unsigned int newTimestamp);
 
@@ -65,7 +65,7 @@ public slots:
 
 private:
     std::set<int> items;
-    std::shared_ptr<MenuData> menuData;
+    MenuData* menuData;
     unsigned int timestamp = 0;
 };
 

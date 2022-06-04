@@ -12,10 +12,15 @@ add_executable(Server
         ServerExample/src/handlers.cpp
         ServerExample/src/session.cpp)
 target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
 
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
 target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
+target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+
+target_include_directories(Server PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(Server restbed crypto ssl pthread gflags folly dl fmt)
 
@@ -41,15 +46,23 @@ add_library(QtMenu STATIC
 target_link_libraries(QtMenu
         Qt5::Widgets)
 
-
+# library
 add_library(QtCart STATIC
         QtClient/include/CartList.h
         QtClient/src/CartList.cpp)
 target_link_libraries(QtCart
         Qt5::Widgets)
+# end library
+
 target_link_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_link_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
+
 target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
+target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
+target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
+target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(QtCart PRIVATE $ENV{HOME}/restbed/restbed/source)
+
 target_link_libraries(QtCart folly dl fmt gflags)
 
 
@@ -89,13 +102,15 @@ add_executable(QtClient
         QtClient/include/Order.h QtClient/src/Order.cpp)
 
 target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
+target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
+
 
 target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
+target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
+target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
+target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(QtClient PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(QtClient crypto ssl pthread folly dl fmt gflags)
 target_link_libraries(QtClient Qt5::Widgets Qt5::Quick)
-target_link_libraries(QtClient QtMenu QtCart QtOrder JsonParser)
-
-
-
+target_link_libraries(QtClient QtMenu QtCart QtOrder JsonParser) # linking

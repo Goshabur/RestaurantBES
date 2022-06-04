@@ -118,7 +118,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            var order = theClient.getOrderFromServer(id);
+                            var order = theClient.getOrder(id);
                             if (order) {
 	                            popupLoader.setSource("OrderPopup.qml", {"order": order})
 	                            popupLoader.item.open()

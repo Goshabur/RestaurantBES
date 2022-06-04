@@ -60,7 +60,7 @@ ApplicationWindow {
 	            passwordInput.clear()
 	            close()
             } else {
-				windowColor = "darkred"
+				windowColor = "red"
 				timer.start()
 			}
         }
@@ -69,7 +69,7 @@ ApplicationWindow {
     Timer {
         interval: 100
         running: true
-        onTriggered: register.open()
+        onTriggered: signIn.open()
     }
 
     Header {

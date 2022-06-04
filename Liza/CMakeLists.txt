@@ -29,7 +29,12 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/jtv/libpqxx.git
         GIT_TAG a6b1d60e74c1427c8ac2324b85cd4a0dc2068332
 )
+
 set(PQXX_LIBRARIES pqxx_static)
+set(FOLLY_DIRECTORY $ENV{HOME}/folly_installed/installed/)
+set(FMT fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE)
+set(GLOG glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o)
+set(DOUBLE_CONVERSIONS double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI)
 
 FetchContent_MakeAvailable(libpqxx)
 
@@ -39,14 +44,14 @@ add_library(Server
         ../Ver/ServerExample/src/session.cpp
         )
 
-target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
-target_link_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
+target_link_directories(Server PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
+target_link_directories(Server PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
 
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
-target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
-target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
-target_include_directories(Server PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(Server PRIVATE ${FOLLY_DIRECTORY}/folly/include)
+target_include_directories(Server PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
+target_include_directories(Server PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
+target_include_directories(Server PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(Server restbed crypto ssl pthread gflags folly dl fmt)
@@ -61,15 +66,15 @@ add_executable(RestaurantBES
         src/server.cpp
         )
 
-target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
-target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
-target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/lib)
-target_link_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/lib)
+target_link_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
+target_link_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
+target_link_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/lib)
+target_link_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/lib)
 
-target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
-target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
-target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/folly/include)
+target_include_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
+target_include_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
+target_include_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/source)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/restbed/source)
 
@@ -84,16 +89,16 @@ endif ()
 add_subdirectory(tgbot-cpp)
 add_executable(TelegramBot Telegram_Bot/tgBot.cpp src/admin.cpp)
 
-target_link_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
-target_link_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/fmt/lib)
-target_link_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion/lib)
+target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
+target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/fmt/lib)
+target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/double-conversion/lib)
 target_link_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/restbed/build)
 
 target_include_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/restbed/source)
-target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/glog/include)
-target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/fmt/include)
-target_include_directories(TelegramBot PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion/include)
+target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/folly/include)
+target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/glog/include)
+target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/fmt/include)
+target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/double-conversion/include)
 
 target_link_libraries(TelegramBot "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)
 target_link_libraries(TelegramBot TgBot ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${CURL_LIBRARIES})
@@ -123,13 +128,13 @@ add_library(QtCart STATIC
         ../Ver/QtClient/src/CartList.cpp)
 target_link_libraries(QtCart
         Qt5::Widgets)
-target_link_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
-target_link_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
+target_link_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
+target_link_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
 
-target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
-target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
-target_include_directories(QtCart PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/folly/include)
+target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
+target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
+target_include_directories(QtCart PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
 target_include_directories(QtCart PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(QtCart folly dl fmt gflags double-conversion glog)
@@ -148,9 +153,9 @@ target_link_libraries(JsonParser
         Qt5::Widgets
         QtMenu
         QtCart)
-target_link_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
-target_include_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(JsonParser PRIVATE $ENV{HOME}/folly_installed/installed/glog-2Q8xht8wcxfXuQlWzaHdvPGfSj9lC1BK8dozBXhSo6o/include)
+target_link_directories(JsonParser PRIVATE ${FOLLY_DIRECTORY}/installed/folly/lib)
+target_include_directories(JsonParser PRIVATE ${FOLLY_DIRECTORY}/folly/include)
+target_include_directories(JsonParser PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
 target_link_libraries(JsonParser folly dl fmt)
 
 add_executable(QtClient
@@ -169,13 +174,13 @@ add_executable(QtClient
         ../Ver/QtClient/include/Order.h
         ../Ver/QtClient/src/Order.cpp)
 
-target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/lib)
-target_link_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/lib)
+target_link_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
+target_link_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
 
-target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/folly/include)
-target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/glog-hlx3KJNmWcAtpfcbv-FURS7ajZk1KR1M1LeNXUanJck/include)
-target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/fmt-G-S79T7s0y6Nnej83wZiZVdv4C7yFWpiMPbiszI6qrE/include)
-target_include_directories(QtClient PRIVATE $ENV{HOME}/folly_installed/installed/double-conversion-SeMNpgJWTLYvzAlvJj42BLnPB2NwSiyEOWeS43W3eJI/include)
+target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/folly/include)
+target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
+target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
+target_include_directories(QtClient PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
 target_include_directories(QtClient PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(QtClient crypto ssl pthread folly dl fmt gflags)

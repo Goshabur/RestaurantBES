@@ -51,9 +51,9 @@ public:
         m_order_id = std::stoi(connectGet(
             R"(INSERT INTO "ORDER" ("ITEMS", "COST", "STATUS", "TIMESTAMP", "LAST_MODIFIED", "ADDRESS", "COMMENT") VALUES (')" +
             cart + "', " + std::to_string(cost) + ", " +
-            std::to_string(m_order_status) + ", '" +
-            std::to_string(restbes::time_now) + "', '" +
-            std::to_string(restbes::time_now) + "', '" + m_address + "', " +
+            std::to_string(m_order_status) + ", " +
+            std::to_string(restbes::time_now) + ", " +
+            std::to_string(restbes::time_now) + ", '" + m_address + "', '" +
             m_comment + "') RETURNING \"ORDER_ID\""));
     }
 

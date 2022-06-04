@@ -1,5 +1,6 @@
-#include "server.h"
-#include "handlers.h"
+//#include "../../../Liza/include/fwd.h"
+#include "../include/server.h"
+#include "../include/handlers.h"
 
 #include <gflags/gflags.h>
 
@@ -45,10 +46,11 @@ DEFINE_validator(SSLkeys, &ValidatePath);
 DEFINE_validator(port, &ValidatePort);
 DEFINE_validator(workers, &ValidateWorkers);
 
+
+auto server = std::make_shared<restbes::Server>();
+
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
-
-    auto server = std::make_shared<restbes::Server>();
 
 //    auto echo = createResource("/echo",
 //                               std::nullopt,

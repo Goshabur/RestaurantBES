@@ -28,7 +28,6 @@ void postAuthorizationMethodHandler(
     std::string user_id = request->get_header("User-ID", "");
     unsigned int session_id = request->get_header("Session-ID", 0);
     auto receivingSession = server->getSession(session_id);
-    auto user = server->getUser(user_id);
 
     if (receivingSession == nullptr) {
         auto response = generateResponse("Check your connection", "text/plain",
@@ -52,6 +51,9 @@ void postAuthorizationMethodHandler(
 
         if (restbesClient::check_sign_in(user_email, password)) {
             user_id = restbesClient::get_client_id_by_email(user_email);
+            Server::addUser(user_id, server);
+            if (receivingSession->getUserId().empty()) server->assignSession(session_id, user_id);
+            auto user = server->getUser(user_id);
             std::string user_name = restbesClient::get_client_name(user_id);
 
             responseJson["body"]["user_id"] = std::stoi(user_id);
@@ -63,15 +65,19 @@ void postAuthorizationMethodHandler(
                 R"(SELECT * FROM "HISTORY" WHERE "CLIENT_ID" = )" + user_id);
 
             for (auto row : result) {
-                dynamic item = dynamic::object;
-                item["id"] = row[1].as<int>();
-                item["status"] =
-                    restbesOrder::get_order_status(item["id"].asString());
-                item["timestamp"] =
-                    restbesOrder::get_order_timestamp(item["id"].asString());
-                item["last_modified"] = restbesOrder::get_order_last_modified(
-                    item["id"].asString());
-                responseJson["body"]["orders"].push_back(item);
+                pqxx::result result_order = connectGet_pqxx_result(
+                    R"(SELECT * FROM "ORDER" WHERE "ORDER_ID" = )" +
+                    std::to_string(row[1].as<int>()));
+                    dynamic item = dynamic::object;
+                    item["order_id"] = row[1].as<int>();
+                    item["status"] =
+                        restbesOrder::get_order_status(std::to_string(item["order_id"].asInt()));
+                    item["timestamp"] = restbesOrder::get_order_timestamp(
+                        std::to_string(item["order_id"].asInt()));
+                    item["last_modified"] =
+                        restbesOrder::get_order_last_modified(
+                            std::to_string(item["order_id"].asInt()));
+                    responseJson["body"]["orders"].push_back(item);
             }
 
             session->close(*generateResponse(folly::toJson(responseJson) + '\n',
@@ -131,6 +137,9 @@ void postAuthorizationMethodHandler(
             restbesClient::Client client(user_name, user_email, password,
                                          user_cart);
             user_id = client.get_client_id();
+            Server::addUser(user_id, server);
+            if (receivingSession->getUserId().empty()) server->assignSession(session_id, user_id);
+            auto user = server->getUser(user_id);
 
             responseJson["body"]["user_id"] = std::stoi(user_id);
             responseJson["body"]["name"] = user_name;
@@ -197,7 +206,7 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
                                     Connection::KEEP_ALIVE));
 
     } else if (command == "set_cart") {
-        auto new_cart = values.at("body").at("cart").get<json>();
+        std::string new_cart = values.at("body").at("cart").get<json>().dump();
 
         restbesCart::set_cart(user_id, new_cart,
                               restbesCart::cart_cost(new_cart));
@@ -229,8 +238,8 @@ void postOrderMethodHandler(const std::shared_ptr<restbed::Session> &session,
     }
 
     auto values = json::parse(data);
-    std::string address = values.at("address").get<std::string>();
-    std::string comment = values.at("comment").get<std::string>();
+    std::string address = values.at("body").at("address").get<std::string>();
+    std::string comment = values.at("body").at("comment").get<std::string>();
 
     dynamic responseJson = dynamic::object;
     responseJson["query"] = "create_order";
@@ -270,7 +279,7 @@ void getOrderHandler(const std::shared_ptr<restbed::Session> &session,
     responseJson["status_code"] = 0;
     responseJson["body"] = dynamic::object;
     responseJson["body"]["item"] = "order";
-    responseJson["body"]["order_id"] = order_id;
+    responseJson["body"]["order_id"] = std::stoi(order_id);
     responseJson["body"]["timestamp"] =
         restbesOrder::get_order_timestamp(order_id);
     responseJson["body"]["last_modified"] =

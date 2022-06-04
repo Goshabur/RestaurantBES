@@ -26,12 +26,17 @@ void set_cart(const std::string &client_id,
               int cart_cost) {
     connectExec(R"(UPDATE "CART" SET "CART" = ')" + cart +
                 R"(' WHERE "CLIENT_ID" = )" + client_id);
-    connectExec(R"(UPDATE "CART" SET "COST" = ')" + std::to_string(cart_cost) +
-                R"(' WHERE "CLIENT_ID" = )" + client_id);
+    connectExec(R"(UPDATE "CART" SET "COST" = )" + std::to_string(cart_cost) +
+                R"( WHERE "CLIENT_ID" = )" + client_id);
 }
 
 void set_item_count(const std::string &client_id, int dish_id, int count) {
+    if (count == 0) {
+        return;
+    }
+
     dynamic new_cart = dynamic::array;
+    bool existsInCart = false;
 
     auto cart = json::parse(restbesCart::get_cart(client_id));
     for (auto &el : cart) {
@@ -40,11 +45,14 @@ void set_item_count(const std::string &client_id, int dish_id, int count) {
 
         if (el.at("dish_id").get<int>() == dish_id) {
             item["count"] = count;
-
-            if (count == 0) {
-                continue;
-            }
+            existsInCart = true;
         }
+        new_cart.push_back(item);
+    }
+
+    if (!existsInCart) {
+        dynamic item = dynamic::object("dish_id", dish_id)(
+            "count", count);
         new_cart.push_back(item);
     }
 

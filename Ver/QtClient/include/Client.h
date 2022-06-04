@@ -70,7 +70,8 @@ public:
 
     Q_INVOKABLE void createOrder(const QString &addr, const QString &commnt);
 
-    Q_INVOKABLE restbes::Order* getOrderFromServer(int orderId);
+private slots:
+    void getOrderFromServer(int orderId);
 
 signals:
 
@@ -87,6 +88,8 @@ signals:
     void newOrder(restbes::Order* order);
 
     void orderStatusChanged(restbes::Order* order);
+
+    void getOrder(int orderId);
 
 public slots:
 

@@ -30,7 +30,7 @@ std::set<int>::const_iterator MenuList::end() const {
     return items.end();
 }
 
-std::shared_ptr<MenuData> MenuList::getMenuData() const {
+MenuData* MenuList::getMenuData() const {
     return menuData;
 }
 
@@ -64,10 +64,10 @@ MenuItem MenuList::getItem(int id) const {
     return (menuData->count(id)) ? menuData->at(id) : MenuItem{};
 }
 
-void MenuList::setMenu(std::shared_ptr<MenuData> newData) {
+void MenuList::setMenu(MenuData* newData) {
     emit beginChangeLayout();
     items.clear();
-    menuData = std::move(newData);
+    menuData = newData;
     for (const auto &it: *menuData) {
         items.insert(it.first);
     }

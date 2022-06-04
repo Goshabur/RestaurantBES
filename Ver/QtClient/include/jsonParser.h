@@ -23,9 +23,9 @@ public:
 
     static CartItem parseCartItem(const nlohmann::json &json);
 
-    static std::shared_ptr<MenuData> parseMenu(const std::string &input);
+    static MenuData* parseMenu(const std::string &input);
 
-    static std::shared_ptr<MenuData> parseMenu(const nlohmann::json &json);
+    static MenuData* parseMenu(const nlohmann::json &json);
 
     static std::shared_ptr<CartData> parseCart(const std::string &input);
 

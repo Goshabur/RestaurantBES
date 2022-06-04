@@ -18,8 +18,8 @@ CREATE TABLE public."ORDER"
 (
     "ORDER_ID" serial,
     "STATUS" integer NOT NULL,
-    "TIMESTAMP" text NOT NULL,
-    "LAST_MODIFIED" text NOT NULL,
+    "TIMESTAMP" integer NOT NULL,
+    "LAST_MODIFIED" integer NOT NULL,
     "ITEMS" jsonb,
     "ADDRESS" text NOT NULL,
     "COMMENT" text,
@@ -39,7 +39,7 @@ CREATE TABLE public."DISH"
 
 CREATE TABLE public."MENU_HISTORY"
 (
-    "TIMESTAMP" text NOT NULL
+    "TIMESTAMP" integer NOT NULL
 );
 
 CREATE TABLE public."HISTORY"

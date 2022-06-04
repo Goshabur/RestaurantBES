@@ -15,7 +15,7 @@ MenuItem JsonParser::parseDish(const std::string &input) {
 
 MenuItem JsonParser::parseDish(const nlohmann::json &json) {
     return {
-            json.at("id"),
+            json.at("dish_id"),
             getQStringValue(json, "name"),
             getQStringValue(json, "image"),
             json.at("price"),
@@ -31,18 +31,18 @@ CartItem JsonParser::parseCartItem(const std::string &input) {
 
 CartItem JsonParser::parseCartItem(const nlohmann::json &json) {
     return {
-            json.at("id"),
-            json.at("quantity")
+            json.at("dish_id"),
+            json.at("count")
     };
 }
 
-std::shared_ptr<MenuData> JsonParser::parseMenu(const std::string &input) {
+MenuData* JsonParser::parseMenu(const std::string &input) {
     nlohmann::json jsonMenu = nlohmann::json::parse(input);
     return parseMenu(jsonMenu);
 }
 
-std::shared_ptr<MenuData> JsonParser::parseMenu(const nlohmann::json &json) {
-    auto menuData = std::make_shared<MenuData>();
+MenuData* JsonParser::parseMenu(const nlohmann::json &json) {
+    auto* menuData = new MenuData();
     const nlohmann::json::array_t &dishArray = json.at("contents");
     for (const auto &dish: dishArray) {
         auto dishItem = parseDish(dish);

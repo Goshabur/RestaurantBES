@@ -2,6 +2,8 @@
 #include "server.h"
 #include "session.h"
 
+using namespace std::chrono_literals;
+
 namespace restbes {
 
 User::User(std::string nm, std::shared_ptr<Server> serv) : id(std::move(nm)),
@@ -9,7 +11,8 @@ User::User(std::string nm, std::shared_ptr<Server> serv) : id(std::move(nm)),
                                                                    serv)) {}
 
 void User::push(std::shared_ptr<restbed::Response> response) {
-    auto lockedSessions = activeSessions.rlock();
+    auto lockedSessions = activeSessions.rlock(10ms);
+    if (!lockedSessions) throw std::runtime_error("Couldn't acquire lock");
     for (auto session_id: *lockedSessions) {
         auto session = server->getSession(session_id);
         if (session != nullptr) session->push(response);

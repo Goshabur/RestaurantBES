@@ -3,14 +3,15 @@
 #include "Client.h"
 #include "jsonParser.h"
 #include "MenuList.h"
+#include "folly/dynamic.h"
+#include "folly/json.h"
 
 namespace restbes {
 
 Client::Client(std::string server, int _port, QObject *parent)
-        : address(
-        "https://" + std::move(server) + ':' + std::to_string(_port)),
+        : QObject(parent),
+          address("https://" + std::move(server) + ':' + std::to_string(_port)),
           port(_port),
-          QObject(parent),
           postingClient(std::make_shared<httplib::Client>(address)),
           pollingClient(std::make_shared<httplib::Client>(address)) {
 
@@ -41,8 +42,10 @@ Client::Client(std::string server, int _port, QObject *parent)
     postingClient->set_read_timeout(180);
     postingClient->enable_server_certificate_verification(false);
     getMenuFromServer();
-    setItemCount(1, 2);
-    setItemCount(2, 1);
+
+    connect(this, &Client::getOrder, this, &Client::getOrderFromServer);
+//    setItemCount(1, 2);
+//    setItemCount(2, 1);
 }
 
 bool Client::getRegStatus() const {
@@ -166,7 +169,7 @@ MenuList *Client::getMenu() const {
 void Client::startPolling() {
     pollingThread = std::make_shared<std::thread>([this]() {
         while (true) {
-            auto res = pollingClient->Get("/get", *headers.rlock());
+            auto res = pollingClient->Get("/get", headers.copy());
             if (res == nullptr) {
                 throw std::runtime_error("Can't connect to the server");
             } else if (res->status != 200) {
@@ -174,6 +177,7 @@ void Client::startPolling() {
                         "Bad response from the server " +
                         std::to_string(res->status));
             }
+            qDebug() << res->body.c_str();
             nlohmann::json json = nlohmann::json::parse(res->body);
             const std::string &stringEvent = json.at(
                     "event").get<std::string>();
@@ -186,12 +190,13 @@ void Client::startPolling() {
                     break;
                 }
                 case OrderChanged: {
-                    if (timestamp <= orderList->getTimestamp()) break;
+//                    if (timestamp <= orderList->getTimestamp()) {
+//                      qDebug() << "timestamp is:" << timestamp;
+//                      qDebug() << "old timestamp is:" << orderList->getTimestamp();
+//                      break;
+//                    }
                     int orderId = json["body"]["order_id"].get<int>();
-                    auto* order = getOrderFromServer(orderId);
-                    if (!order) break;
-                    if (order->getStatus() == 1) emit newOrder(order);
-                    else emit orderStatusChanged(order);
+                    emit getOrder(orderId);
                     break;
                 }
                 case MenuChanged: {
@@ -248,7 +253,7 @@ void Client::clearCart(bool notifyServer) {
             return;
         }
         nlohmann::json json = nlohmann::json::parse(response->body);
-        unsigned int timestamp = json["date"].get<unsigned int>();
+        unsigned int timestamp = json["timestamp"].get<int>();
         cartList->setTimestamp(timestamp);
         qDebug() << "Answer:\n" << response->body.c_str() << '\n';
     }
@@ -267,9 +272,9 @@ void Client::getCartFromServer() {
 
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto cartData = JsonParser::parseCart(jsonBody.at("body"));
-    unsigned int timestamp = jsonBody["body"]["date"].get<unsigned int>();
+//    unsigned int timestamp = jsonBody["body"]["timestamp"].get<int>();
     cartList->setCart(std::move(cartData));
-    cartList->setTimestamp(timestamp);
+//    cartList->setTimestamp(timestamp);
 }
 
 void Client::setItemCount(int id, int value) {
@@ -319,7 +324,7 @@ void Client::createOrder(const QString &addr, const QString &commnt) {
 Client::Client(QObject *parent) : QObject(parent) {
 }
 
-Order *Client::getOrderFromServer(int orderId) {
+void Client::getOrderFromServer(int orderId) {
     auto orderHeaders = headers.copy();
     orderHeaders.insert({"Order-ID", std::to_string(orderId)});
     auto response = postingClient->Get("/order",
@@ -328,7 +333,7 @@ Order *Client::getOrderFromServer(int orderId) {
         throw std::runtime_error("Can't connect to the server");
     } else if (response->status != 200 || response->body.empty()) {
         qDebug() << "Can't get the order" << orderId << "from /order\n";
-        return nullptr;
+        return;
     }
     qDebug() << "Got the order " << orderId << " from the server";
     qDebug() << response->body.c_str() << '\n';
@@ -338,7 +343,8 @@ Order *Client::getOrderFromServer(int orderId) {
     JsonParser::parseOrder(jsonBody["body"], *order);
     orderList->setItemStatus(order->getOrderId(), order->getStatus(), order->getTimestamp());
     orderList->setTimestamp(order->getLastModified());
-    return order;
+    if (order->getStatus() == 0) emit newOrder(order);
+    else emit orderStatusChanged(order);
 }
 
 OrderList *Client::getOrderList() const {

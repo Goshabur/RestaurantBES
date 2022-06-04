@@ -50,6 +50,7 @@ Popup {
                     anchors.fill: parent
                     anchors.centerIn: parent
                     anchors.margins: 10
+                    text: "email@gma"
                     font.pixelSize: parent.height *2/3
                     maximumLength: 40
                 }
@@ -74,6 +75,7 @@ Popup {
                     anchors.margins: 10
                     passwordMaskDelay: 400
                     echoMode: TextInput.Password
+                    text: "lol"
                     font.pixelSize: parent.height *2/3
                     maximumLength: 40
                 }
