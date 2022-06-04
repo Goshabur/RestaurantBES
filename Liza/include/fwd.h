@@ -12,8 +12,6 @@
 
 namespace restbes {
 
-static std::time_t time_now = std::time(nullptr);
-
 enum OrderStatus { CREATED = 0, ACCEPTED, CANCELLED, IN_PROGRESS, COMPLETED };
 enum DishStatus { UNAVAILABLE = 0, AVAILABLE };
 
@@ -38,6 +36,8 @@ static std::ofstream server_request_log("server_request_log.txt",
 
 static std::ofstream server_error_log("server_error_log.txt",
                                       std::ofstream::app);
+
+std::time_t getTime();
 
 void connectExec(const std::string &sql);
 

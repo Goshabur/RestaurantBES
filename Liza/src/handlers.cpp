@@ -15,9 +15,95 @@ using restbes::server_error_log;
 using restbes::server_request_log;
 using restbes::Session;
 
-// TODO: refactor, please...
-
 namespace restbes {
+
+std::shared_ptr<Server> &getServer() {
+    static auto server = std::make_shared<Server>();
+    return server;
+}
+
+void addUserToServer(const std::shared_ptr<Server> &server,
+                     const std::shared_ptr<Session> &receivingSession,
+                     const std::string &user_id,
+                     unsigned int &session_id) {
+    Server::addUser(user_id, server);
+    if (receivingSession->getUserId().empty())
+        server->assignSession(session_id, user_id);
+}
+
+void sendResponse(const std::shared_ptr<restbed::Session> &session,
+                  const dynamic &responseJson) {
+    session->close(*generateResponse(folly::toJson(responseJson),
+                                     "application/json", Connection::CLOSE));
+}
+
+void sendNotification(const std::shared_ptr<User> &user,
+                      const dynamic &notificationJson) {
+    user->push(generateResponse(folly::toJson(notificationJson),
+                                "application/json", Connection::KEEP_ALIVE));
+}
+
+void parseInsertOrders(dynamic &responseJson, const std::string &user_id) {
+    pqxx::result result = connectGet_pqxx_result(
+        R"(SELECT * FROM "HISTORY" WHERE "CLIENT_ID" = )" + user_id);
+
+    for (auto row : result) {
+        pqxx::result result_order = connectGet_pqxx_result(
+            R"(SELECT * FROM "ORDER" WHERE "ORDER_ID" = )" +
+            std::to_string(row[1].as<int>()));
+        dynamic item = dynamic::object;
+        item["order_id"] = row[1].as<int>();
+        item["status"] = restbesOrder::get_order_status(
+            std::to_string(item["order_id"].asInt()));
+        item["timestamp"] = restbesOrder::get_order_timestamp(
+            std::to_string(item["order_id"].asInt()));
+        item["last_modified"] = restbesOrder::get_order_last_modified(
+            std::to_string(item["order_id"].asInt()));
+        responseJson["body"]["orders"].push_back(item);
+    }
+}
+
+dynamic cartChangeResponse() {
+    return dynamic::object("status_code", 0)("query", "cart_changed")(
+        "timestamp", restbes::getTime());
+}
+
+dynamic cartChangeNotification() {
+    return dynamic::object("event", "cart_changed")("timestamp",
+                                                    restbes::getTime());
+}
+
+dynamic orderChangedResponse() {
+    return dynamic::object("query", "create_order")("status_code", 0)(
+        "timestamp", restbes::getTime());
+}
+
+dynamic orderChangedNotification(const std::string &order_id) {
+    return dynamic::object("event", "order_changed")(
+        "timestamp", restbesOrder::get_order_last_modified(order_id))(
+        "body", dynamic::object("order_id", std::stoi(order_id)));
+}
+
+void formErrorResponse(dynamic &responseJson, const std::string &user_email) {
+    if (restbesClient::check_user_exists(user_email)) {
+        responseJson["body"]["message"] = "error: incorrect password";
+    } else {
+        responseJson["body"]["message"] = "error: no user with this email";
+    }
+    responseJson["status_code"] = 1;
+    responseJson["body"] = dynamic::object;
+    responseJson["body"]["error_code"] = 1;
+}
+
+void setUsersInfoInResponse(dynamic &responseJson,
+                            const std::string &user_id,
+                            const std::string &user_name,
+                            const std::string &user_email) {
+    responseJson["body"]["user_id"] = std::stoi(user_id);
+    responseJson["body"]["name"] = user_name;
+    responseJson["body"]["email"] = user_email;
+    responseJson["body"]["orders"] = dynamic::array;
+}
 
 void postAuthorizationMethodHandler(
     const std::shared_ptr<restbed::Session> &session,
@@ -30,9 +116,8 @@ void postAuthorizationMethodHandler(
     auto receivingSession = server->getSession(session_id);
 
     if (receivingSession == nullptr) {
-        auto response = generateResponse("Check your connection", "text/plain",
-                                         Connection::CLOSE);
-        session->close(*response);
+        session->close(*generateResponse("Check your connection", "text/plain",
+                                         Connection::CLOSE));
         return;
     }
 
@@ -41,76 +126,37 @@ void postAuthorizationMethodHandler(
     std::string user_email = values.at("body").at("email").get<std::string>();
     std::string password = values.at("body").at("password").get<std::string>();
 
-    dynamic responseJson = dynamic::object;
-    responseJson["status_code"] = 0;
-    responseJson["body"] = dynamic::object;
-    responseJson["body"]["item"] = "user";
+    dynamic responseJson = dynamic::object("status_code", 0)(
+        "body", dynamic::object("item", "user"));
 
     if (command == "sign_in") {
         responseJson["query"] = "sign_in";
 
         if (restbesClient::check_sign_in(user_email, password)) {
             user_id = restbesClient::get_client_id_by_email(user_email);
-            Server::addUser(user_id, server);
-            if (receivingSession->getUserId().empty())
-                server->assignSession(session_id, user_id);
-            auto user = server->getUser(user_id);
             std::string user_name = restbesClient::get_client_name(user_id);
 
-            responseJson["body"]["user_id"] = std::stoi(user_id);
-            responseJson["body"]["name"] = user_name;
-            responseJson["body"]["email"] = user_email;
-            responseJson["body"]["orders"] = dynamic::array;
+            addUserToServer(server, receivingSession, user_id, session_id);
+            auto user = server->getUser(user_id);
 
-            pqxx::result result = connectGet_pqxx_result(
-                R"(SELECT * FROM "HISTORY" WHERE "CLIENT_ID" = )" + user_id);
+            setUsersInfoInResponse(responseJson, user_id, user_name, user_email);
 
-            for (auto row : result) {
-                pqxx::result result_order = connectGet_pqxx_result(
-                    R"(SELECT * FROM "ORDER" WHERE "ORDER_ID" = )" +
-                    std::to_string(row[1].as<int>()));
-                dynamic item = dynamic::object;
-                item["order_id"] = row[1].as<int>();
-                item["status"] = restbesOrder::get_order_status(
-                    std::to_string(item["order_id"].asInt()));
-                item["timestamp"] = restbesOrder::get_order_timestamp(
-                    std::to_string(item["order_id"].asInt()));
-                item["last_modified"] = restbesOrder::get_order_last_modified(
-                    std::to_string(item["order_id"].asInt()));
-                responseJson["body"]["orders"].push_back(item);
-            }
+            parseInsertOrders(responseJson, user_id);
 
-            session->close(*generateResponse(folly::toJson(responseJson) + '\n',
-                                             "application/json",
-                                             Connection::CLOSE));
+            sendResponse(session, responseJson);
 
             if (values.at("body").at("update_cart").get<bool>()) {
                 auto new_cart = values.at("body").at("cart").get<json>().dump();
                 restbesCart::set_cart(user_id, new_cart,
                                       restbesCart::cart_cost(new_cart));
 
-                dynamic notificationJson = dynamic::object;
-                notificationJson["event"] = "cart_changed";
-                notificationJson["timestamp"] =
-                    std::stoi(std::to_string(time_now));
-                user->push(generateResponse(
-                    folly::toJson(notificationJson) + '\n', "application/json",
-                    Connection::KEEP_ALIVE));
+                dynamic notificationJson = cartChangeNotification();
+                sendNotification(user, notificationJson);
             }
 
         } else {
-            if (restbesClient::check_user_exists(user_email)) {
-                responseJson["body"]["message"] = "error: incorrect password";
-            } else {
-                responseJson["body"]["message"] =
-                    "error: no user with this email";
-            }
-            responseJson["status_code"] = 1;
-            responseJson["body"] = dynamic::object;
-            responseJson["body"]["error_code"] = 1;
-            session->close(*generateResponse(folly::toJson(responseJson) + '\n',
-                                             "application/json",
-                                             Connection::CLOSE));
+            formErrorResponse(responseJson, user_email);
+            sendResponse(session, responseJson);
         }
 
     } else if (command == "sign_up") {
@@ -125,9 +171,7 @@ void postAuthorizationMethodHandler(
                 "error: user with this email already exists";
             responseJson["body"]["error_code"] = 1;
 
-            session->close(*generateResponse(folly::toJson(responseJson) + '\n',
-                                             "application/json",
-                                             Connection::CLOSE));
+            sendResponse(session, responseJson);
 
         } else {
             if (values.at("body").at("update_cart").get<bool>()) {
@@ -137,29 +181,20 @@ void postAuthorizationMethodHandler(
             restbesClient::Client client(user_name, user_email, password,
                                          user_cart);
             user_id = client.get_client_id();
-            Server::addUser(user_id, server);
-            if (receivingSession->getUserId().empty())
-                server->assignSession(session_id, user_id);
+
+            addUserToServer(server, receivingSession, user_id, session_id);
             auto user = server->getUser(user_id);
 
-            responseJson["body"]["user_id"] = std::stoi(user_id);
-            responseJson["body"]["name"] = user_name;
-            responseJson["body"]["email"] = user_email;
-            responseJson["body"]["orders"] = dynamic::array;
+            setUsersInfoInResponse(responseJson, user_id, user_name, user_email);
 
-            session->close(*generateResponse(folly::toJson(responseJson) + '\n',
-                                             "application/json",
-                                             Connection::CLOSE));
+            sendResponse(session, responseJson);
 
             if (values.at("body").at("update_cart").get<bool>()) {
                 dynamic notificationJson = dynamic::object;
                 notificationJson["event"] = "cart_changed";
-                notificationJson["timestamp"] =
-                    std::stoi(std::to_string(time_now));
+                notificationJson["timestamp"] = restbes::getTime();
 
-                user->push(generateResponse(folly::toJson(notificationJson),
-                                            "application/json",
-                                            Connection::KEEP_ALIVE));
+                sendNotification(user, notificationJson);
             }
         }
     }
@@ -175,36 +210,24 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
     auto user = server->getUser(user_id);
 
     if (receivingSession == nullptr) {
-        auto response = generateResponse("Check your connection", "text/plain",
-                                         Connection::CLOSE);
-        session->close(*response);
+        session->close(*generateResponse("Check your connection", "text/plain",
+                                         Connection::CLOSE));
         return;
     }
 
     auto values = json::parse(data);
-
     std::string command = values.at("query").get<std::string>();
-    dynamic responseJson = dynamic::object;
-    dynamic notificationJson = dynamic::object;
-    responseJson["status_code"] = 0;
-    responseJson["query"] = "cart_changed";
-    notificationJson["event"] = "cart_changed";
-    responseJson["timestamp"] = std::stoi(std::to_string(time_now));
-    notificationJson["timestamp"] = std::stoi(std::to_string(time_now));
+
+    dynamic responseJson = cartChangeResponse();
+    dynamic notificationJson = cartChangeNotification();
 
     if (command == "set_item_count") {
-        int dish_id = values.at("body").at("dish_id").get<int>();
-        int count = values.at("body").at("count").get<int>();
+        restbesCart::set_item_count(user_id,
+                                    values.at("body").at("dish_id").get<int>(),
+                                    values.at("body").at("count").get<int>());
 
-        restbesCart::set_item_count(user_id, dish_id, count);
-
-        session->close(*generateResponse(folly::toJson(responseJson),
-                                         "application/json",
-                                         Connection::CLOSE));
-
-        user->push(generateResponse(folly::toJson(notificationJson),
-                                    "application/json",
-                                    Connection::KEEP_ALIVE));
+        sendResponse(session, responseJson);
+        sendNotification(user, notificationJson);
 
     } else if (command == "set_cart") {
         std::string new_cart = values.at("body").at("cart").get<json>().dump();
@@ -212,13 +235,8 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
         restbesCart::set_cart(user_id, new_cart,
                               restbesCart::cart_cost(new_cart));
 
-        session->close(*generateResponse(folly::toJson(responseJson),
-                                         "application/json",
-                                         Connection::CLOSE));
-
-        user->push(generateResponse(folly::toJson(notificationJson),
-                                    "application/json",
-                                    Connection::KEEP_ALIVE));
+        sendResponse(session, responseJson);
+        sendNotification(user, notificationJson);
     }
 }
 
@@ -232,9 +250,8 @@ void postOrderMethodHandler(const std::shared_ptr<restbed::Session> &session,
     auto user = server->getUser(user_id);
 
     if (receivingSession == nullptr) {
-        auto response = generateResponse("Check your connection", "text/plain",
-                                         Connection::CLOSE);
-        session->close(*response);
+        session->close(*generateResponse("Check your connection", "text/plain",
+                                         Connection::CLOSE));
         return;
     }
 
@@ -242,26 +259,14 @@ void postOrderMethodHandler(const std::shared_ptr<restbed::Session> &session,
     std::string address = values.at("body").at("address").get<std::string>();
     std::string comment = values.at("body").at("comment").get<std::string>();
 
-    dynamic responseJson = dynamic::object;
-    responseJson["query"] = "create_order";
-    responseJson["status_code"] = 0;
-    responseJson["timestamp"] = std::stoi(std::to_string(restbes::time_now));
-
     restbesClient::Client client(std::stoi(user_id));
     std::string order_id = client.create_order(address, comment);
 
-    dynamic notificationJson = dynamic::object;
-    notificationJson["event"] = "order_changed";
-    notificationJson["timestamp"] =
-        restbesOrder::get_order_last_modified(order_id);
-    notificationJson["body"] = dynamic::object;
-    notificationJson["body"]["order_id"] = std::stoi(order_id);
+    dynamic responseJson = orderChangedResponse();
+    dynamic notificationJson = orderChangedNotification(order_id);
 
-    session->close(*generateResponse(folly::toJson(responseJson),
-                                     "application/json", Connection::CLOSE));
-
-    user->push(generateResponse(folly::toJson(notificationJson),
-                                "application/json", Connection::KEEP_ALIVE));
+    sendResponse(session, responseJson);
+    sendNotification(user, notificationJson);
 }
 
 void getMenuHandler(const std::shared_ptr<restbed::Session> &session,
@@ -383,11 +388,6 @@ void pollingHandler(const std::shared_ptr<restbed::Session> &session,
         if (!user_id.empty() && realSession->getUserId().empty())
             server->assignSession(session_id, user_id);
     }
-}
-
-std::shared_ptr<Server> &getServer() {
-    static auto server = std::make_shared<Server>();
-    return server;
 }
 
 void notifySessionsMenuChanged() {

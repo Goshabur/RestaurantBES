@@ -1,12 +1,10 @@
 #include "../include/admin.h"
 #include "../include/fwd.h"
-#include "../include/order.h"
 #include "handlers.h"
 
 using restbes::connectExec;
 using restbes::connectGet;
 using restbes::connectGet_pqxx_result;
-using restbes::time_now;
 
 namespace restbesAdmin {
 bool check_admin(const std::string &password) {
@@ -47,9 +45,7 @@ void change_order_status(const std::string &order_id,
     connectExec(R"(UPDATE "ORDER" SET "STATUS" = )" + set_status +
                 " WHERE \"ORDER_ID\"=" + order_id);
     connectExec(R"(UPDATE "ORDER" SET "LAST_MODIFIED" = ')" +
-                std::to_string(time_now) + "' WHERE \"ORDER_ID\"=" + order_id);
-
-    //    restbesOrder::Order order(std::stoi(order_id));
+                std::to_string(restbes::getTime()) + "' WHERE \"ORDER_ID\"=" + order_id);
 
     restbes::notifySessionsOrderChanged(order_id);
 }
@@ -59,7 +55,7 @@ void change_dish_status(const std::string &dish_id,
     connectExec(R"(UPDATE "DISH" SET "STATUS" = )" + set_status +
                 " WHERE \"DISH_ID\"=" + dish_id);
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
-                std::to_string(time_now) + "'");
+                std::to_string(restbes::getTime()) + "'");
 
     restbes::notifySessionsMenuChanged();
 }
@@ -82,7 +78,7 @@ void change_dish_price(const std::string &dish_id,
     connectExec(R"(UPDATE "DISH" SET "PRICE" = )" + set_price +
                 " WHERE \"DISH_ID\"= '" + dish_id + "'");
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
-                std::to_string(time_now) + "'");
+                std::to_string(restbes::getTime()) + "'");
 
     restbes::notifySessionsMenuChanged();
 }
@@ -91,7 +87,7 @@ void change_dish_info(const std::string &dish_id, const std::string &set_info) {
     connectExec(R"(UPDATE "DISH" SET "INFO" = ')" + set_info +
                 "' WHERE \"DISH_ID\"= '" + dish_id + "'");
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
-                std::to_string(time_now) + "'");
+                std::to_string(restbes::getTime()) + "'");
 
     restbes::notifySessionsMenuChanged();
 }

@@ -2,6 +2,10 @@
 
 namespace restbes {
 
+std::time_t getTime() {
+    return std::time(nullptr);
+}
+
 void connectExec(const std::string &sql) {
     pqxx::connection C(
         "dbname=testdb user=postgres password=restbes2022 hostaddr=127.0.0.1 "
