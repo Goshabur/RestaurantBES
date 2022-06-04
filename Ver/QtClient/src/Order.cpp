@@ -70,5 +70,4 @@ void Order::setCart(CartList* newCart) {
     emit cartChanged();
 }
 
-
 }

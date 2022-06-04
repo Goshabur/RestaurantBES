@@ -80,7 +80,6 @@ Item {
                 color: "lightpink"
 	            ListView {
 	                flickDeceleration: 14000000 / parent.height
-	                verticalLayoutDirection: ListView.BottomToTop
 	                anchors.fill: parent
 	                spacing: 20
 	                boundsBehavior: Flickable.StopAtBounds
