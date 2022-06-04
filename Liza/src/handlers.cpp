@@ -63,12 +63,12 @@ void parseInsertOrders(dynamic &responseJson, const std::string &user_id) {
     }
 }
 
-dynamic cartChangeResponse() {
+dynamic cartChangedResponse() {
     return dynamic::object("status_code", 0)("query", "cart_changed")(
         "timestamp", restbes::getTime());
 }
 
-dynamic cartChangeNotification() {
+dynamic cartChangedNotification() {
     return dynamic::object("event", "cart_changed")("timestamp",
                                                     restbes::getTime());
 }
@@ -84,7 +84,7 @@ dynamic orderChangedNotification(const std::string &order_id) {
         "body", dynamic::object("order_id", std::stoi(order_id)));
 }
 
-void formErrorResponse(dynamic &responseJson, const std::string &user_email) {
+void formErrorResponseAuthentication(dynamic &responseJson, const std::string &user_email) {
     if (restbesClient::check_user_exists(user_email)) {
         responseJson["body"]["message"] = "error: incorrect password";
     } else {
@@ -92,6 +92,14 @@ void formErrorResponse(dynamic &responseJson, const std::string &user_email) {
     }
     responseJson["status_code"] = 1;
     responseJson["body"] = dynamic::object;
+    responseJson["body"]["error_code"] = 1;
+}
+
+void formErrorResponseAuthorization(dynamic &responseJson) {
+    responseJson["status_code"] = 1;
+    responseJson["body"] = dynamic::object;
+    responseJson["body"]["message"] =
+        "error: user with this email already exists";
     responseJson["body"]["error_code"] = 1;
 }
 
@@ -127,11 +135,9 @@ void postAuthorizationMethodHandler(
     std::string password = values.at("body").at("password").get<std::string>();
 
     dynamic responseJson = dynamic::object("status_code", 0)(
-        "body", dynamic::object("item", "user"));
+        "body", dynamic::object("item", "user"))("query", command);
 
     if (command == "sign_in") {
-        responseJson["query"] = "sign_in";
-
         if (restbesClient::check_sign_in(user_email, password)) {
             user_id = restbesClient::get_client_id_by_email(user_email);
             std::string user_name = restbesClient::get_client_name(user_id);
@@ -150,27 +156,21 @@ void postAuthorizationMethodHandler(
                 restbesCart::set_cart(user_id, new_cart,
                                       restbesCart::cart_cost(new_cart));
 
-                dynamic notificationJson = cartChangeNotification();
+                dynamic notificationJson = cartChangedNotification();
                 sendNotification(user, notificationJson);
             }
 
         } else {
-            formErrorResponse(responseJson, user_email);
+            formErrorResponseAuthentication(responseJson, user_email);
             sendResponse(session, responseJson);
         }
 
     } else if (command == "sign_up") {
         std::string user_name = values.at("body").at("name").get<std::string>();
-        responseJson["query"] = "sign_up";
         std::string user_cart = "{}";
 
         if (restbesClient::check_user_exists(user_email)) {
-            responseJson["status_code"] = 1;
-            responseJson["body"] = dynamic::object;
-            responseJson["body"]["message"] =
-                "error: user with this email already exists";
-            responseJson["body"]["error_code"] = 1;
-
+            formErrorResponseAuthorization(responseJson);
             sendResponse(session, responseJson);
 
         } else {
@@ -190,10 +190,7 @@ void postAuthorizationMethodHandler(
             sendResponse(session, responseJson);
 
             if (values.at("body").at("update_cart").get<bool>()) {
-                dynamic notificationJson = dynamic::object;
-                notificationJson["event"] = "cart_changed";
-                notificationJson["timestamp"] = restbes::getTime();
-
+                dynamic notificationJson = cartChangedNotification();
                 sendNotification(user, notificationJson);
             }
         }
@@ -218,8 +215,8 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
     auto values = json::parse(data);
     std::string command = values.at("query").get<std::string>();
 
-    dynamic responseJson = cartChangeResponse();
-    dynamic notificationJson = cartChangeNotification();
+    dynamic responseJson = cartChangedResponse();
+    dynamic notificationJson = cartChangedNotification();
 
     if (command == "set_item_count") {
         restbesCart::set_item_count(user_id,
@@ -402,20 +399,12 @@ void notifySessionsMenuChanged() {
 }
 
 void notifySessionsOrderChanged(const std::string &order_id) {
-    folly::dynamic notificationJson = folly::dynamic::object;
-    notificationJson["event"] = "order_changed";
-    notificationJson["timestamp"] =
-        restbesOrder::get_order_last_modified(order_id);
-    notificationJson["body"] = folly::dynamic::object;
-    notificationJson["body"]["order_id"] = std::stoi(order_id);
+    folly::dynamic notificationJson = orderChangedNotification(order_id);
 
     std::string user_id = restbesOrder::get_order_client_id(order_id);
     Server::addUser(user_id, getServer());
     auto user = restbes::getServer()->getUser(user_id);
-
-    user->push(restbes::generateResponse(folly::toJson(notificationJson),
-                                         "application/json",
-                                         restbes::Connection::KEEP_ALIVE));
+    sendNotification(user, notificationJson);
 }
 
 std::string show_menu() {
