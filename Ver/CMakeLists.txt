@@ -30,51 +30,21 @@ FetchContent_MakeAvailable(json)
 
 include_directories(QtClient/include)
 
-include_directories(QtClient/include)
-
-add_library(QtMenu STATIC
-        QtClient/include/MenuItem.h
-        QtClient/include/MenuList.h
-        QtClient/src/MenuList.cpp)
-target_link_libraries(QtMenu
-        Qt5::Widgets)
-target_link_directories(QtMenu PRIVATE ${FOLLY_LIB})
-target_include_directories(QtMenu PRIVATE ${FOLLY_INCLUDE})
-
-add_library(QtCart STATIC
-        QtClient/include/CartList.h
-        QtClient/src/CartList.cpp)
-target_link_libraries(QtCart
-        Qt5::Widgets)
-target_link_directories(QtCart PRIVATE ${FOLLY_LIB})
-target_include_directories(QtCart PRIVATE ${FOLLY_INCLUDE})
-
-target_link_libraries(QtCart folly dl fmt gflags double-conversion glog)
-
-add_library(QtOrder
-        QtClient/include/OrderList.h
-        QtClient/src/OrderList.cpp)
-target_link_libraries(QtOrder
-        Qt5::Widgets)
-target_link_directories(QtOrder PRIVATE ${FOLLY_LIB})
-target_include_directories(QtOrder PRIVATE ${FOLLY_INCLUDE})
-
-add_library(JsonParser STATIC
-        QtClient/src/jsonParser.cpp
-        )
-target_link_libraries(JsonParser
-        nlohmann_json::nlohmann_json
-        Qt5::Widgets
-        QtMenu
-        QtCart)
-target_link_directories(JsonParser PRIVATE ${FOLLY_DIRECTORY}/installed/folly/lib)
-target_include_directories(JsonParser PRIVATE ${FOLLY_DIRECTORY}/folly/include)
-target_include_directories(JsonParser PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
-target_link_libraries(JsonParser folly dl fmt)
-
 add_executable(QtClient
         QtClient/src/main.cpp
         QtClient/src/qml.qrc
+
+        QtClient/include/MenuItem.h
+        QtClient/include/MenuList.h
+        QtClient/src/MenuList.cpp
+
+        QtClient/include/CartList.h
+        QtClient/src/CartList.cpp
+
+        QtClient/include/OrderList.h
+        QtClient/src/OrderList.cpp
+
+        QtClient/src/jsonParser.cpp
 
         QtClient/include/Client.h
         QtClient/src/Client.cpp
@@ -91,5 +61,4 @@ target_link_directories(QtClient PRIVATE ${FOLLY_LIB})
 target_include_directories(QtClient PRIVATE ${FOLLY_INCLUDE})
 
 target_link_libraries(QtClient crypto ssl pthread folly dl fmt gflags)
-target_link_libraries(QtClient Qt5::Widgets Qt5::Quick)
-target_link_libraries(QtClient QtMenu QtCart QtOrder JsonParser)
+target_link_libraries(QtClient Qt5::Widgets Qt5::Quick nlohmann_json::nlohmann_json)
