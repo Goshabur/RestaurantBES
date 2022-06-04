@@ -196,7 +196,7 @@ void Client::startPolling() {
 //                      break;
 //                    }
                     int orderId = json["body"]["order_id"].get<int>();
-                    emit getOrder(orderId);
+                    emit getOrder(orderId, Notification);
                     break;
                 }
                 case MenuChanged: {
@@ -324,7 +324,7 @@ void Client::createOrder(const QString &addr, const QString &commnt) {
 Client::Client(QObject *parent) : QObject(parent) {
 }
 
-void Client::getOrderFromServer(int orderId) {
+void Client::getOrderFromServer(int orderId, int type) {
     auto orderHeaders = headers.copy();
     orderHeaders.insert({"Order-ID", std::to_string(orderId)});
     auto response = postingClient->Get("/order",
@@ -343,8 +343,14 @@ void Client::getOrderFromServer(int orderId) {
     JsonParser::parseOrder(jsonBody["body"], *order);
     orderList->setItemStatus(order->getOrderId(), order->getStatus(), order->getTimestamp());
     orderList->setTimestamp(order->getLastModified());
-    if (order->getStatus() == 0) emit newOrder(order);
-    else emit orderStatusChanged(order);
+    switch (type) {
+        case Notification:
+            if (order->getStatus() == 0) emit showOrder(order);
+            else emit orderStatusChanged(order);
+            break;
+        case WindowPopup: emit showOrder(order); break;
+        default: break;
+    }
 }
 
 OrderList *Client::getOrderList() const {
