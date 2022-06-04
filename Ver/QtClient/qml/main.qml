@@ -136,7 +136,7 @@ ApplicationWindow {
 
 	Connections {
 		target: theClient
-		onNewOrder: {
+		onShowOrder: {
 			popupLoader.setSource("OrderPopup.qml", {"order": order})
 			popupLoader.item.open()
 		}

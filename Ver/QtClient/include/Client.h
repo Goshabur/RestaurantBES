@@ -31,6 +31,12 @@ public:
     };
     Q_ENUM(ServerNotification);
 
+    enum OrderType {
+        Notification,
+        WindowPopup
+    };
+    Q_ENUM(OrderType);
+
     explicit Client(QObject *parent = nullptr);
 
     explicit Client(std::string server, int _port, QObject *parent = nullptr);
@@ -71,7 +77,7 @@ public:
     Q_INVOKABLE void createOrder(const QString &addr, const QString &commnt);
 
 private slots:
-    void getOrderFromServer(int orderId);
+    void getOrderFromServer(int orderId, int type);
 
 signals:
 
@@ -85,11 +91,11 @@ signals:
 
     void sessionIdChanged();
 
-    void newOrder(restbes::Order* order);
+    void showOrder(restbes::Order* order);
 
     void orderStatusChanged(restbes::Order* order);
 
-    void getOrder(int orderId);
+    void getOrder(int orderId, int type);
 
 public slots:
 
