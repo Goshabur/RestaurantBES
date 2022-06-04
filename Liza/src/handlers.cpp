@@ -152,7 +152,15 @@ void postAuthorizationMethodHandler(
             sendResponse(session, responseJson);
 
             if (values.at("body").at("update_cart").get<bool>()) {
-                auto new_cart = values.at("body").at("cart").get<json>().dump();
+                std::string new_cart = values.at("body").at("cart").get<json>().dump();
+                restbesCart::set_cart(user_id, new_cart,
+                                      restbesCart::cart_cost(new_cart));
+
+                dynamic notificationJson = cartChangedNotification();
+                sendNotification(user, notificationJson);
+            } else {
+                std::string new_cart = restbesCart::get_cart(user_id);
+
                 restbesCart::set_cart(user_id, new_cart,
                                       restbesCart::cart_cost(new_cart));
 

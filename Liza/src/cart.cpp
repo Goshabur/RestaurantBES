@@ -31,10 +31,6 @@ void set_cart(const std::string &client_id,
 }
 
 void set_item_count(const std::string &client_id, int dish_id, int count) {
-    if (count == 0) {
-        return;
-    }
-
     dynamic new_cart = dynamic::array;
     bool existsInCart = false;
 
@@ -44,13 +40,17 @@ void set_item_count(const std::string &client_id, int dish_id, int count) {
             "count", el.at("count").get<int>());
 
         if (el.at("dish_id").get<int>() == dish_id) {
+            if (count == 0) {
+                continue;
+            }
+
             item["count"] = count;
             existsInCart = true;
         }
         new_cart.push_back(item);
     }
 
-    if (!existsInCart) {
+    if (!existsInCart && count != 0) {
         dynamic item = dynamic::object("dish_id", dish_id)(
             "count", count);
         new_cart.push_back(item);
