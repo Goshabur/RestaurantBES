@@ -409,7 +409,8 @@ void notifySessionsOrderChanged(const std::string &order_id) {
     notificationJson["body"]["order_id"] = std::stoi(order_id);
 
     std::string user_id = restbesOrder::get_order_client_id(order_id);
-    auto user = restbes::getServer()->getUser(order_id);
+    Server::addUser(user_id, getServer());
+    auto user = restbes::getServer()->getUser(user_id);
 
     user->push(restbes::generateResponse(folly::toJson(notificationJson),
                                          "application/json",

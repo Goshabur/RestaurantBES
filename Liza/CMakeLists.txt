@@ -56,6 +56,8 @@ target_include_directories(Server PRIVATE $ENV{HOME}/restbed/restbed/source)
 
 target_link_libraries(Server restbed crypto ssl pthread gflags folly dl fmt)
 
+add_subdirectory(tgbot-cpp)
+
 add_executable(RestaurantBES
         src/admin.cpp
         src/client.cpp
@@ -64,6 +66,7 @@ add_executable(RestaurantBES
         src/cart.cpp
         src/order.cpp
         src/server.cpp
+        src/tgBot.cpp
         )
 
 target_link_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
@@ -78,41 +81,14 @@ target_include_directories(RestaurantBES PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CON
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/source)
 target_include_directories(RestaurantBES PRIVATE $ENV{HOME}/restbed/restbed/source)
 
-target_link_libraries(RestaurantBES Server restbed crypto ssl pthread gflags folly double-conversion dl fmt glog)
-target_link_libraries(RestaurantBES "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json)
+target_link_libraries(RestaurantBES Server TgBot)
+target_link_libraries(RestaurantBES restbed crypto ssl pthread gflags folly double-conversion dl fmt glog nlohmann_json::nlohmann_json)
+target_link_libraries(RestaurantBES ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${PQXX_LIBRARIES})
 
 if (CURL_FOUND)
     include_directories(${CURL_INCLUDE_DIRS})
     add_definitions(-DHAVE_CURL)
 endif ()
-
-add_subdirectory(tgbot-cpp)
-add_executable(TelegramBot
-        Telegram_Bot/tgBot.cpp
-        Telegram_Bot/tgBot_main.cpp
-        Telegram_Bot/tgBot.h
-        src/admin.cpp
-        src/order.cpp
-        src/cart.cpp
-        src/client.cpp
-        src/server.cpp
-        )
-
-target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/folly/lib)
-target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/lib)
-target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${FMT}/lib)
-target_link_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/lib)
-target_link_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/restbed/build)
-
-target_include_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/restbed/source)
-target_include_directories(TelegramBot PRIVATE $ENV{HOME}/restbed/source)
-target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/folly/include)
-target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${GLOG}/include)
-target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${FMT}/include)
-target_include_directories(TelegramBot PRIVATE ${FOLLY_DIRECTORY}/${DOUBLE_CONVERSIONS}/include)
-
-target_link_libraries(TelegramBot "${PQXX_LIBRARIES}" nlohmann_json::nlohmann_json restbed crypto ssl pthread gflags folly double-conversion dl fmt glog)
-target_link_libraries(TelegramBot TgBot ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${CURL_LIBRARIES})
 
 include(FetchContent)
 

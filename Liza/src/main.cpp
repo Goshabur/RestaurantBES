@@ -1,10 +1,11 @@
 #include <gflags/gflags.h>
 #include <filesystem>
 #include "handlers.h"
+#include "tgBot.h"
 
 using namespace std::chrono_literals;
-using restbes::getServer;
 using restbes::errorHandler;
+using restbes::getServer;
 
 static bool ValidatePath(const char *flagname, const std::string &value) {
     bool key = std::filesystem::exists(value + "/server.key");
@@ -48,6 +49,9 @@ DEFINE_validator(workers, &ValidateWorkers);
 int main(int argc, char **argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
 
+    std::thread t([&] { TelegramBot::tgBotPolling(); });
+    t.detach();
+
     auto order = createResource("/order", restbes::getOrderHandler,
                                 restbes::postOrderMethodHandler, errorHandler,
                                 getServer());
@@ -81,7 +85,6 @@ int main(int argc, char **argv) {
     getServer()->addResource(menu);
     getServer()->schedule(restbes::handleInactiveSessions, getServer(), 1s);
     getServer()->schedule(restbes::cleanUpUserSessions, getServer(), 2s);
-    //    getServer()server->schedule(swapMenus, server, 3s);
     getServer()->setSettings(settings);
     getServer()->startServer();
 
