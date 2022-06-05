@@ -5,6 +5,7 @@ HSE first year C++ project
 - [Клиенты и их возможности](#Функции-клиентов)
 - [Схема БД](#Схема-БД)
 - [Архитектура клиента](#Архитектура-клиента)
+- [Архитектура сервера](#Архитектура-сервера)
 - [Схема сетей](#Схема-сетей)
 - [Обработка запросов клиента](#Обработка-запросов-клиента)
 - [Сценарии](#Обрабатываем-3-сценария)
@@ -34,11 +35,14 @@ HSE first year C++ project
     - Добавление нового товара
 - Изменение статуса заказа
 
-# Схема БД
-![Схема-БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBaseUML.png)
-
 # Архитектура клиента
 ![Архитектура-клиента](https://github.com/Goshabur/RestaurantBES/blob/main/ITServices.png)
+
+# Архитектура сервера
+![Архитектура-сервера](https://github.com/Goshabur/RestaurantBES/blob/main/ServerUML.png)
+
+# Схема БД
+![Схема-БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBaseUML.png)
 
 # Схема сетей
 ![Схема-сетей](https://github.com/Goshabur/RestaurantBES/blob/main/NetworkDiagram.png)
