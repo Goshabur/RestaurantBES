@@ -103,8 +103,6 @@ void Client::setSessionId(int newId) {
 bool Client::registerUser(const QString &regEmail,
                           const QString &regPassword,
                           const QString &regName) {
-    // TODO: remove the next line
-//    return false;
 
     std::string jsonReq = JsonParser::generateRegistrationQuery(
             regEmail,
@@ -113,27 +111,20 @@ bool Client::registerUser(const QString &regEmail,
             *cartList);
     qDebug() << jsonReq.c_str();
     auto response = postingClient->Post("/user",
-                                        *headers.rlock(),
+                                        headers.copy(),
                                         jsonReq,
                                         "application/json");
     if (!response || response->status != 200) return false;
     qDebug() << "Authorized user";
     qDebug() << response->body.c_str() << '\n';
 
-    // TODO: remove the next 3 lines
-//    auto* order = new Order();
-//    order->setCart(cartList.get());
-//    emit orderStatusChanged(order);
-
     return parseUserFromJson(response->body);
 }
 
 bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
-    // TODO: remove the next line
-//    return false;
 
     auto response = postingClient->Post("/user",
-                                        *headers.rlock(),
+                                        headers.copy(),
                                         JsonParser::generateSignInQuery(
                                                 regEmail,
                                                 regPassword,
@@ -142,7 +133,9 @@ bool Client::signInUser(const QString &regEmail, const QString &regPassword) {
     if (!response || response->status != 200) return false;
     qDebug() << "Authorized user";
     qDebug() << response->body.c_str() << '\n';
-    return parseUserFromJson(response->body);
+    bool success = parseUserFromJson(response->body);
+    if (success && cartList->size() == 0) getCartFromServer();
+    return success;
 }
 
 bool Client::parseUserFromJson(const nlohmann::json &json) {
@@ -177,31 +170,42 @@ void Client::startPolling() {
                         "Bad response from the server " +
                         std::to_string(res->status));
             }
-            qDebug() << res->body.c_str();
+            qDebug() << "Notification\n" << res->body.c_str() << '\n';
             nlohmann::json json = nlohmann::json::parse(res->body);
             const std::string &stringEvent = json.at(
                     "event").get<std::string>();
             unsigned int timestamp = json["timestamp"].get<unsigned int>();
             PollingEvent event = eventMap.at(stringEvent);
+            auto checkTimestamp = [](unsigned int timestamp,
+                                     unsigned int oldTimestamp) {
+                if (timestamp <= oldTimestamp) {
+                    qDebug()
+                            << "Timestamp is outdated. No changes will be made";
+                    qDebug() << "timestamp is:" << timestamp;
+                    qDebug() << "old timestamp is:"
+                             << oldTimestamp << '\n';
+                    return false;
+                }
+                return true;
+            };
             switch (event) {
                 case CartChanged: {
-                    if (timestamp <= cartList->getTimestamp()) break;
-                    if (regStatus) getCartFromServer();
+                    if (checkTimestamp(timestamp, cartList->getTimestamp())
+                        && regStatus)
+                        getCartFromServer();
                     break;
                 }
                 case OrderChanged: {
-//                    if (timestamp <= orderList->getTimestamp()) {
-//                      qDebug() << "timestamp is:" << timestamp;
-//                      qDebug() << "old timestamp is:" << orderList->getTimestamp();
-//                      break;
-//                    }
-                    int orderId = json["body"]["order_id"].get<int>();
-                    emit getOrder(orderId, Notification);
+                    if (checkTimestamp(timestamp, orderList->getTimestamp())) {
+                        int orderId = json["body"]["order_id"].get<int>();
+                        emit getOrder(orderId, Notification);
+                    }
                     break;
                 }
                 case MenuChanged: {
-                    if (timestamp <= menuList->getTimestamp()) break;
-                    getMenuFromServer();
+                    if (checkTimestamp(timestamp,
+                                       menuList->getTimestamp()))
+                        getMenuFromServer();
                     break;
                 }
                 default:
@@ -217,7 +221,7 @@ restbes::CartList *Client::getCart() const {
 
 void Client::getMenuFromServer() {
     auto response = postingClient->Get("/menu",
-                                       *headers.rlock());
+                                       headers.copy());
     if (!response) {
         throw std::runtime_error("Can't connect to resource /menu");
     } else if (response->status != 200) {
@@ -238,7 +242,7 @@ void Client::clearCart(bool notifyServer) {
     if (regStatus && notifyServer) {
         std::string query = JsonParser::generateSetCartQuery(*cartList);
         auto response = postingClient->Post("/cart",
-                                            *headers.rlock(),
+                                            headers.copy(),
                                             query,
                                             "application/json");
         qDebug() << "set_cart command sent to the server";
@@ -261,7 +265,7 @@ void Client::clearCart(bool notifyServer) {
 
 void Client::getCartFromServer() {
     auto response = postingClient->Get("/cart",
-                                       *headers.rlock());
+                                       headers.copy());
     if (!response) {
         throw std::runtime_error("Can't connect to the server");
     } else if (response->status != 200) {
@@ -282,7 +286,7 @@ void Client::setItemCount(int id, int value) {
     if (regStatus && countChanged) {
         std::string query = JsonParser::generateSetItemCountQuery(id, value);
         auto response = postingClient->Post("/cart",
-                                            *headers.rlock(),
+                                            headers.copy(),
                                             query,
                                             "application/json");
         qDebug() << "set_item_count command sent to the server";
@@ -314,7 +318,7 @@ void Client::decreaseItemCount(int id) {
 void Client::createOrder(const QString &addr, const QString &commnt) {
     std::string query = JsonParser::generateCreateOrderQuery(addr, commnt);
     auto response = postingClient->Post("/order",
-                                        *headers.rlock(),
+                                        headers.copy(),
                                         query,
                                         "application/json");
     qDebug() << "New order sent to the server";
@@ -341,15 +345,19 @@ void Client::getOrderFromServer(int orderId, int type) {
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto *order = new Order();
     JsonParser::parseOrder(jsonBody["body"], *order);
-    orderList->setItemStatus(order->getOrderId(), order->getStatus(), order->getTimestamp());
+    orderList->setItemStatus(order->getOrderId(), order->getStatus(),
+                             order->getTimestamp());
     orderList->setTimestamp(order->getLastModified());
     switch (type) {
         case Notification:
             if (order->getStatus() == 0) emit showOrder(order);
             else emit orderStatusChanged(order);
             break;
-        case WindowPopup: emit showOrder(order); break;
-        default: break;
+        case WindowPopup:
+            emit showOrder(order);
+            break;
+        default:
+            break;
     }
 }
 
