@@ -1,5 +1,5 @@
 # RestaurantBES
-HSE first year project
+HSE first year C++ project
 
 # Содержание
 - [Клиенты и их возможности](#Функции-клиентов)
