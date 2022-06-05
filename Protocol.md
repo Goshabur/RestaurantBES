@@ -126,6 +126,7 @@
   "status_code": 0,
   "body": {
     "item": "cart",
+    "timestamp": "34680923",
     "contents": [
       {
         "dish_id": 0,
