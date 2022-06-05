@@ -9,3 +9,6 @@ HSE first year project
 
 # Схема сетей
 ![Сети](https://github.com/Goshabur/RestaurantBES/blob/main/NetworkDiagram.png)
+
+# Архитектура
+![Архитектура](https://github.com/Goshabur/RestaurantBES/blob/main/ServerUML.png)
