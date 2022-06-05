@@ -5,7 +5,7 @@ project(RestaurantBES)
 
 include_directories(/usr/local/include ${OPENSSL_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 
-include_directories(../Ver/ServerExample/include)
+include_directories(../Ver/Server/include)
 include_directories(./include)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -53,9 +53,9 @@ set(FOLLY_LIB ${FOLLY_DIRECTORY}/folly/lib
 FetchContent_MakeAvailable(libpqxx)
 
 add_library(Server STATIC
-        ../Ver/ServerExample/src/user.cpp
-        ../Ver/ServerExample/src/server.cpp
-        ../Ver/ServerExample/src/session.cpp
+        ../Ver/Server/src/user.cpp
+        ../Ver/Server/src/server.cpp
+        ../Ver/Server/src/session.cpp
         )
 
 target_include_directories(Server PRIVATE $ENV{HOME}/restbed/source)
