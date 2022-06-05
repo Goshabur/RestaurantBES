@@ -2,7 +2,7 @@
 HSE first year project
 
 # Клиент-сервер
-![Клиент-Сервер](https://github.com/Goshabur/RestaurantBES/blob/main/Client-Server%20Model.png)
+![Клиент-Сервер](https://github.com/Goshabur/RestaurantBES/blob/main/Client-ServerModel.png)
 
 # Схема БД
 ![Схема БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBaseUML.png)
