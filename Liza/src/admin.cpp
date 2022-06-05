@@ -45,7 +45,8 @@ void change_order_status(const std::string &order_id,
     connectExec(R"(UPDATE "ORDER" SET "STATUS" = )" + set_status +
                 " WHERE \"ORDER_ID\"=" + order_id);
     connectExec(R"(UPDATE "ORDER" SET "LAST_MODIFIED" = ')" +
-                std::to_string(restbes::getTime()) + "' WHERE \"ORDER_ID\"=" + order_id);
+                std::to_string(restbes::getTime()) +
+                "' WHERE \"ORDER_ID\"=" + order_id);
 
     restbes::notifySessionsOrderChanged(order_id);
 }
@@ -77,15 +78,6 @@ void change_dish_price(const std::string &dish_id,
                        const std::string &set_price) {
     connectExec(R"(UPDATE "DISH" SET "PRICE" = )" + set_price +
                 " WHERE \"DISH_ID\"= '" + dish_id + "'");
-    connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
-                std::to_string(restbes::getTime()) + "'");
-
-    restbes::notifySessionsMenuChanged();
-}
-
-void change_dish_info(const std::string &dish_id, const std::string &set_info) {
-    connectExec(R"(UPDATE "DISH" SET "INFO" = ')" + set_info +
-                "' WHERE \"DISH_ID\"= '" + dish_id + "'");
     connectExec(R"(UPDATE "MENU_HISTORY" SET "TIMESTAMP" = ')" +
                 std::to_string(restbes::getTime()) + "'");
 

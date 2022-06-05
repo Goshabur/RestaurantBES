@@ -24,8 +24,6 @@ void change_dish_status(const std::string &dish_name,
 void change_dish_price(const std::string &dish_id,
                        const std::string &set_price);
 
-void change_dish_info(const std::string &dish_id, const std::string &set_info);
-
 std::string getPrice(const std::string &dish_id);
 
 int getDishStatus(const std::string &dish_id);
