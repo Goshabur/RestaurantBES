@@ -158,14 +158,6 @@ void postAuthorizationMethodHandler(
 
                 dynamic notificationJson = cartChangedNotification();
                 sendNotification(user, notificationJson);
-            } else {
-                std::string new_cart = restbesCart::get_cart(user_id);
-
-                restbesCart::set_cart(user_id, new_cart,
-                                      restbesCart::cart_cost(new_cart));
-
-                dynamic notificationJson = cartChangedNotification();
-                sendNotification(user, notificationJson);
             }
 
         } else {
