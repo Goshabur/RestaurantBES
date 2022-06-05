@@ -4,7 +4,7 @@ HSE first year C++ project
 # Содержание
 - [Клиенты и их возможности](#Функции-клиентов)
 - [Схема БД](#Схема-БД)
-- [Архитектура](#Архитектура)
+- [Архитектура клиента](#Архитектура-клиента)
 - [Схема сетей](#Схема-сетей)
 - [Обработка запросов клиента](#Обработка-запросов-клиента)
 - [Сценарии](#Обрабатываем-3-сценария)
@@ -37,8 +37,8 @@ HSE first year C++ project
 # Схема БД
 ![Схема-БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBaseUML.png)
 
-# Архитектура
-![Архитектура](https://github.com/Goshabur/RestaurantBES/blob/main/ServerUML.png)
+# Архитектура клиента
+![Архитектура-клиента](https://github.com/Goshabur/RestaurantBES/blob/main/ITSERVICES.png)
 
 # Схема сетей
 ![Схема-сетей](https://github.com/Goshabur/RestaurantBES/blob/main/NetworkDiagram.png)
