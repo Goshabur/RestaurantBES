@@ -7,8 +7,8 @@ HSE first year project
 # Схема БД
 ![Схема БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBaseUML.png)
 
-# Схема сетей
-![Сети](https://github.com/Goshabur/RestaurantBES/blob/main/NetworkDiagram.png)
-
 # Архитектура
 ![Архитектура](https://github.com/Goshabur/RestaurantBES/blob/main/ServerUML.png)
+
+# Схема сетей
+![Сети](https://github.com/Goshabur/RestaurantBES/blob/main/NetworkDiagram.png)
