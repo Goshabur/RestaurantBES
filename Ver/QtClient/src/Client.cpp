@@ -276,9 +276,9 @@ void Client::getCartFromServer() {
 
     nlohmann::json jsonBody = nlohmann::json::parse(response->body);
     auto cartData = JsonParser::parseCart(jsonBody.at("body"));
-//    unsigned int timestamp = jsonBody["body"]["timestamp"].get<int>();
+    unsigned int timestamp = jsonBody["body"]["timestamp"].get<int>();
     cartList->setCart(std::move(cartData));
-//    cartList->setTimestamp(timestamp);
+    cartList->setTimestamp(timestamp);
 }
 
 void Client::setItemCount(int id, int value) {
