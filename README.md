@@ -38,7 +38,7 @@ HSE first year C++ project
 ![Схема-БД](https://github.com/Goshabur/RestaurantBES/blob/main/DataBaseUML.png)
 
 # Архитектура клиента
-![Архитектура-клиента](https://github.com/Goshabur/RestaurantBES/blob/main/ITSERVICES.png)
+![Архитектура-клиента](https://github.com/Goshabur/RestaurantBES/blob/main/ITServices.png)
 
 # Схема сетей
 ![Схема-сетей](https://github.com/Goshabur/RestaurantBES/blob/main/NetworkDiagram.png)
