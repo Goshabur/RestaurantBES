@@ -14,6 +14,8 @@ int cart_cost(const std::string &user_cart);
 
 std::string get_cart(const std::string &user_id);
 
+int get_cart_timestamp(const std::string &user_id);
+
 void set_cart(const std::string &client_id,
               const std::string &cart,
               int cart_cost);

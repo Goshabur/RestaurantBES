@@ -42,7 +42,6 @@ public:
     bool toChangeDishPrice;
     std::string newDishName;
     std::string newDishPrice;
-    std::string newDishInfo;
     std::string newDishImage;
 };
 

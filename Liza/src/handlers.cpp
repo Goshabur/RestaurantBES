@@ -68,9 +68,9 @@ dynamic cartChangedResponse() {
         "timestamp", restbes::getTime());
 }
 
-dynamic cartChangedNotification() {
-    return dynamic::object("event", "cart_changed")("timestamp",
-                                                    restbes::getTime());
+dynamic cartChangedNotification(const std::string &user_id) {
+    return dynamic::object("event", "cart_changed")(
+        "timestamp", restbesCart::get_cart_timestamp(user_id));
 }
 
 dynamic orderChangedResponse() {
@@ -84,7 +84,8 @@ dynamic orderChangedNotification(const std::string &order_id) {
         "body", dynamic::object("order_id", std::stoi(order_id)));
 }
 
-void formErrorResponseAuthentication(dynamic &responseJson, const std::string &user_email) {
+void formErrorResponseAuthentication(dynamic &responseJson,
+                                     const std::string &user_email) {
     if (restbesClient::check_user_exists(user_email)) {
         responseJson["body"]["message"] = "error: incorrect password";
     } else {
@@ -145,26 +146,20 @@ void postAuthorizationMethodHandler(
             addUserToServer(server, receivingSession, user_id, session_id);
             auto user = server->getUser(user_id);
 
-            setUsersInfoInResponse(responseJson, user_id, user_name, user_email);
+            setUsersInfoInResponse(responseJson, user_id, user_name,
+                                   user_email);
 
             parseInsertOrders(responseJson, user_id);
 
             sendResponse(session, responseJson);
 
             if (values.at("body").at("update_cart").get<bool>()) {
-                std::string new_cart = values.at("body").at("cart").get<json>().dump();
+                std::string new_cart =
+                    values.at("body").at("cart").get<json>().dump();
                 restbesCart::set_cart(user_id, new_cart,
                                       restbesCart::cart_cost(new_cart));
 
-                dynamic notificationJson = cartChangedNotification();
-                sendNotification(user, notificationJson);
-            } else {
-                std::string new_cart = restbesCart::get_cart(user_id);
-
-                restbesCart::set_cart(user_id, new_cart,
-                                      restbesCart::cart_cost(new_cart));
-
-                dynamic notificationJson = cartChangedNotification();
+                dynamic notificationJson = cartChangedNotification(user_id);
                 sendNotification(user, notificationJson);
             }
 
@@ -193,12 +188,13 @@ void postAuthorizationMethodHandler(
             addUserToServer(server, receivingSession, user_id, session_id);
             auto user = server->getUser(user_id);
 
-            setUsersInfoInResponse(responseJson, user_id, user_name, user_email);
+            setUsersInfoInResponse(responseJson, user_id, user_name,
+                                   user_email);
 
             sendResponse(session, responseJson);
 
             if (values.at("body").at("update_cart").get<bool>()) {
-                dynamic notificationJson = cartChangedNotification();
+                dynamic notificationJson = cartChangedNotification(user_id);
                 sendNotification(user, notificationJson);
             }
         }
@@ -224,7 +220,7 @@ void postCartMethodHandler(const std::shared_ptr<restbed::Session> &session,
     std::string command = values.at("query").get<std::string>();
 
     dynamic responseJson = cartChangedResponse();
-    dynamic notificationJson = cartChangedNotification();
+    dynamic notificationJson = cartChangedNotification(user_id);
 
     if (command == "set_item_count") {
         restbesCart::set_item_count(user_id,
@@ -324,6 +320,8 @@ void getCartHandler(const std::shared_ptr<restbed::Session> &session,
     responseJson["status_code"] = 0;
     responseJson["body"] = dynamic::object;
     responseJson["body"]["item"] = "cart";
+    responseJson["body"]["timestamp"] =
+        restbesCart::get_cart_timestamp(user_id);
     responseJson["body"]["contents"] = dynamic::array;
 
     auto contents = json::parse(restbesCart::get_cart(user_id));

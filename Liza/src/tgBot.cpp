@@ -396,16 +396,9 @@ void TelegramBot::tgBotPolling() {
                     state[message->chat->id].newDishPrice = message->text;
                     state[message->chat->id].waitNewDishPrice = false;
                     bot.getApi().sendMessage(message->chat->id,
-                                             "Enter dish info (description).");
-                    state[message->chat->id].waitNewDishInfo = true;
+                                             "Enter dish image URL.");
+                    state[message->chat->id].waitNewDishImage = true;
                 }
-
-            } else if (state[message->chat->id].waitNewDishInfo) {
-                state[message->chat->id].newDishInfo = message->text;
-                state[message->chat->id].waitNewDishInfo = false;
-                bot.getApi().sendMessage(message->chat->id,
-                                         "Enter dish image URL.");
-                state[message->chat->id].waitNewDishImage = true;
 
             } else if (state[message->chat->id].waitNewDishImage) {
                 // TODO (optional): check for valid url;
@@ -419,7 +412,6 @@ void TelegramBot::tgBotPolling() {
 
                 state[message->chat->id].newDishName.clear();
                 state[message->chat->id].newDishPrice.clear();
-                state[message->chat->id].newDishInfo.clear();
                 state[message->chat->id].newDishImage.clear();
 
                 bot.getApi().sendMessage(

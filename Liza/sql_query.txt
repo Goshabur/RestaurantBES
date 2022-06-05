@@ -63,7 +63,8 @@ CREATE TABLE public."CART"
 (
     "CLIENT_ID" integer NOT NULL,
     "CART" jsonb,
-    "COST" integer NOT NULL
+    "COST" integer NOT NULL,
+    "TIMESTAMP" integer NOT NULL
 );
 
 ALTER TABLE IF EXISTS public."HISTORY"

@@ -21,12 +21,20 @@ std::string get_cart(const std::string &user_id) {
         R"(SELECT "CART"::TEXT FROM "CART" WHERE "CLIENT_ID" = )" + user_id);
 }
 
+int get_cart_timestamp(const std::string &user_id) {
+    return std::stoi(connectGet(
+        R"(SELECT "TIMESTAMP" FROM "CART" WHERE "CLIENT_ID" = )" + user_id));
+}
+
 void set_cart(const std::string &client_id,
               const std::string &cart,
               int cart_cost) {
     connectExec(R"(UPDATE "CART" SET "CART" = ')" + cart +
                 R"(' WHERE "CLIENT_ID" = )" + client_id);
     connectExec(R"(UPDATE "CART" SET "COST" = )" + std::to_string(cart_cost) +
+                R"( WHERE "CLIENT_ID" = )" + client_id);
+    connectExec(R"(UPDATE "CART" SET "TIMESTAMP" = )" +
+                std::to_string(restbes::getTime()) +
                 R"( WHERE "CLIENT_ID" = )" + client_id);
 }
 
@@ -51,8 +59,7 @@ void set_item_count(const std::string &client_id, int dish_id, int count) {
     }
 
     if (!existsInCart && count != 0) {
-        dynamic item = dynamic::object("dish_id", dish_id)(
-            "count", count);
+        dynamic item = dynamic::object("dish_id", dish_id)("count", count);
         new_cart.push_back(item);
     }
 
