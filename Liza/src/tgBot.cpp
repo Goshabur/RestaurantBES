@@ -20,7 +20,7 @@ bool check_number(const std::string &num) {
 }  // namespace TelegramBot
 
 void TelegramBot::tgBotPolling() {
-    std::ifstream infile("/home/lizaerem/RestaurantBES/Liza/Secure/TOKEN.txt");
+    std::ifstream infile("/root/RestaurantBES/Liza/Secure/TOKEN.txt");
     std::string TOKEN;
     infile >> TOKEN;
     TgBot::Bot bot(TOKEN);
