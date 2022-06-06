@@ -13,6 +13,7 @@ HSE first year C++ project
 - [Формат данных в POST-запросах](#Формат-данных-в-POST-запросах)
 - [Формат ответов](#Формат-ответов)
 - [Формат уведомлений](#Формат-уведомлений)
+- [Сборка](#Сборка)
 
 # Функции клиентов
 Две роли — заказчик (через приложение) и администратор (через телеграм-бота).
@@ -359,4 +360,56 @@ HSE first year C++ project
     "status": 0
   }
 }
+```
+
+# Сборка
+
+- [Библиотеки](#Необходимые-библиотеки)
+- [Флаги](#Флаги)
+- [Запуск сервера](#Запуск-сервера)
+- [Запуск клиента](#Запуск-клиента)
+
+### Необходимые библиотеки:
+- [restbed](https://github.com/Corvusoft/restbed) — асинхронная работа с HTTPs запросами на сервере. См. [build](https://github.com/Corvusoft/restbed#build)
+- [nlohmann/json](https://github.com/nlohmann/json#embedded-fetchcontent) — см. [CMakeLists.txt](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/CMakeLists.txt)
+- [PostgreSQL](https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-20-04-quickstart) — реляционная база данных. См. шаги 1 и 2. Затем необходимо установить пароль командой `\password postgres`. Далее см. шаг 4. После этого необходимо настроить порты и разрешить подключение **не** только с локальной машины (на ваше усмотрение):
+  - `$ sudo gedit /etc/postgresql/12/main/postgresql.conf`
+  - Меняем строчку `listen_addresses = '*'`
+  - Настроить порты можно командой `$ ss -nlt` (в нашем случае это порт 5432 и IP-адрес удаленного сервера). Убедитесь, что ваш IP-адрес есть в списке.
+  - Перезапускаем, чтобы сохранить изменения:
+   
+    `$ sudo systemctl restart postgresql`
+  - База данных готова к использованию. Подключение к БД на удаленном сервере выполняется командой `$ psql -U<имя_пользователя> -h<IP-адрес> -d<имя_БД>`
+  - См. [список команд](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/sql_query.txt), чтобы наполнить базу данных
+  - Библиотека [libpqxx](https://github.com/jtv/libpqxx#building-libpqxx) уже есть в [CMakeLists.txt](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/CMakeLists.txt), дополнительных действий не требуется
+- Qt — интерфейс клиента:
+  - `$ sudo apt-get install qt5-default`
+  - `$ sudo apt-get install qml-module-qtquick-dialogs qml-module-qtquick-controls2 qml-module-qtquick-layouts qml-module-qtquick-window2` 
+- [tgbot-cpp](https://github.com/reo7sp/tgbot-cpp) — см. [установку](https://github.com/reo7sp/tgbot-cpp#library-installation). Больше ничего не требуется, [CMakeLists.txt](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/CMakeLists.txt) уже настроен
+- [gflags](https://github.com/gflags/gflags) — настройка флагов для запуска из консоли:
+  - `$ sudo apt-get install libgflags-dev`
+- [folly](https://github.com/facebook/folly) — потокобезопасность ([folly::Synchronized](https://github.com/facebook/folly/blob/main/folly/docs/Synchronized.md)) и работа с JSON ([folly::dynamic](https://github.com/facebook/folly/blob/main/folly/docs/Dynamic.md)). См. [build](https://github.com/facebook/folly#build). Необходимо настроить пути до папок folly, как это сделано в [CMakeLists.txt](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/CMakeLists.txt). Будьте внимательны, иначе потратите кучу нервов :) А еще надо иметь в виду, что установка folly съедает немалое количество места на диске, поэтому более разумным будет установка только необходимых библиотек (см. используемые библиотеки в [CMakeLists.txt](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/CMakeLists.txt))
+
+### Флаги
+
+```shell
+--port N # Номер порта (0 < N < 32768), обязательный
+
+--SSLkeys /GLOBAL/PATH # Путь до папки с ключами и сертификатом для соединения по протоколу https, обязательный
+
+--workers # Максимальное количество потоков (0 < n < 100), по умолчанию 10
+```
+
+### Запуск сервера
+```
+$ cmake --build . --target RestaurantBES
+
+$ ./RestaurantBES --port <N> --SSLkeys </GLOBAL/PATH>
+```
+
+### Запуск клиента
+```
+$ cmake --build . --target QtClient
+
+$ ./QtClient
 ```
