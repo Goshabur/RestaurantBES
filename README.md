@@ -369,7 +369,7 @@ HSE first year C++ project
 - [Запуск сервера](#Запуск-сервера)
 - [Запуск клиента](#Запуск-клиента)
 
-Предполагается использование ОС Linux (Ubuntu 16.04+)
+Предполагается использование ОС Linux (Ubuntu 16.04+). Необходимо склонировать ветку [deploy](https://github.com/Goshabur/RestaurantBES/tree/deploy). Все последующие действия выполнять из той же директории, в которую было произведено клонирвоание.
 
 ### Установка библиотек и зависимостей:
 - [restbed](https://github.com/Corvusoft/restbed) — асинхронная работа с HTTPS запросами на сервере. См. [build](https://github.com/Corvusoft/restbed#build)
