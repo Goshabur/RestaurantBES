@@ -364,13 +364,15 @@ HSE first year C++ project
 
 # Сборка
 
-- [Библиотеки](#Необходимые-библиотеки)
+- [Библиотеки](#Установка-библиотек-и-зависимостей)
 - [Флаги](#Флаги)
 - [Запуск сервера](#Запуск-сервера)
 - [Запуск клиента](#Запуск-клиента)
 
-### Необходимые библиотеки:
-- [restbed](https://github.com/Corvusoft/restbed) — асинхронная работа с HTTPs запросами на сервере. См. [build](https://github.com/Corvusoft/restbed#build)
+Предполагается использование ОС Linux (Ubuntu 16.04+)
+
+### Установка библиотек и зависимостей:
+- [restbed](https://github.com/Corvusoft/restbed) — асинхронная работа с HTTPS запросами на сервере. См. [build](https://github.com/Corvusoft/restbed#build)
 - [nlohmann/json](https://github.com/nlohmann/json#embedded-fetchcontent) — см. [CMakeLists.txt](https://github.com/Goshabur/RestaurantBES/blob/main/Liza/CMakeLists.txt)
 - [PostgreSQL](https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-20-04-quickstart) — реляционная база данных. См. шаги 1 и 2. Затем необходимо установить пароль командой `\password postgres`. Далее см. шаг 4. После этого необходимо настроить порты и разрешить подключение **не** только с локальной машины (на ваше усмотрение):
   - `$ sudo gedit /etc/postgresql/12/main/postgresql.conf`
@@ -411,5 +413,5 @@ $ ./RestaurantBES --port <N> --SSLkeys </GLOBAL/PATH>
 ```
 $ cmake --build . --target QtClient
 
-$ ./QtClient
+$ ./QtClient --server <IP-адрес>
 ```
